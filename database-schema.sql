@@ -77,6 +77,7 @@ ALTER TABLE
     "bikepartstracker"."category" ADD PRIMARY KEY("id");
 CREATE TABLE "bikepartstracker"."user"(
     "id" UUID NOT NULL,
+    "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
     "last_seen_at" TIMESTAMP(0) WITH TIME zone NULL,
