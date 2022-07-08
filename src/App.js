@@ -1,24 +1,41 @@
-import Card from './Card';
+// Import everything needed to use the `useQuery` hook
+import { useQuery, gql } from '@apollo/client';
 
-import './App.scss';
+const GET_LOCATIONS = gql`
+  query GetLocations {
+    locations {
+      id
+      name
+      description
+      photo
+    }
+  }
+`;
 
-function App() {
+function DisplayLocations() {
+  const { loading, error, data } = useQuery(GET_LOCATIONS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  return data.locations.map(({ id, name, description, photo }) => (
+    <div key={id}>
+      <h3>{name}</h3>
+      <img width="400" height="250" alt="location-reference" src={`${photo}`} />
+      <br />
+      <b>About this location:</b>
+      <p>{description}</p>
+      <br />
+    </div>
+  ));
+}
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        Bike Parts Bin
-      </header>
-      <main>
-        <Card part="Frame" name="Canyon Lux CF SLX" purchaseDate="2018" purchasePrice="2000" weight="1650" />
-        <Card part="Powermeter" name="Quarq Powermeter" purchaseDate="2018" purchasePrice="750" weight="500" />
-        <Card part="Crankarm" name="SRAM XX1" purchaseDate="2018" purchasePrice="500" weight="346" />
-        <Card part="Deraillieur" name="SRAM XX1 Eagle AXS" purchaseDate="2019" purchasePrice="2000" weight="120" />
-        <Card part="Chain" name="SRAM XP-1950" purchaseDate="2018" purchasePrice="30" weight="50" />
-        <Card part="Trigger" name="SRAM XX1 AXS Trigger" purchaseDate="2019" purchasePrice="80" weight="45" />
-        <Card part="Handlebar" name="Darimo MTB bar" purchaseDate="2020" purchasePrice="300" weight="80" />
-      </main>
+    <div>
+      <h2>My first Apollo app 🚀</h2>
+      <br/>
+      <DisplayLocations />
     </div>
   );
 }
-
-export default App;
