@@ -1,10 +1,3 @@
-// note - this function MUST be named `identity-signup` to work
-// we do not yet offer local emulation of this functionality in Netlify Dev
-//
-// more:
-// https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
-// https://www.netlify.com/docs/functions/#identity-and-functions
-// const fetch = require('node-fetch')
 import fetch from 'node-fetch'
 
 exports.handler = async function (event) {
