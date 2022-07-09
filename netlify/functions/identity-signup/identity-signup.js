@@ -6,8 +6,8 @@
 // https://www.netlify.com/docs/functions/#identity-and-functions
 const fetch = require("node-fetch");
 
-const handler = async function (event) {
-  const { user } = data
+const handler = async function (event, context) {
+  const { user } = event.body
 
   console.log('USER: ', user)
 
