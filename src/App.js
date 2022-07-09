@@ -7,31 +7,28 @@ import "@reach/tabs/styles.css"
 
 const IdentityModal = React.lazy(() => import("react-netlify-identity-widget"))
 
-const GET_LOCATIONS = gql`
-  query GetLocations {
-    locations {
+const USER_NAME = gql`
+  query UserName {
+    bikepartstracker_user {
       id
       name
-      description
-      photo
     }
   }
-`;
+`
 
-function DisplayLocations() {
-  const { loading, error, data } = useQuery(GET_LOCATIONS);
+function DisplayUser() {
+  const { loading, error, data } = useQuery(USER_NAME);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
+  if (error) {
+    console.log('ERROR: ', error)
 
-  return data.locations.map(({ id, name, description, photo }) => (
+    return <p>Error :(</p>
+  }
+
+  return data.map(({ id, name }) => (
     <div key={id}>
       <h3>{name}</h3>
-      <img width="400" height="250" alt="location-reference" src={`${photo}`} />
-      <br />
-      <b>About this location:</b>
-      <p>{description}</p>
-      <br />
     </div>
   ));
 }
@@ -44,8 +41,8 @@ export default function App() {
       <AuthStatusView />
       <div>
         <h2>My first Apollo app 🚀</h2>
+        <DisplayUser />
         <br />
-        <DisplayLocations />
       </div>
     </IdentityContextProvider>
   );
@@ -54,8 +51,8 @@ export default function App() {
 function AuthStatusView() {
   const identity = useIdentityContext()
   const [dialog, setDialog] = React.useState(false)
-  console.log('IDENTITY: ', identity)
-  console.log('TOKEN: ', identity?.user?.token?.access_token)
+  // console.log('IDENTITY: ', identity)
+  // console.log('TOKEN: ', identity?.user?.token?.access_token)
   const name = (identity?.user?.user_metadata && identity?.user?.user_metadata.full_name) || 'NoName'
   const avatar_url = identity?.user?.user_metadata?.avatar_url
 

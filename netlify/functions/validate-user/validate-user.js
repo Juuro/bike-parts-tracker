@@ -3,9 +3,9 @@ exports.handler = async (event, context) => {
   
   console.log('EVENT: ', event)
   console.log('CONTEXT: ', context)
-  console.log('USER_META: ', user.user_metadata)
-  console.log('APP_META: ', user.app_metadata)
-
+  console.log('USER_META: ', user?.user_metadata)
+  console.log('APP_META: ', user?.app_metadata)
+  
   if (user) {
     const { sub: userID } = user
     const { app_metadata: { roles } } = user
