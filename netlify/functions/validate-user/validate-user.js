@@ -1,5 +1,6 @@
 exports.handler = async (event, context) => {
   const { user } = context.clientContext;
+  console.log('CONTEXT: ', context)
   console.log('META: ', user.user_metadata)
   if (user) {
     const userID = user.sub;
