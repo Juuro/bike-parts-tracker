@@ -10,6 +10,7 @@ const IdentityModal = React.lazy(() => import("react-netlify-identity-widget"))
 const BIKES = gql`
   query GetBikes {
     bikepartstracker_bike {
+      id
       name
       ebike
       discipline {
@@ -48,9 +49,9 @@ function DisplayUser() {
     return <p>Error :(</p>
   }
 
-  return data.bikepartstracker_bike.map(({id, name}) => (
+  return data.bikepartstracker_bike.map(({id, name, discipline: {name: discipline_name}}) => (
     <div key={id}>
-      <h3>{name}</h3>
+      <h3>{name} ({discipline_name})</h3>
     </div>
   ));
 }
