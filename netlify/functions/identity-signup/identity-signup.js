@@ -21,34 +21,31 @@ exports.handler = async function (event) {
     }
   }
 
-  // const result = await fetch(
-  //   "https://neutral-stud-43.hasura.app/v1/graphql",
-  //   {
-  //     method: "POST",
-  //     body: JSON.stringify(responseBody),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "x-hasura-admin-secret":
-  //         process.env.HASURA_SECRET
-  //     }
-  //   }
-  // );
+  const result = await fetch(
+    "https://neutral-stud-43.hasura.app/v1/graphql",
+    {
+      method: "POST",
+      body: JSON.stringify(responseBody),
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret":
+          process.env.HASURA_SECRET
+      }
+    }
+  );
 
-  // const { errors } = await result.json();
+  const { errors } = await result.json();
 
-  // if (errors) {
-  //   console.log(errors);
-  //   return {
-  //     statusCode: 500,
-  //     body: "Something is wrong"
-  //   };
-  // } else {
-  //   return {
-  //     statusCode: 200,
-  //     body: JSON.stringify(responseBody)
-  //   };
-  // }
-  return {
-    statusCode: 200
-  };
+  if (errors) {
+    console.log(errors);
+    return {
+      statusCode: 500,
+      body: "Something is wrong"
+    };
+  } else {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(responseBody)
+    };
+  }
 }
