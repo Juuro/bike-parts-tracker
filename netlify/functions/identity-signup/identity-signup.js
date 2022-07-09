@@ -9,6 +9,8 @@ import fetch from "node-fetch";
 const handler = async function (event, context) {
   const { user } = JSON.parse(event.body);
 
+  console.log('user: ', user)
+
   const responseBodyString = JSON.stringify({
     query: `
     mutation insertUser($id: String, $email:String, $name:String){

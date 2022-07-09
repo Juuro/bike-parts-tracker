@@ -44,7 +44,7 @@ export default function App() {
       <AuthStatusView />
       <div>
         <h2>My first Apollo app 🚀</h2>
-        <br/>
+        <br />
         <DisplayLocations />
       </div>
     </IdentityContextProvider>
@@ -53,6 +53,7 @@ export default function App() {
 
 function AuthStatusView() {
   const identity = useIdentityContext()
+  const { verifyToken } = identity
   const [dialog, setDialog] = React.useState(false)
   const name =
     (identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.full_name) || 'NoName'
@@ -69,13 +70,13 @@ function AuthStatusView() {
             </button>
           </>
         ) : (
-            <>
-              <h1> hello! try logging in! </h1>
-              <button className="btn" style={{ maxWidth: 400, background: 'darkgreen' }} onClick={() => setDialog(true)}>
-                LOG IN
+          <>
+            <h1> hello! try logging in! </h1>
+            <button className="btn" style={{ maxWidth: 400, background: 'darkgreen' }} onClick={() => setDialog(true)}>
+              LOG IN
             </button>
-            </>
-          )}
+          </>
+        )}
 
         <IdentityModal
           showDialog={dialog}
