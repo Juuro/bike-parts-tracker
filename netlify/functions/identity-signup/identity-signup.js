@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-exports.handler = async function (event) {
+export async function handler (event) {
   const data = JSON.parse(event.body)
   const { user } = data
 
