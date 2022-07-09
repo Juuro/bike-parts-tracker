@@ -1,15 +1,17 @@
 exports.handler = async (event, context) => {
-  const { user } = context.clientContext;
+  const { clientContext: { user } } = context
+  
   console.log('EVENT: ', event)
   console.log('CONTEXT: ', context)
   console.log('USER_META: ', user.user_metadata)
   console.log('APP_META: ', user.app_metadata)
+
   if (user) {
-    const userID = user.sub;
-    const { roles } = user.app_metadata
+    const { sub: userID } = user
+    const { app_metadata: { roles } } = user
     let userRole = "user"
 
-    if (roles.includes('admin')) {
+    if (roles?.includes('admin')) {
       userRole = 'admin'
     }
 
@@ -21,10 +23,11 @@ exports.handler = async (event, context) => {
       })
     };
   }
+
   return {
     statusCode: 200,
     body: JSON.stringify({
-      "X-Hasura-role": "anonymous"
+      "X-Hasura-Role": "anonymous"
     })
-  };
-};
+  }
+}
