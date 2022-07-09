@@ -8,11 +8,37 @@ import "@reach/tabs/styles.css"
 const IdentityModal = React.lazy(() => import("react-netlify-identity-widget"))
 
 const USER_NAME = gql`
-  query UserName {
-    bikepartstracker_user {
-      id
-      name
+  query GetBikes {
+    query GetBikes {
+      bikepartstracker_bike {
+        name
+        ebike
+        discipline {
+          name
+        }
+        category {
+          name
+        }
+        installations_aggregate {
+          nodes {
+            part {
+              name
+              parts_type {
+                name
+              }
+              manufacturer {
+                name
+              }
+              sell_status {
+                name
+              }
+            }
+          }
+        }
+      }
     }
+    
+    
   }
 `
 
@@ -26,7 +52,7 @@ function DisplayUser() {
     return <p>Error :(</p>
   }
 
-  return data.map(({ id, name }) => (
+  return data.bikepartstracker_bike.map(({id, name}) => (
     <div key={id}>
       <h3>{name}</h3>
     </div>
