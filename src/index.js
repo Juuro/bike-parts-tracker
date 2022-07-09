@@ -28,16 +28,16 @@ const authLink = setContext((_, { headers }) => {
 
 console.log('authLink', authLink)
 
-// const client = new ApolloClient({
-//   link: authLink.concat(httpLink),
-//   cache: new InMemoryCache(),
-// });
-
 const client = new ApolloClient({
-  // uri: 'https://flyby-gateway.herokuapp.com/',
-  uri: 'https://neutral-stud-43.hasura.app/v1/graphql',
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
+
+// const client = new ApolloClient({
+//   // uri: 'https://flyby-gateway.herokuapp.com/',
+//   uri: 'https://neutral-stud-43.hasura.app/v1/graphql',
+//   cache: new InMemoryCache(),
+// });
 
 // Supported in React 18+
 const root = ReactDOM.createRoot(document.getElementById('root'));
