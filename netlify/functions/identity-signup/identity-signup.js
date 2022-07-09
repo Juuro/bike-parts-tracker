@@ -1,10 +1,11 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-exports.handler = async function (event) {
+exports.handler = async function (event, context) {
   const data = JSON.parse(event.body)
   const { user } = data
 
   console.log('USER: ', user)
+  console.log('clientContext: ', context.clientContext)
 
   const responseBody = {
     query: `
