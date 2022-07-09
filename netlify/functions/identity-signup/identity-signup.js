@@ -29,7 +29,7 @@ const handler = async function (event) {
     "https://neutral-stud-43.hasura.app/v1/graphql",
     {
       method: "POST",
-      body: responseBodyString,
+      body: JSON.stringify(responseBody),
       headers: {
         "Content-Type": "application/json",
         "x-hasura-admin-secret":
