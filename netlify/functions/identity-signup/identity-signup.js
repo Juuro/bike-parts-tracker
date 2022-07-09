@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 exports.handler = async function (event, context) {
   const data = JSON.parse(event.body)
@@ -29,8 +29,7 @@ exports.handler = async function (event, context) {
       body: JSON.stringify(responseBody),
       headers: {
         "Content-Type": "application/json",
-        "x-hasura-admin-secret":
-          process.env.HASURA_SECRET
+        "x-hasura-admin-secret": process.env.HASURA_SECRET
       }
     }
   );

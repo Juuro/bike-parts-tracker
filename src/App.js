@@ -55,13 +55,14 @@ function AuthStatusView() {
   const identity = useIdentityContext()
   const [dialog, setDialog] = React.useState(false)
   console.log('IDENTITY: ', identity)
-  const name =
-    (identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.full_name) || 'NoName'
-  const avatar_url = identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.avatar_url
+  console.log('TOKEN: ', identity?.user?.token?.access_token)
+  const name = (identity?.user?.user_metadata && identity?.user?.user_metadata.full_name) || 'NoName'
+  const avatar_url = identity?.user?.user_metadata?.avatar_url
+
   return (
     <div className="App">
       <header className="App-header">
-        {identity && identity.isLoggedIn ? (
+        {identity?.isLoggedIn ? (
           <>
             <h1> hello {name}!</h1>
             {avatar_url && <img alt="user name" src={avatar_url} style={{ height: 100, borderRadius: '50%' }} />}
@@ -85,18 +86,6 @@ function AuthStatusView() {
           onSignup={(user) => console.log('welcome ', user?.user_metadata)}
           onLogout={() => console.log('bye ', name)}
         />
-
-        <h3>
-          Or{' '}
-          <a
-            href="https://github.com/sw-yx/react-netlify-identity-widget"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'powderblue' }}
-          >
-            view the source
-          </a>
-        </h3>
       </header>
     </div>
   )
