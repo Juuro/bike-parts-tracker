@@ -6,11 +6,11 @@
 // https://www.netlify.com/docs/functions/#identity-and-functions
 const fetch = require("node-fetch");
 
-const handler = async function (event, context) {
-  const eventData = JSON.parse(event.body)
-  const { user } = eventData
+const handler = async function (event) {
+  const data = JSON.parse(event.body)
+   const { user } = data
 
-  console.log('USER: ', user)
+   console.log('USER: ', user)
 
   const responseBody = {
     query: `
@@ -40,7 +40,7 @@ const handler = async function (event, context) {
     }
   );
 
-  const { errors, data } = await result.json();
+  const { errors } = await result.json();
 
   if (errors) {
     console.log(errors);
