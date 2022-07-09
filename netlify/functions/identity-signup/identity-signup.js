@@ -7,7 +7,7 @@
 // const fetch = require('node-fetch')
 import fetch from 'node-fetch'
 
-const handler = async function (event) {
+exports.handler = async function (event) {
   const data = JSON.parse(event.body)
   const { user } = data
 
@@ -29,8 +29,6 @@ const handler = async function (event) {
     body: JSON.stringify(responseBody),
   }
 }
-
-module.exports = { handler }
 
 // const handler = async function (event) {
 //   const data = JSON.parse(event.body)
