@@ -53,7 +53,6 @@ export default function App() {
 
 function AuthStatusView() {
   const identity = useIdentityContext()
-  const { verifyToken } = identity
   const [dialog, setDialog] = React.useState(false)
   const name =
     (identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.full_name) || 'NoName'
