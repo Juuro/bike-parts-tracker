@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 exports.handler = async function (event) {
   const data = JSON.parse(event.body)
