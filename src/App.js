@@ -1,5 +1,6 @@
 // Import everything needed to use the `useQuery` hook
 import { useQuery, gql } from '@apollo/client';
+import { IdentityContextProvider } from 'react-netlify-identity';
 
 const GET_LOCATIONS = gql`
   query GetLocations {
@@ -31,11 +32,15 @@ function DisplayLocations() {
 }
 
 export default function App() {
+  const url = 'https://deploy-preview-8--taupe-alpaca-7cf6ad.netlify.app/';
+
   return (
-    <div>
-      <h2>My first Apollo app 🚀</h2>
-      <br/>
-      <DisplayLocations />
-    </div>
+    <IdentityContextProvider url={url}>
+      <div>
+        <h2>My first Apollo app 🚀</h2>
+        <br/>
+        <DisplayLocations />
+      </div>
+    </IdentityContextProvider>
   );
 }
