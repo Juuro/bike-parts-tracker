@@ -7,7 +7,7 @@ CREATE TABLE "bikepartstracker"."bike"(
     "updated_at" TIMESTAMP(0) WITH TIME zone NULL,
     "name" TEXT NOT NULL,
     "ebike" BOOLEAN NOT NULL,
-    "user_id" UUID NOT NULL,
+    "user_id" TEXT NOT NULL,
     "discipline_id" UUID NOT NULL,
     "category_id" UUID NOT NULL,
     "strava_bike" TEXT NULL
@@ -28,7 +28,7 @@ CREATE TABLE "bikepartstracker"."part"(
     "receipt" TEXT NULL,
     "secondhand" BOOLEAN NOT NULL,
     "shop_url" TEXT NULL,
-    "user_id" UUID NOT NULL,
+    "user_id" TEXT NOT NULL,
     "sell_status_id" UUID NOT NULL,
     "model_year" INTEGER NOT NULL
 );
@@ -76,7 +76,7 @@ CREATE TABLE "bikepartstracker"."category"(
 ALTER TABLE
     "bikepartstracker"."category" ADD PRIMARY KEY("id");
 CREATE TABLE "bikepartstracker"."user"(
-    "id" UUID NOT NULL,
+    "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "created_at" TIMESTAMP(0) WITH TIME zone NOT NULL,
