@@ -40,7 +40,10 @@ const BIKES = gql`
 `
 
 function DisplayUser() {
+  const identity = useIdentityContext()
   const { loading, error, data } = useQuery(BIKES);
+  
+  if (!identity?.isLoggedIn) return
 
   if (loading) return <p>Loading...</p>;
   if (error) {
