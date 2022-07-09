@@ -7,43 +7,39 @@ import "@reach/tabs/styles.css"
 
 const IdentityModal = React.lazy(() => import("react-netlify-identity-widget"))
 
-const USER_NAME = gql`
+const BIKES = gql`
   query GetBikes {
-    query GetBikes {
-      bikepartstracker_bike {
+    bikepartstracker_bike {
+      name
+      ebike
+      discipline {
         name
-        ebike
-        discipline {
-          name
-        }
-        category {
-          name
-        }
-        installations_aggregate {
-          nodes {
-            part {
+      }
+      category {
+        name
+      }
+      installations_aggregate {
+        nodes {
+          part {
+            name
+            parts_type {
               name
-              parts_type {
-                name
-              }
-              manufacturer {
-                name
-              }
-              sell_status {
-                name
-              }
+            }
+            manufacturer {
+              name
+            }
+            sell_status {
+              name
             }
           }
         }
       }
     }
-    
-    
   }
 `
 
 function DisplayUser() {
-  const { loading, error, data } = useQuery(USER_NAME);
+  const { loading, error, data } = useQuery(BIKES);
 
   if (loading) return <p>Loading...</p>;
   if (error) {
