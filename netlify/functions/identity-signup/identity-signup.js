@@ -7,7 +7,8 @@
 const fetch = require("node-fetch");
 
 const handler = async function (event, context) {
-  const { user } = event.body
+  const eventData = JSON.parse(event.body)
+  const { user } = eventData
 
   console.log('USER: ', user)
 
