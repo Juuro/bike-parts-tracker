@@ -14,6 +14,7 @@ console.log('httplink', httpLink)
 
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
+  console.log('localstorage', localStorage.getItem('gotrue.user'))
   const { user: { token: { access_token } } } = JSON.parse(localStorage.getItem('gotrue.user'));
 
   console.log('access_token: ', access_token)
