@@ -23,7 +23,7 @@ exports.handler = async function (event, context) {
   }
 
   const result = await fetch(
-    "https://neutral-stud-43.hasura.app/v1/graphql",
+    process.env.HASURA_URL,
     {
       method: "POST",
       body: JSON.stringify(responseBody),

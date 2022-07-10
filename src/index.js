@@ -7,8 +7,10 @@ import reportWebVitals from './reportWebVitals';
 import './index.scss';
 
 const httpLink = createHttpLink({
-  uri: process.env.HASURA_URL,
+  uri: 'https://neutral-stud-43.hasura.app/v1/graphql',
 });
+
+console.log('process.env.HASURA_URL:', process.env.HASURA_URL)
 
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
