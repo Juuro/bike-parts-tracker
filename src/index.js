@@ -10,8 +10,6 @@ const httpLink = createHttpLink({
   uri: 'https://neutral-stud-43.hasura.app/v1/graphql',
 });
 
-console.log('process.env.HASURA_URL:', process.env.HASURA_URL)
-
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
   console.log('localstorage', localStorage.getItem('gotrue.user'))
