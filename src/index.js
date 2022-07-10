@@ -7,7 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import './index.scss';
 
 const httpLink = createHttpLink({
-  uri: 'https://neutral-stud-43.hasura.app/v1/graphql',
+  uri: process.env.HASURA_URL,
 });
 
 const authLink = setContext((_, { headers }) => {
