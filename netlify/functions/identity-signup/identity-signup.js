@@ -1,51 +1,56 @@
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// note - this function MUST be named `identity-signup` to work
+// we do not yet offer local emulation of this functionality in Netlify Dev
+//
+// more:
+// https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
+// https://docs.netlify.com/functions/functions-and-identity/
 
-exports.handler = async function (event, context) {
-  const data = JSON.parse(event.body)
-  const { user } = data
+const axios = require("axios");
 
-  console.log('USER: ', user)
-  console.log('clientContext: ', context.clientContext)
+const handler = async function (event) {
+  const data = JSON.parse(event.body);
+  const { user } = data;
 
   const responseBody = {
-    query: `
-      mutation insertUser($id: String, $email:String, $name:String){
-        insert_bikepartstracker_user(objects: {id: $id, email: $email, name: $name}) {
+    app_metadata: {
+      roles:
+        user.email.split("@")[1] === "trust-this-company.com"
+          ? ["editor"]
+          : ["visitor"],
+      my_user_info: "this is some user info",
+    },
+    user_metadata: {
+      // append current user metadata
+      ...user.user_metadata,
+      custom_data_from_function: "hurray this is some extra metadata",
+    },
+  };
+
+  const response = await axios.post({
+    url: process.env.HASURA_URL,
+    headers: {
+      ["x-hasura-admin-secret"]: process.env.HASURA_SECRET
+    },
+    body: JSON.stringify({
+      query: `
+      mutation insertUser($id: String, $email: String, $name: String) {
+        insert_user(objects: {email: $email, name: $name, id: $id}) {
           affected_rows
         }
-      }    
+      }
     `,
     variables: {
       id: user.id,
       email: user.email,
       name: user.user_metadata.full_name
     }
-  }
+    }),
+  });
 
-  const result = await fetch(
-    process.env.HASURA_URL,
-    {
-      method: "POST",
-      body: JSON.stringify(responseBody),
-      headers: {
-        "Content-Type": "application/json",
-        "x-hasura-admin-secret": process.env.HASURA_SECRET
-      }
-    }
-  );
+  return {
+    statusCode: 200,
+    body: JSON.stringify(responseBody),
+  };
+};
 
-  const { errors } = await result.json();
-
-  if (errors) {
-    console.log(errors);
-    return {
-      statusCode: 500,
-      body: "Something is wrong"
-    };
-  } else {
-    return {
-      statusCode: 200,
-      body: JSON.stringify(responseBody)
-    };
-  }
-}
+module.exports = { handler };

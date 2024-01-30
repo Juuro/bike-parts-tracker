@@ -1,4 +1,4 @@
-import './Card.scss'
+import "./Card.scss";
 
 function Card(props) {
   return (
@@ -25,7 +25,7 @@ function Card(props) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Card
+export default Card;
