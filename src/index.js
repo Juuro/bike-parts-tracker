@@ -1,9 +1,9 @@
 import { React } from "react";
 import * as ReactDOM from "react-dom/client";
-import { ApolloClient, ApolloProvider, createHttpLink } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+// import { ApolloClient, ApolloProvider, createHttpLink } from "@apollo/client";
+// import { setContext } from "@apollo/client/link/context";
 import App from "./App";
-import { cache } from "./cache";
+// import { cache } from "./cache";
 import reportWebVitals from "./reportWebVitals";
 import "./index.scss";
 

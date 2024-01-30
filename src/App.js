@@ -1,14 +1,12 @@
-import React, { useEffect, useReducer } from "react";
+import React from "react";
 import {
   useQuery,
   gql,
-  useReactiveVar,
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
   HttpLink,
 } from "@apollo/client";
-import { userVar } from "./cache";
 
 import "./App.scss";
 
