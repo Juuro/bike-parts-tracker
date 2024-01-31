@@ -26,8 +26,7 @@ const handler = async function (event) {
     },
   };
 
-  const response = await axios.post({
-    url: process.env.HASURA_URL,
+  const response = await axios.post(process.env.HASURA_URL,{
     headers: {
       ["x-hasura-admin-secret"]: process.env.HASURA_SECRET
     },
