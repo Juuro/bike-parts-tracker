@@ -30,13 +30,14 @@ const handler = async function (event) {
   const response = await axios.post(process.env.HASURA_URL, {
     headers: {
       "Content-Type": "application/json",
-      "HASURA_GRAPHQL_ADMIN_SECRET": process.env.HASURA_SECRET,
+      "x-hasura-admin-secret": process.env.HASURA_SECRET,
     },
     body: responseBodyString,
   });
 
   if (response.data.errors) {
     console.log("Errors: ", response.data.errors);
+    console.log("Request: ", response.request);
   }
 
   return {
