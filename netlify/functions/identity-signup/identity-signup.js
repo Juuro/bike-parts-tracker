@@ -4,8 +4,7 @@
 // more:
 // https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
 // https://docs.netlify.com/functions/functions-and-identity/
-import fetch from "node-fetch";
-import axios from "axios";
+const fetch = require("node-fetch");
 
 const handler = async function (event) {
   console.log("Sign Up");
@@ -43,6 +42,8 @@ const handler = async function (event) {
       "x-hasura-admin-secret": process.env.HASURA_SECRET,
     },
   });
+
+  const { errors, data } = await result.json();
 
   if (errors) {
     console.log(errors);
