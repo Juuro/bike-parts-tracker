@@ -10,6 +10,8 @@ function App() {
     throw new Error(
       'process.env.REACT_APP_NETLIFY_IDENTITY_URL is blank, which means you probably forgot to set it in your Netlify environment variables',
     )
+  else 
+      console.log('URL: ', url)
   return (
     <IdentityContextProvider url={url}>
       <AuthStatusView />
