@@ -4,7 +4,7 @@
 // more:
 // https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
 // https://docs.netlify.com/functions/functions-and-identity/
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require("node-fetch");
 
 const handler = async function (event) {
   console.log("Sign Up");
