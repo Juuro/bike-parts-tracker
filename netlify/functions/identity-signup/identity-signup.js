@@ -34,6 +34,7 @@ const handler = async function (event) {
     headers: {
       "Content-Type": "application/json",
       "x-hasura-admin-secret": process.env.HASURA_SECRET,
+      "x-hasura-access-key": process.env.HASURA_SECRET,
     },
     body: responseBodyString,
   });
