@@ -12,7 +12,7 @@ const handler = async function (event) {
   const data = JSON.parse(event.body);
   const { user } = data;
 
-  const responseBodyString = JSON.stringify({
+  const graphqlQuery = JSON.stringify({
     query: `
       mutation insertUser($id: String, $email: String, $name: String) {
         insert_user(objects: {email: $email, name: $name, id: $id}) {
@@ -27,12 +27,27 @@ const handler = async function (event) {
     },
   });
 
-  const response = await axios.post(process.env.HASURA_URL, {
-    headers: {
-      "content-type": "application/json",
-      "x-hasura-admin-secret": process.env.HASURA_SECRET,
-    },
-    body: responseBodyString,
+  const headers = {
+    "content-type": "application/json",
+    "x-hasura-admin-secret": process.env.HASURA_SECRET,
+  }
+
+  // const response = await axios.post(process.env.HASURA_URL, {
+  //   headers: {
+  //     "content-type": "application/json",
+  //     "x-hasura-admin-secret": process.env.HASURA_SECRET,
+  //   },
+  //   body: graphqlQuery,
+  // });
+
+
+
+
+  const response = axios({
+    url: process.env.HASURA_URL,
+    method: 'post',
+    headers: headers,
+    data: graphqlQuery
   });
 
   if (response.data.errors) {
