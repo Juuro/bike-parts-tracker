@@ -32,14 +32,14 @@ const handler = async function (event) {
     "x-hasura-admin-secret": process.env.HASURA_SECRET,
   }
 
-  const response = axios({
+  const response = await axios({
     url: process.env.HASURA_URL,
     method: 'post',
     headers: headers,
     data: graphqlQuery
   });
 
-  if (response.data?.errors) {
+  if (response.data.errors) {
     console.log("Errors: ", response.data.errors);
     console.log("Request: ", response.request);
   }
