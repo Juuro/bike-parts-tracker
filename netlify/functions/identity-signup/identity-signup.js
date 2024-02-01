@@ -32,17 +32,6 @@ const handler = async function (event) {
     "x-hasura-admin-secret": process.env.HASURA_SECRET,
   }
 
-  // const response = await axios.post(process.env.HASURA_URL, {
-  //   headers: {
-  //     "content-type": "application/json",
-  //     "x-hasura-admin-secret": process.env.HASURA_SECRET,
-  //   },
-  //   body: graphqlQuery,
-  // });
-
-
-
-
   const response = axios({
     url: process.env.HASURA_URL,
     method: 'post',
@@ -50,7 +39,7 @@ const handler = async function (event) {
     data: graphqlQuery
   });
 
-  if (response.data.errors) {
+  if (response.data?.errors) {
     console.log("Errors: ", response.data.errors);
     console.log("Request: ", response.request);
   }
