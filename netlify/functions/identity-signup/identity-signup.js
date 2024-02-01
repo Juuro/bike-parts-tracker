@@ -32,7 +32,7 @@ const handler = async function (event) {
   const response = await axios.post(process.env.HASURA_URL, {
     headers: {
       "Content-Type": "application/json",
-      ["x-hasura-admin-secret"]: process.env.HASURA_SECRET,
+      "x-hasura-admin-secret": process.env.HASURA_SECRET,
     },
     body: responseBodyString,
   });
