@@ -27,7 +27,8 @@ const handler = async function (event) {
     },
   });
 
-  console.log("responseBodyString: ", responseBodyString);
+  // console.log("responseBodyString: ", responseBodyString);
+  console.log("process.env.HASURA_SECRET: ", process.env.HASURA_SECRET);
 
   const response = await axios.post(process.env.HASURA_URL, {
     headers: {
@@ -37,7 +38,7 @@ const handler = async function (event) {
     body: responseBodyString,
   });
 
-  console.log("Response: ", response);
+  // console.log("Response: ", response);
 
   if (response.data.errors) {
     console.log("Errors: ", response.data.errors);
