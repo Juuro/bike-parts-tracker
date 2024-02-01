@@ -4,11 +4,13 @@
 // more:
 // https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
 // https://docs.netlify.com/functions/functions-and-identity/
-const fetch = require("node-fetch");
+
+const axios = require("axios");
 
 const handler = async function (event) {
   console.log("Sign Up");
-  const { user } = JSON.parse(event.body);
+  const data = JSON.parse(event.body);
+  const { user } = data;
 
   const responseBodyString = JSON.stringify({
     query: `
@@ -27,36 +29,20 @@ const handler = async function (event) {
 
   console.log("responseBodyString: ", responseBodyString);
 
-  // const response = await axios.post(process.env.HASURA_URL, {
-  //   headers: {
-  //     ["x-hasura-admin-secret"]: process.env.HASURA_SECRET,
-  //   },
-  //   body: responseBodyString,
-  // });
-
-  const result = await fetch(process.env.HASURA_URL, {
-    method: "POST",
-    body: responseBodyString,
+  const response = await axios.post(process.env.HASURA_URL, {
     headers: {
       "Content-Type": "application/json",
-      "x-hasura-admin-secret": process.env.HASURA_SECRET,
+      ["x-hasura-admin-secret"]: process.env.HASURA_SECRET,
     },
+    body: responseBodyString,
   });
 
-  const { errors, data } = await result.json();
+  console.log("Response: ", response);
 
-  if (errors) {
-    console.log(errors);
-    return {
-      statusCode: 500,
-      body: "Something is wrong",
-    };
-  } else {
-    return {
-      statusCode: 200,
-      body: JSON.stringify(responseBody),
-    };
-  }
+  return {
+    statusCode: 200,
+    body: JSON.stringify(responseBody),
+  };
 };
 
-export default { handler };
+module.exports = { handler };
