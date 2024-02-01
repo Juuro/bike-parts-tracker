@@ -4,8 +4,8 @@
 // more:
 // https://www.netlify.com/blog/2019/02/21/the-role-of-roles-and-how-to-set-them-in-netlify-identity/
 // https://docs.netlify.com/functions/functions-and-identity/
-const fetch = require("node-fetch");
-const axios = require("axios");
+import fetch from "node-fetch";
+import axios from "axios";
 
 const handler = async function (event) {
   console.log("Sign Up");
@@ -58,4 +58,4 @@ const handler = async function (event) {
   }
 };
 
-module.exports = { handler };
+export default { handler };
