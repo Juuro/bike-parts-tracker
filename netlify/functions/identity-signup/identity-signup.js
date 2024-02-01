@@ -8,31 +8,11 @@
 const axios = require("axios");
 
 const handler = async function (event) {
-  console.log('Sign Up')
-  const data = JSON.parse(event.body);
-  const { user } = data;
+  console.log("Sign Up");
+  const { user } = JSON.parse(event.body);
 
-  const responseBody = {
-    app_metadata: {
-      roles:
-        user.email.split("@")[1] === "trust-this-company.com"
-          ? ["editor"]
-          : ["visitor"],
-      my_user_info: "this is some user info",
-    },
-    user_metadata: {
-      // append current user metadata
-      ...user.user_metadata,
-      custom_data_from_function: "hurray this is some extra metadata",
-    },
-  };
-
-  const response = await axios.post(process.env.HASURA_URL,{
-    headers: {
-      ["x-hasura-admin-secret"]: process.env.HASURA_SECRET
-    },
-    body: JSON.stringify({
-      query: `
+  const responseBodyString = JSON.stringify({
+    query: `
       mutation insertUser($id: String, $email: String, $name: String) {
         insert_user(objects: {email: $email, name: $name, id: $id}) {
           affected_rows
@@ -42,17 +22,40 @@ const handler = async function (event) {
     variables: {
       id: user.id,
       email: user.email,
-      name: user.user_metadata.full_name
-    }
-    }),
+      name: user.user_metadata.full_name,
+    },
   });
 
-  console.log('Response: ', response)
+  console.log("responseBodyString: ", responseBodyString);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(responseBody),
-  };
+  // const response = await axios.post(process.env.HASURA_URL, {
+  //   headers: {
+  //     ["x-hasura-admin-secret"]: process.env.HASURA_SECRET,
+  //   },
+  //   body: responseBodyString,
+  // });
+
+  const result = await fetch(process.env.HASURA_URL, {
+    method: "POST",
+    body: responseBodyString,
+    headers: {
+      "Content-Type": "application/json",
+      "x-hasura-admin-secret": process.env.HASURA_SECRET,
+    },
+  });
+
+  if (errors) {
+    console.log(errors);
+    return {
+      statusCode: 500,
+      body: "Something is wrong",
+    };
+  } else {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(responseBody),
+    };
+  }
 };
 
 module.exports = { handler };
