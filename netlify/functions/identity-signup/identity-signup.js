@@ -47,7 +47,7 @@ const handler = async function (event) {
     }),
   });
 
-  console.log('Response, ')
+  console.log('Response: ', response)
 
   return {
     statusCode: 200,
