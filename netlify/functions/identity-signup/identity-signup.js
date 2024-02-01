@@ -39,9 +39,13 @@ const handler = async function (event) {
 
   console.log("Response: ", response);
 
+  if (response.data.errors) {
+    console.log("Errors: ", response.data.errors);
+  }
+
   return {
     statusCode: 200,
-    body: JSON.stringify(response),
+    body: JSON.stringify(response.data),
   };
 };
 
