@@ -8,6 +8,7 @@
 const axios = require("axios");
 
 const handler = async function (event) {
+  console.log('Sign Up')
   const data = JSON.parse(event.body);
   const { user } = data;
 
@@ -45,6 +46,8 @@ const handler = async function (event) {
     }
     }),
   });
+
+  console.log('Response, ')
 
   return {
     statusCode: 200,
