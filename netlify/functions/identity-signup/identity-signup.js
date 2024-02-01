@@ -27,19 +27,13 @@ const handler = async function (event) {
     },
   });
 
-  // console.log("responseBodyString: ", responseBodyString);
-  console.log("process.env.HASURA_SECRET: ", process.env.HASURA_SECRET);
-
   const response = await axios.post(process.env.HASURA_URL, {
     headers: {
       "Content-Type": "application/json",
-      "x-hasura-admin-secret": process.env.HASURA_SECRET,
-      "x-hasura-access-key": process.env.HASURA_SECRET,
+      "HASURA_GRAPHQL_ADMIN_SECRET": process.env.HASURA_SECRET,
     },
     body: responseBodyString,
   });
-
-  // console.log("Response: ", response);
 
   if (response.data.errors) {
     console.log("Errors: ", response.data.errors);
