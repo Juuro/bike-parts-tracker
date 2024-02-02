@@ -25,12 +25,13 @@ function AuthStatusView() {
   const name =
     (identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.full_name) || 'NoName'
   const avatar_url = identity && identity.user && identity.user.user_metadata && identity.user.user_metadata.avatar_url
+  const token = identity.user?.token.access_token;
   return (
     <div className="App">
       <header className="App-header">
         {identity && identity.isLoggedIn ? (
           <>
-            <h1> hello {name}!</h1>
+            <h1> hello {name} ({token})!</h1>
             {avatar_url && <img alt="user name" src={avatar_url} style={{ height: 100, borderRadius: '50%' }} />}
             <button className="btn" style={{ maxWidth: 400, background: 'orangered' }} onClick={() => setDialog(true)}>
               LOG OUT
@@ -48,7 +49,7 @@ function AuthStatusView() {
         <IdentityModal
           showDialog={dialog}
           onCloseDialog={() => setDialog(false)}
-          onLogin={(user) => console.log('hello ', user, identity)}
+          onLogin={(user) => console.log('hello ', user!.user_metadata)}
           onSignup={(user) => console.log('welcome ', user!.user_metadata)}
           onLogout={() => console.log('bye ', name)}
         />
