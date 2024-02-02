@@ -1,10 +1,10 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
 const handler = async (event, context) => {
-  console.log("Validate user");
   const {
     identity,
     user
   } = context.clientContext;
+  console.log("Validate user", identity, user);
   if (user) {
     const userID = user.sub;
     return {
@@ -25,3 +25,4 @@ const handler = async (event, context) => {
 };
 
 module.exports = { handler };
+

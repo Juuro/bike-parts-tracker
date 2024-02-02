@@ -48,7 +48,7 @@ function AuthStatusView() {
         <IdentityModal
           showDialog={dialog}
           onCloseDialog={() => setDialog(false)}
-          onLogin={(user) => console.log('hello ', user!.user_metadata)}
+          onLogin={(user) => console.log('hello ', user, identity)}
           onSignup={(user) => console.log('welcome ', user!.user_metadata)}
           onLogout={() => console.log('bye ', name)}
         />
