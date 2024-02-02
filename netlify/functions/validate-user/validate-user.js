@@ -1,5 +1,6 @@
 // Docs on event and context https://docs.netlify.com/functions/build/#code-your-function-2
-exports.handler = async (event, context) => {
+const handler = async (event, context) => {
+  console.log("Validate user");
   const {
     identity,
     user
@@ -22,3 +23,5 @@ exports.handler = async (event, context) => {
     })
   };
 };
+
+module.exports = { handler };
