@@ -4,22 +4,21 @@ const handler = async (event, context) => {
     identity,
     user
   } = context.clientContext;
-  console.log("Validate user", identity, user);
+  
   if (user) {
-    const userID = user.sub;
+    const userId = user.sub;
     return {
       statusCode: 200,
       body: JSON.stringify({
-        "X-Hasura-User-Id": userID,
-        "X-Hasura-Role": "user",
-        "x-hasura-custom-var": "Something"
+        "x-hasura-user-id": userId,
+        "x-hasura-role": "user"
       })
     };
   }
   return {
     statusCode: 200,
     body: JSON.stringify({
-      "X-Hasura-role": "anonymous"
+      "x-hasura-role": "anonymous"
     })
   };
 };
