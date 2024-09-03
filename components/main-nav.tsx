@@ -15,11 +15,12 @@ import {
 } from "./ui/navigation-menu";
 import React from "react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function MainNav() {
   return (
     <div className="flex gap-4 items-center">
-      <CustomLink href="/">
+      <Link href="/">
         <Button variant="ghost" className="p-0">
           <Image
             src="/logo.png"
@@ -29,8 +30,10 @@ export function MainNav() {
             className="min-w-8"
           />
         </Button>
-      </CustomLink>
-      <h2>Bike Parts Tracker</h2>
+      </Link>
+      <Link href="/">
+        <h2>Bike Parts Tracker</h2>
+      </Link>
     </div>
   );
 }

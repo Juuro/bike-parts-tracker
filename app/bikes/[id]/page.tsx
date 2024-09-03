@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { fetchBike, fetchBikeParts } from "@/utils/requests";
+import addInstallation from "@/app/actions/addInstallation";
 import Link from "next/link";
 
 export default function BikePage() {
@@ -24,15 +25,16 @@ export default function BikePage() {
   }, [status]);
 
   return (
-    <section className="bg-slate-50">
+    <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl mb-4">{bike?.name}</h2>
+        <h1 className="text-4xl font-bold mb-6">{bike?.name}</h1>
         <ul>
           {bikeParts.length == 0 ? (
             <p>No parts found</p>
           ) : (
             bikeParts.map((installation) => {
               const { part } = installation;
+
               return (
                 <li key={installation.id}>
                   {part.parts_type.name}: {part.manufacturer.name} {part.name} (
@@ -57,6 +59,18 @@ export default function BikePage() {
             })
           )}
         </ul>
+
+        {/* AddPartsForm component */}
+        <form action={addInstallation}>
+          <input type="text" name="" />
+          <select>
+            <option>Type</option>
+            <option>Frame</option>
+          </select>
+          <button className="rounded-md bg-pink-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+            Add part ...
+          </button>
+        </form>
       </div>
     </section>
   );

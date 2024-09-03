@@ -17,12 +17,12 @@ export default function Index() {
     if (status === "authenticated") {
       fetchBikes(setBikes);
     }
-    console.log("BIKES: ", bikes);
   }, [status]);
 
   return (
-    <section className="bg-slate-50">
+    <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-bold mb-6">Dashboard</h1>
         <h2 className="text-2xl mb-4">Bikes</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 rounded-lg mb-8">
           {bikes.length === 0 ? (

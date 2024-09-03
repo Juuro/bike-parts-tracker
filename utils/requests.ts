@@ -33,4 +33,13 @@ const fetchBikeParts = async (id, setBikeParts) => {
   }
 };
 
+// const addBikeParts = async (id) => {
+//   try {
+//     const response = await fetch(`/api/bikes/${id}/addpart`);
+//     console.log("RESPONSE: ", response);
+//   } catch (error) {
+//     console.error("Error adding parts:", error);
+//   }
+// };
+
 export { fetchBikes, fetchBike, fetchBikeParts };
