@@ -28,6 +28,7 @@ export default function BikePage() {
     <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold mb-6">{bike?.name}</h1>
+        {/* calculated weight, measured weight */}
         <ul>
           {bikeParts.length == 0 ? (
             <p>No parts found</p>
