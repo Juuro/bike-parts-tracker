@@ -3,7 +3,7 @@ import { request, gql } from "graphql-request";
 import { getToken } from "next-auth/jwt";
 import { auth } from "@/auth";
 
-export const GET = async (req) => {
+export const GET = async (req, { params }) => {
   try {
     const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
@@ -11,23 +11,42 @@ export const GET = async (req) => {
     const accessToken = token?.accessToken;
 
     const query = gql`
-      query GetBikes($id: uuid!) {
-        bike(where: { user_id: { _eq: $id } }) {
+      query GetInstallation($bike_id: uuid!) {
+        installation(where: { bike_id: { _eq: $bike_id } }) {
           id
-          name
-          strava_bike
-          discipline {
-            abbr
+          part {
+            id
+            buy_price
+            model_year
             name
+            purchase_date
+            receipt
+            secondhand
+            sell_price
+            shop_url
+            updated_at
+            user_id
+            weight
+            manufacturer {
+              name
+            }
+            sell_status {
+              name
+            }
+            parts_type {
+              name
+            }
           }
+          installed_at
+          uninstalled_at
         }
       }
     `;
 
-    const { bike: userResponse } = await request(
+    const { installation: userResponse } = await request(
       process.env.AUTH_HASURA_GRAPHQL_URL!,
       query,
-      { id: userId },
+      { bike_id: params.id },
       {
         authorization: `Bearer ${accessToken}`,
       }
