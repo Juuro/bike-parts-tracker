@@ -10,27 +10,24 @@ export const GET = async (req) => {
     const accessToken = session?.accessToken;
 
     const query = gql`
-      query GetBikes($id: uuid!) {
-        bike(where: { user_id: { _eq: $id } }) {
+      query GetManufacturers {
+        manufacturer {
           id
           name
-          strava_bike
-          discipline {
-            abbr
-            name
-          }
         }
       }
     `;
 
-    const { bike: userResponse } = await request(
+    const { manufacturer: userResponse } = await request(
       process.env.AUTH_HASURA_GRAPHQL_URL!,
       query,
-      { id: userId },
+      {},
       {
         authorization: `Bearer ${accessToken}`,
       }
     );
+
+    console.log("REsponse: ", userResponse);
 
     return new Response(JSON.stringify(userResponse), {
       status: 200,

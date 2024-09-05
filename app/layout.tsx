@@ -19,7 +19,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
       <body className={`h-full ${inter.className}`}>
         <SessionProvider>
           <Header />
-          <main>{children}</main>
+          <main className="">{children}</main>
           <Footer />
         </SessionProvider>
       </body>

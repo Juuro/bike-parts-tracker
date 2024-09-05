@@ -39,6 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // Add user ID to the session
     session: async ({ session, token, user }) => {
       session.accessToken = token.accessToken; // Pass accessToken to the session
+      session.userId = token.sub;
       return session;
     },
   },
