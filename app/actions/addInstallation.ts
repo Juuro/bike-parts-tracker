@@ -24,7 +24,7 @@ async function addInstallation(formData) {
       $purchase_date: timestamptz = ""
       $secondhand: Boolean = false
       $sell_status_id: uuid = ""
-      $sell_price: float8 = ""
+      $sell_price: float8 = null
       $shop_url: String = ""
       $type_id: uuid = ""
       $user_id: uuid = ""
@@ -61,30 +61,30 @@ async function addInstallation(formData) {
     }
   `;
 
-  // const data = await request(
-  //   process.env.AUTH_HASURA_GRAPHQL_URL!,
-  //   query,
-  //   {
-  //     user_id: userId,
-  //     bike_id: formData.get("bike"),
-  //     manufacturer_id: "e8fd544f-1434-4ab3-b142-97c2198b8c4a",
-  //     model_year: formData.get("year"),
-  //     buy_price: formData.get("price"),
-  //     purchase_date: formData.get("purchase_date"),
-  //     secondhand: stringToBoolean(formData.get("secondhand")),
-  //     sell_status_id: "3e25ac79-5efe-4704-9324-9f3f211d3e05",
-  //     shop_url: formData.get("shop_url"),
-  //     type_id: "97021dba-dea7-4652-afc8-7c93d151d181",
-  //     weight: formData.get("weight"),
-  //     name: formData.get("name"),
-  //     installed_at: formData.get("installed_at"),
-  //   },
-  //   {
-  //     authorization: `Bearer ${accessToken}`,
-  //   }
-  // );
+  const data = await request(
+    process.env.AUTH_HASURA_GRAPHQL_URL!,
+    query,
+    {
+      user_id: userId,
+      bike_id: formData.get("bike"),
+      manufacturer_id: formData.get("manufacturer"),
+      model_year: parseInt(formData.get("year")),
+      buy_price: parseFloat(formData.get("price")),
+      purchase_date: formData.get("purchase_date"),
+      secondhand: stringToBoolean(formData.get("secondhand")),
+      sell_status_id: formData.get("sell_status"),
+      shop_url: formData.get("shop_url"),
+      type_id: formData.get("type"),
+      weight: parseInt(formData.get("weight")),
+      name: formData.get("name"),
+      installed_at: formData.get("installed_at"),
+    },
+    {
+      authorization: `Bearer ${accessToken}`,
+    }
+  );
 
-  // console.log("HALLO", data.insert_installation.returning);
+  console.log("HALLO", data.insert_installation.returning);
   try {
     revalidatePath(`/bikes/${bikeId}`);
     console.log(`Revalidation triggered for /bikes/${bikeId}`);

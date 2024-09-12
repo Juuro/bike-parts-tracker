@@ -1,5 +1,10 @@
 import addInstallation from "@/app/actions/addInstallation";
-import { fetchManufacturers } from "@/utils/requests";
+import {
+  fetchBikes,
+  fetchManufacturers,
+  fetchPartsType,
+  fetchSellStatus,
+} from "@/utils/requests";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
@@ -23,12 +28,33 @@ const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
+  const [bikes, setBikes] = useState([]);
   const [manufacturers, setManufacturers] = useState([]);
+  const [sellStatus, setSellStatus] = useState([]);
+  const [partsType, setPartsType] = useState([]);
   const { data: session, status } = useSession();
 
   useEffect(() => {
     if (status === "authenticated") {
+      fetchBikes(setBikes);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
       fetchManufacturers(setManufacturers);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchSellStatus(setSellStatus);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchPartsType(setPartsType);
     }
   }, [status]);
 
@@ -50,7 +76,8 @@ const Modal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    // TODO: This is wrong between 0 and 1 o'clock during summer time.
+    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     setSelectedDate(formattedDate);
   }, []);
 
@@ -115,12 +142,23 @@ const Modal: React.FC<ModalProps> = ({
                     id="bike"
                     defaultValue={bike.id}
                     required
+                    disabled={false}
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   >
                     <option value="" disabled hidden>
                       Select bike
                     </option>
-                    <option value={bike.id}>{bike.name}</option>
+                    {bikes.length == 0 ? (
+                      <p>No bikes found</p>
+                    ) : (
+                      bikes.map((bike) => {
+                        return (
+                          <option key={bike.id} value={bike.id}>
+                            {bike.name}
+                          </option>
+                        );
+                      })
+                    )}
                   </select>
                 </div>
                 <div className="col-span-2">
@@ -179,6 +217,7 @@ const Modal: React.FC<ModalProps> = ({
                   <input
                     type="number"
                     name="year"
+                    min="1910"
                     id="year"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="1985"
@@ -195,6 +234,7 @@ const Modal: React.FC<ModalProps> = ({
                   <input
                     type="number"
                     name="price"
+                    min="0"
                     id="price"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="399"
@@ -221,36 +261,25 @@ const Modal: React.FC<ModalProps> = ({
                   <legend className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     For sale
                   </legend>
-                  <p>
-                    <input
-                      name="sell_status"
-                      type="radio"
-                      id="for_sale"
-                      className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:ring-primary-600 focus:border-primary-600"
-                      value="for_sale"
-                    />
-                    <label htmlFor="for_sale">For sale</label>
-                  </p>
-                  <p>
-                    <input
-                      name="sell_status"
-                      type="radio"
-                      id="not_for_sale"
-                      className="mr-2 bg-gray-50 border border-gray-300 text-gray-900"
-                      value="not_for_sale"
-                    />
-                    <label htmlFor="not_for_sale">Not for sale</label>
-                  </p>
-                  <p>
-                    <input
-                      name="sell_status"
-                      type="radio"
-                      id="sold"
-                      className="mr-2 bg-gray-50 border border-gray-300 text-gray-900"
-                      value="sold"
-                    />
-                    <label htmlFor="sold">Sold</label>
-                  </p>
+
+                  {sellStatus.length == 0 ? (
+                    <p>No sell status found</p>
+                  ) : (
+                    sellStatus.map((status) => {
+                      return (
+                        <p key={status.slug}>
+                          <input
+                            name="sell_status"
+                            type="radio"
+                            id={status.slug}
+                            className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:ring-primary-600 focus:border-primary-600"
+                            value={status.id}
+                          />
+                          <label htmlFor={status.slug}>{status.name}</label>
+                        </p>
+                      );
+                    })
+                  )}
                 </fieldset>
 
                 <div className="col-span-1">
@@ -263,6 +292,7 @@ const Modal: React.FC<ModalProps> = ({
                   <input
                     type="number"
                     name="sell_price"
+                    min="1"
                     id="sell_price"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="299"
@@ -316,9 +346,17 @@ const Modal: React.FC<ModalProps> = ({
                     <option value="" disabled hidden>
                       Select type of part
                     </option>
-                    <option value="Frame">Frame</option>
-                    <option value="Front Brake">Front Brake</option>
-                    <option value="Handlebar">Handlebar</option>
+                    {partsType.length == 0 ? (
+                      <p>No parts found</p>
+                    ) : (
+                      partsType.map((type) => {
+                        return (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
+                          </option>
+                        );
+                      })
+                    )}
                   </select>
                 </div>
                 <div className="col-span-1">
@@ -329,8 +367,9 @@ const Modal: React.FC<ModalProps> = ({
                     Weight
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     name="weight"
+                    min="0"
                     id="weight"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder=""

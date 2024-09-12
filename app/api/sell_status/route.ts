@@ -10,15 +10,16 @@ export const GET = async (req) => {
     const accessToken = session?.accessToken;
 
     const query = gql`
-      query GetManufacturers {
-        manufacturer {
+      query GetSellStatus {
+        sell_status {
           id
+          slug
           name
         }
       }
     `;
 
-    const { manufacturer: userResponse } = await request(
+    const { sell_status: userResponse } = await request(
       process.env.AUTH_HASURA_GRAPHQL_URL!,
       query,
       {},

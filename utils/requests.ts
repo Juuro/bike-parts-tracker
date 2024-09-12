@@ -44,13 +44,33 @@ const fetchManufacturers = async (setManufacturers) => {
   }
 };
 
-// const addBikeParts = async (id) => {
-//   try {
-//     const response = await fetch(`/api/bikes/${id}/addpart`);
-//     console.log("RESPONSE: ", response);
-//   } catch (error) {
-//     console.error("Error adding parts:", error);
-//   }
-// };
+const fetchSellStatus = async (setSellStatus) => {
+  try {
+    const response = await fetch("/api/sell_status");
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    setSellStatus(data);
+  } catch (error) {
+    console.error("Error fetching manufacturers:", error);
+  }
+};
 
-export { fetchBikes, fetchBike, fetchBikeParts, fetchManufacturers };
+const fetchPartsType = async (setPartsType) => {
+  try {
+    const response = await fetch("/api/parts_type");
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    setPartsType(data);
+  } catch (error) {
+    console.error("Error fetching manufacturers:", error);
+  }
+};
+
+export {
+  fetchBikes,
+  fetchBike,
+  fetchBikeParts,
+  fetchManufacturers,
+  fetchSellStatus,
+  fetchPartsType,
+};

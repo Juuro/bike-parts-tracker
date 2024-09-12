@@ -1,4 +1,4 @@
-const stringToBoolean: boolean = (string) => {
+const stringToBoolean: boolean = (string: string) => {
   if (string === "true") {
     return true;
   }
