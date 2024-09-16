@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { fetchBike, fetchBikeParts } from "@/utils/requests";
 import Link from "next/link";
 import Modal from "@/components/Modal";
+import deletePart from "@/app/actions/deletePart";
+import { useRouter } from "next/navigation";
 
 export default function BikePage() {
   const { id } = useParams();
@@ -12,12 +14,20 @@ export default function BikePage() {
   const [bike, setBike] = useState();
   const [bikeParts, setBikeParts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = (event: Event) => {
     if (event?.key === "Escape" || event.target === event.currentTarget) {
       setIsModalOpen(false);
     }
+  };
+
+  const handleDeletePart = async (installationId: string, partId: string) => {
+    await deletePart(installationId, partId);
+    // TODO: Ungeil.
+    window.location.reload();
+    router.refresh();
   };
 
   useEffect(() => {
@@ -64,10 +74,17 @@ export default function BikePage() {
                   )}
                   {part.sell_status.name}
                   <button
+                    onClick={() => handleDeletePart(installation.id, part.id)}
                     className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     type="button"
                   >
-                    Delete
+                    Delete Part
+                  </button>
+                  <button
+                    className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    type="button"
+                  >
+                    Remove Part From Bike
                   </button>
                 </li>
               );

@@ -6,10 +6,8 @@ import {
   fetchSellStatus,
 } from "@/utils/requests";
 import { useSession } from "next-auth/react";
-import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useFormState } from "react-dom";
 import ReactDOM from "react-dom";
 
 interface ModalProps {
@@ -36,33 +34,18 @@ const Modal: React.FC<ModalProps> = ({
   const [sellStatus, setSellStatus] = useState([]);
   const [partsType, setPartsType] = useState([]);
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "authenticated") {
       fetchBikes(setBikes);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
       fetchManufacturers(setManufacturers);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
       fetchSellStatus(setSellStatus);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
       fetchPartsType(setPartsType);
     }
   }, [status]);
 
   useEffect(() => {
+    // TODO: Theres an error when pressic ESC or clicking the close icon in the upper right corner.
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();

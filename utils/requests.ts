@@ -18,7 +18,7 @@ const fetchBike = async (id, setBike) => {
     const data = await response.json();
     setBike(data[0]);
   } catch (error) {
-    console.error("Error fetching bikes:", error);
+    console.error("Error fetching bike:", error);
   }
 };
 
@@ -51,7 +51,7 @@ const fetchSellStatus = async (setSellStatus) => {
     const data = await response.json();
     setSellStatus(data);
   } catch (error) {
-    console.error("Error fetching manufacturers:", error);
+    console.error("Error fetching sell status:", error);
   }
 };
 
@@ -62,7 +62,7 @@ const fetchPartsType = async (setPartsType) => {
     const data = await response.json();
     setPartsType(data);
   } catch (error) {
-    console.error("Error fetching manufacturers:", error);
+    console.error("Error fetching part types:", error);
   }
 };
 

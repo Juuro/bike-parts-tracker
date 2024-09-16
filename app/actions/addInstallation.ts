@@ -1,17 +1,11 @@
 "use server";
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { stringToBoolean } from "@/utils/functions";
-import { redirect, router } from "next/navigation";
-import { NextResponse } from "next/server";
 
 async function addInstallation(formData) {
   const session = await auth();
-
-  // console.log("session: ", session);
-
-  // console.log(prevState, formData);
 
   const bikeId = formData.get("bike");
   const userId = session?.userId;
@@ -19,7 +13,7 @@ async function addInstallation(formData) {
   const accessToken = session?.accessToken;
 
   const query = gql`
-    mutation MyMutation(
+    mutation AddInstallation(
       $bike_id: uuid = ""
       $manufacturer_id: uuid = ""
       $model_year: Int = 10
