@@ -1,17 +1,20 @@
 "use server";
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { stringToBoolean } from "@/utils/functions";
+import { redirect, router } from "next/navigation";
+import { NextResponse } from "next/server";
 
 async function addInstallation(formData) {
   const session = await auth();
 
-  console.log("Form Data: ", formData);
+  // console.log("session: ", session);
 
-  const userId = "369b5e55-7e2b-4c81-b6d0-bdc7ff6a7445";
-  const bikeId = "12072258-daef-4354-bce8-7adb7e37c8d5";
+  // console.log(prevState, formData);
+
+  const bikeId = formData.get("bike");
+  const userId = session?.userId;
 
   const accessToken = session?.accessToken;
 
@@ -66,7 +69,7 @@ async function addInstallation(formData) {
     query,
     {
       user_id: userId,
-      bike_id: formData.get("bike"),
+      bike_id: bikeId,
       manufacturer_id: formData.get("manufacturer"),
       model_year: parseInt(formData.get("year")),
       buy_price: parseFloat(formData.get("price")),
@@ -84,12 +87,10 @@ async function addInstallation(formData) {
     }
   );
 
-  console.log("HALLO", data.insert_installation.returning);
   try {
-    revalidatePath(`/bikes/${bikeId}`);
-    console.log(`Revalidation triggered for /bikes/${bikeId}`);
+    await revalidatePath(`/bikes/${bikeId}`, "layout");
   } catch (error) {
-    console.error("Revalidation error:", error);
+    console.error(error);
   }
 }
 

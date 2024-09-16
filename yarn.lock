@@ -1561,7 +1561,7 @@ next-auth@beta:
   dependencies:
     "@auth/core" "0.34.2"
 
-next@latest:
+next@^14.2.6:
   version "14.2.6"
   resolved "https://registry.npmjs.org/next/-/next-14.2.6.tgz"
   integrity sha512-57Su7RqXs5CBKKKOagt8gPhMM3CpjgbeQhrtei2KLAA1vTNm7jfKS+uDARkSW8ZETUflDCBIsUKGSyQdRs4U4g==

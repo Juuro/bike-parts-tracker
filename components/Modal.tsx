@@ -6,7 +6,10 @@ import {
   fetchSellStatus,
 } from "@/utils/requests";
 import { useSession } from "next-auth/react";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { redirect, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { useFormState } from "react-dom";
 import ReactDOM from "react-dom";
 
 interface ModalProps {
@@ -33,6 +36,7 @@ const Modal: React.FC<ModalProps> = ({
   const [sellStatus, setSellStatus] = useState([]);
   const [partsType, setPartsType] = useState([]);
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -81,6 +85,11 @@ const Modal: React.FC<ModalProps> = ({
     setSelectedDate(formattedDate);
   }, []);
 
+  const handleSubmit = async (formData) => {
+    await addInstallation(formData);
+    redirect(`/bikes/${bike.id}`);
+  };
+
   if (!isOpen) return null;
   // if (false) return null;
 
@@ -128,7 +137,7 @@ const Modal: React.FC<ModalProps> = ({
           </div>
 
           <div className="p-4 md:p-5">
-            <form action={addInstallation}>
+            <form action={handleSubmit}>
               <div className="grid gap-4 mb-4 grid-cols-2">
                 <div className="col-span-2">
                   <label
