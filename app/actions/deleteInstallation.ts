@@ -3,21 +3,18 @@ import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-async function deletePart(installationId: string, partId: string) {
+async function deleteInstallation(installationId: string) {
   const session = await auth();
 
   const userId = session?.userId;
 
-  console.log("DeletePart");
+  console.log("deleteInstallation");
 
   const accessToken = session?.accessToken;
 
   const query = gql`
-    mutation DeletePart {
+    mutation DeleteInstallation {
       delete_installation_by_pk(id: "${installationId}") {
-        id
-      }
-      delete_part_by_pk(id: "${partId}") {
         id
       }
     }
@@ -39,4 +36,4 @@ async function deletePart(installationId: string, partId: string) {
   }
 }
 
-export default deletePart;
+export default deleteInstallation;

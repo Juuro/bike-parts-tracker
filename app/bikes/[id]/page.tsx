@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { fetchBike, fetchBikeParts } from "@/utils/requests";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Modal from "@/components/Modal";
+import { fetchBike, fetchBikeParts } from "@/utils/requests";
 import deletePart from "@/app/actions/deletePart";
-import { useRouter } from "next/navigation";
+import deleteInstallation from "@/app/actions/deleteInstallation";
 
 export default function BikePage() {
   const { id } = useParams();
@@ -25,6 +26,13 @@ export default function BikePage() {
 
   const handleDeletePart = async (installationId: string, partId: string) => {
     await deletePart(installationId, partId);
+    // TODO: Ungeil.
+    window.location.reload();
+    router.refresh();
+  };
+
+  const handleDeleteInstallation = async (installationId: string) => {
+    await deleteInstallation(installationId);
     // TODO: Ungeil.
     window.location.reload();
     router.refresh();
@@ -81,6 +89,7 @@ export default function BikePage() {
                     Delete Part
                   </button>
                   <button
+                    onClick={() => handleDeleteInstallation(installation.id)}
                     className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     type="button"
                   >
