@@ -10,7 +10,6 @@ if (typeof window === "undefined") {
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
 const fetchBikes = async () => {
-  console.log("fetchBikes", `${apiDomain}/bikes`);
   try {
     const response = await fetch(`${apiDomain}/bikes`, {
       method: "GET",

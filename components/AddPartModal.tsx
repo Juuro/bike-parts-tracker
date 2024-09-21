@@ -1,7 +1,6 @@
 "use client";
 
 import addInstallation from "@/app/actions/addInstallation";
-import { auth } from "@/auth";
 import {
   fetchBikes,
   fetchManufacturers,
@@ -10,12 +9,11 @@ import {
 } from "@/utils/requests";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import React, { MouseEventHandler, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useEffect, useState } from "react";
 
 interface ModalProps {
   showCloseButton?: boolean;
-  bike: any;
+  bike: Bike;
 }
 
 const AddPartModal: React.FC<ModalProps> = ({
@@ -23,19 +21,16 @@ const AddPartModal: React.FC<ModalProps> = ({
   bike,
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
-  const [bikes, setBikes] = useState([]);
-  const [manufacturers, setManufacturers] = useState([]);
-  const [sellStatus, setSellStatus] = useState([]);
-  const [partsType, setPartsType] = useState([]);
+  const [bikes, setBikes] = useState<Bike[]>([]);
+  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
+  const [sellStatus, setSellStatus] = useState<SellStatus[]>([]);
+  const [partsType, setPartsType] = useState<PartsType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log("Start ", bike);
     const fetchData = async () => {
       if (status === "authenticated") {
-        // const session = await auth();
-
         if (session) {
           const bikes = await fetchBikes();
           setBikes(bikes);
@@ -52,23 +47,18 @@ const AddPartModal: React.FC<ModalProps> = ({
   }, [status]);
 
   useEffect(() => {
-    console.log("isModalOpen changed");
-  }, [isModalOpen]);
-
-  useEffect(() => {
     const today = new Date();
     // TODO: This is wrong between 0 and 1 o'clock during summer time.
     const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     setSelectedDate(formattedDate);
   }, []);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData: FormData) => {
     await addInstallation(formData);
     redirect(`/bikes/${bike.id}`);
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log(typeof event);
     if (event.target === event.currentTarget) {
       setIsModalOpen(false);
     }
@@ -97,7 +87,7 @@ const AddPartModal: React.FC<ModalProps> = ({
       </button>
       {isModalOpen && (
         <div
-          tabIndex="-1"
+          tabIndex={-1}
           aria-hidden="true"
           className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
           onClick={closeModal}
@@ -158,9 +148,11 @@ const AddPartModal: React.FC<ModalProps> = ({
                           Select bike
                         </option>
                         {bikes.length == 0 ? (
-                          <p>No bikes found</p>
+                          <option value="" disabled hidden>
+                            No bikes found
+                          </option>
                         ) : (
-                          bikes.map((bike) => {
+                          bikes.map((bike: Bike) => {
                             return (
                               <option key={bike.id} value={bike.id}>
                                 {bike.name}
@@ -188,7 +180,9 @@ const AddPartModal: React.FC<ModalProps> = ({
                           Select manufacturer
                         </option>
                         {manufacturers.length == 0 ? (
-                          <p>No parts found</p>
+                          <option value="" disabled hidden>
+                            No parts found
+                          </option>
                         ) : (
                           manufacturers.map((manufacturer) => {
                             return (
@@ -359,7 +353,9 @@ const AddPartModal: React.FC<ModalProps> = ({
                           Select type of part
                         </option>
                         {partsType.length == 0 ? (
-                          <p>No parts found</p>
+                          <option value="" disabled hidden>
+                            No parts found
+                          </option>
                         ) : (
                           partsType.map((type) => {
                             return (

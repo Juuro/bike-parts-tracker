@@ -1,13 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Modal from "@/components/Modal";
 import { fetchBike, fetchBikeParts } from "@/utils/requests";
-import deletePart from "@/app/actions/deletePart";
-import deleteInstallation from "@/app/actions/deleteInstallation";
-import { auth } from "@/auth";
 import DeletePartButton from "@/components/DeletePartButton";
 import DeleteInstallationButton from "@/components/DeleteInstallationButton";
 import AddPartModal from "@/components/AddPartModal";
@@ -15,20 +7,8 @@ import AddPartModal from "@/components/AddPartModal";
 const BikePage = async ({ params }) => {
   const { id } = params;
 
-  let isModalOpen = false;
-
-  const session = await auth();
-
   const bike = await fetchBike(id);
   const bikeParts = await fetchBikeParts(id);
-  // }
-
-  const openModal = () => (isModalOpen = true);
-  const closeModal = (event: Event) => {
-    if (event?.key === "Escape" || event.target === event.currentTarget) {
-      isModalOpen = false;
-    }
-  };
 
   return (
     <section className="bg-slate-50 pt-6">

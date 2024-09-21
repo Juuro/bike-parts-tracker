@@ -22,25 +22,19 @@ declare global {
     userId: string;
   };
 
-  type ManufacturerType = {
-    // Define properties for manufacturer if known
-    // For example:
-    // id: string;
+  type Manufacturer = {
+    id: string;
     name: string;
   };
 
-  type SellStatusType = {
-    // Define properties for sell_status if known
-    // For example:
-    // id: string;
-    // status: string;
+  type SellStatus = {
+    id: string;
+    slug: string;
     name: string;
   };
 
-  type PartsTypeType = {
-    // Define properties for parts_type if known
-    // For example:
-    // id: string;
+  type PartsType = {
+    id: string;
     name: string;
   };
 
