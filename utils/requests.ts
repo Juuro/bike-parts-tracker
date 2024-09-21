@@ -1,3 +1,5 @@
+// TODO: Remove this conditional loading of headers()
+// Replace with `import { headers } from "next/headers"` as soon as every fetch happens in a server component.
 let headers;
 if (typeof window === "undefined") {
   headers = (await import("next/headers")).headers;
@@ -5,7 +7,7 @@ if (typeof window === "undefined") {
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
-const fetchBikes = async (session) => {
+const fetchBikes = async () => {
   try {
     const response = await fetch(`${apiDomain}/bikes`, {
       method: "GET",

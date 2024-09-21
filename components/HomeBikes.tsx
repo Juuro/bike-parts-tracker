@@ -8,7 +8,7 @@ import Link from "next/link";
 const HomeBikes = async () => {
   const session = await auth();
 
-  let bikes = [];
+  let bikes: Bike[] = [];
   if (session) {
     bikes = await fetchBikes();
   }
