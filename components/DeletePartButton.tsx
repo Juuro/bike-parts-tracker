@@ -28,7 +28,7 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
       className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
       type="button"
     >
-      Delete Part
+      Delete
     </button>
   );
 };

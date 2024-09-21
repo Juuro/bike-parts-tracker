@@ -11,10 +11,10 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-interface ModalProps {
+type ModalProps = {
   showCloseButton?: boolean;
   bike: Bike;
-}
+};
 
 const AddPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,

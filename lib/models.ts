@@ -51,9 +51,9 @@ declare global {
     updated_at: string | null;
     user_id: string;
     weight: number;
-    manufacturer: ManufacturerType;
-    sell_status: SellStatusType;
-    parts_type: PartsTypeType;
+    manufacturer: Manufacturer;
+    sell_status: SellStatus;
+    parts_type: PartsType;
   };
 
   type InstalledPart = {

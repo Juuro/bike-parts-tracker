@@ -3,16 +3,22 @@ import Card from "./Card";
 import Image from "next/image";
 import Link from "next/link";
 
-const BikeCard = ({ bike }) => {
+type BikeCardProps = {
+  bike: Bike;
+};
+
+const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
   return (
     <Card>
-      <Image
-        className="w-full"
-        src={`https://picsum.photos/400/300`}
-        alt=""
-        width={0}
-        height={0}
-      />
+      <Link href={`/bikes/${bike.id}`}>
+        <Image
+          className="w-full"
+          src={`https://picsum.photos/400/300?random=${bike.id}`}
+          alt=""
+          width={790}
+          height={592}
+        />
+      </Link>
       <div className="px-6 py-4">
         <div className="font-bold text-xl mb-2">
           <Link href={`/bikes/${bike.id}`}>{bike.name}</Link>
