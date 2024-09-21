@@ -3,11 +3,14 @@
 let headers;
 if (typeof window === "undefined") {
   headers = (await import("next/headers")).headers;
+} else {
+  headers = () => {};
 }
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
 const fetchBikes = async () => {
+  console.log("fetchBikes", `${apiDomain}/bikes`);
   try {
     const response = await fetch(`${apiDomain}/bikes`, {
       method: "GET",
@@ -45,7 +48,6 @@ const fetchBikeParts = async (bikeId) => {
     });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    console.log("Part: ", data);
     return data;
   } catch (error) {
     console.error("Error fetching parts:", error);
