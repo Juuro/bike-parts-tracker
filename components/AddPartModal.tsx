@@ -10,7 +10,7 @@ import {
 } from "@/utils/requests";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { MouseEventHandler, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 interface ModalProps {
@@ -55,16 +55,23 @@ const AddPartModal: React.FC<ModalProps> = ({
     console.log("isModalOpen changed");
   }, [isModalOpen]);
 
-  // useEffect(() => {
-  //   const today = new Date();
-  //   // TODO: This is wrong between 0 and 1 o'clock during summer time.
-  //   const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-  //   setSelectedDate(formattedDate);
-  // }, []);
+  useEffect(() => {
+    const today = new Date();
+    // TODO: This is wrong between 0 and 1 o'clock during summer time.
+    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    setSelectedDate(formattedDate);
+  }, []);
 
   const handleSubmit = async (formData) => {
     await addInstallation(formData);
     redirect(`/bikes/${bike.id}`);
+  };
+
+  const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log(typeof event);
+    if (event.target === event.currentTarget) {
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -93,7 +100,7 @@ const AddPartModal: React.FC<ModalProps> = ({
           tabIndex="-1"
           aria-hidden="true"
           className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
-          onClick={() => setIsModalOpen(false)}
+          onClick={closeModal}
         >
           <div className="relative p-4 w-full max-w-md max-h-full">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
