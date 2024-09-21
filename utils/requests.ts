@@ -1,35 +1,56 @@
+// TODO: Remove this conditional loading of headers()
+// Replace with `import { headers } from "next/headers"` as soon as every fetch happens in a server component.
+let headers;
+if (typeof window === "undefined") {
+  headers = (await import("next/headers")).headers;
+} else {
+  headers = () => {};
+}
+
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
-const fetchBikes = async (setBikes) => {
+const fetchBikes = async () => {
   try {
-    const response = await fetch("/api/bikes");
+    const response = await fetch(`${apiDomain}/bikes`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    setBikes(data);
+    const data: Bike[] = await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching bikes:", error);
+    return [];
   }
 };
 
-const fetchBike = async (id, setBike) => {
+const fetchBike = async (bikeId) => {
   try {
-    const response = await fetch(`/api/bikes/${id}`);
+    const response = await fetch(`${apiDomain}/bikes/${bikeId}`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setBike(data[0]);
+    return data[0];
   } catch (error) {
     console.error("Error fetching bike:", error);
+    return {};
   }
 };
 
-const fetchBikeParts = async (id, setBikeParts) => {
+const fetchBikeParts = async (bikeId) => {
   try {
-    const response = await fetch(`/api/bikes/${id}/installation`);
+    const response = await fetch(`${apiDomain}/bikes/${bikeId}/installation`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setBikeParts(data);
+    return data;
   } catch (error) {
     console.error("Error fetching parts:", error);
+    return [];
   }
 };
 

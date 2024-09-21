@@ -8,7 +8,7 @@ import { SessionProvider } from "next-auth/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NextAuth.js Example",
+  title: "Bike Parts Tracker",
   description:
     "This is an example site to demonstrate how to use NextAuth.js for authentication",
 };
