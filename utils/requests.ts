@@ -14,33 +14,42 @@ const fetchBikes = async () => {
       headers: headers(),
     });
     if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data; // Return the fetched data instead of using setBikes
+    const data: Bike[] = await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching bikes:", error);
-    return []; // Return an empty array or handle the error as needed
+    return [];
   }
 };
 
-const fetchBike = async (id, setBike) => {
+const fetchBike = async (bikeId) => {
   try {
-    const response = await fetch(`/api/bikes/${id}`);
+    const response = await fetch(`${apiDomain}/bikes/${bikeId}`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setBike(data[0]);
+    return data[0];
   } catch (error) {
     console.error("Error fetching bike:", error);
+    return {};
   }
 };
 
-const fetchBikeParts = async (id, setBikeParts) => {
+const fetchBikeParts = async (bikeId) => {
   try {
-    const response = await fetch(`/api/bikes/${id}/installation`);
+    const response = await fetch(`${apiDomain}/bikes/${bikeId}/installation`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setBikeParts(data);
+    console.log("Part: ", data);
+    return data;
   } catch (error) {
     console.error("Error fetching parts:", error);
+    return [];
   }
 };
 

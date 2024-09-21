@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -8,58 +7,58 @@ import Modal from "@/components/Modal";
 import { fetchBike, fetchBikeParts } from "@/utils/requests";
 import deletePart from "@/app/actions/deletePart";
 import deleteInstallation from "@/app/actions/deleteInstallation";
+import { auth } from "@/auth";
 
-export default function BikePage() {
-  const { id } = useParams();
-  const { data: session, status } = useSession();
-  const [bike, setBike] = useState();
-  const [bikeParts, setBikeParts] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
+const BikePage = async ({ params }) => {
+  const { id } = params;
+  // const { data: session, status } = useSession();
+  // const [bike, setBike] = useState();
+  // const [bikeParts, setBikeParts] = useState([]);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const router = useRouter();
+  let isModalOpen = false;
 
-  const openModal = () => setIsModalOpen(true);
+  const session = await auth();
+
+  // let bike: Bike;
+  // let bikeParts: InstalledPart;
+  // if (session) {
+  const bike = await fetchBike(id);
+  console.log("bike ", bike);
+  const bikeParts = await fetchBikeParts(id);
+  // }
+
+  const openModal = () => (isModalOpen = true);
   const closeModal = (event: Event) => {
     if (event?.key === "Escape" || event.target === event.currentTarget) {
-      setIsModalOpen(false);
+      isModalOpen = false;
     }
   };
 
   const handleDeletePart = async (installationId: string, partId: string) => {
     await deletePart(installationId, partId);
     // TODO: Ungeil.
-    window.location.reload();
-    router.refresh();
+    // window.location.reload();
+    // router.refresh();
   };
 
   const handleDeleteInstallation = async (installationId: string) => {
     await deleteInstallation(installationId);
     // TODO: Ungeil.
-    window.location.reload();
-    router.refresh();
+    // window.location.reload();
+    // router.refresh();
   };
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchBike(id, setBike);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchBikeParts(id, setBikeParts);
-    }
-  }, [status, isModalOpen]);
 
   return (
     <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold mb-6">{bike?.name}</h1>
+        <h1 className="text-4xl font-bold mb-6">{bike.name}</h1>
         {/* calculated weight, measured weight */}
         <ul>
           {bikeParts.length == 0 ? (
             <p>No parts found</p>
           ) : (
-            bikeParts.map((installation) => {
+            bikeParts.map((installation: InstalledPart) => {
               const { part } = installation;
 
               return (
@@ -81,7 +80,7 @@ export default function BikePage() {
                     <></>
                   )}
                   {part.sell_status.name}
-                  <button
+                  {/* <button
                     onClick={() => handleDeletePart(installation.id, part.id)}
                     className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     type="button"
@@ -94,15 +93,14 @@ export default function BikePage() {
                     type="button"
                   >
                     Remove Part From Bike
-                  </button>
+                  </button> */}
                 </li>
               );
             })
           )}
         </ul>
-
         {/* AddPartsForm component */}
-        <button
+        {/* <button
           onClick={openModal}
           className="my-5 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           type="button"
@@ -120,9 +118,8 @@ export default function BikePage() {
             ></path>
           </svg>
           Add new part
-        </button>
-
-        <Modal
+        </button> */}
+        {/* <Modal
           isOpen={isModalOpen}
           onOpen={closeModal}
           onClose={closeModal}
@@ -131,8 +128,10 @@ export default function BikePage() {
           bike={bike}
         >
           <p>This is the content inside the modal.</p>
-        </Modal>
+        </Modal> */}
       </div>
     </section>
   );
-}
+};
+
+export default BikePage;
