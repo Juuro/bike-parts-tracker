@@ -1,13 +1,22 @@
+let headers;
+if (typeof window === "undefined") {
+  headers = (await import("next/headers")).headers;
+}
+
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
-const fetchBikes = async (setBikes) => {
+const fetchBikes = async (session) => {
   try {
-    const response = await fetch("/api/bikes");
+    const response = await fetch(`${apiDomain}/bikes`, {
+      method: "GET",
+      headers: headers(),
+    });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setBikes(data);
+    return data; // Return the fetched data instead of using setBikes
   } catch (error) {
     console.error("Error fetching bikes:", error);
+    return []; // Return an empty array or handle the error as needed
   }
 };
 

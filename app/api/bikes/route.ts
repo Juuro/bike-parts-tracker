@@ -1,13 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { request, gql } from "graphql-request";
-import { auth } from "@/auth";
+import { auth } from "@/auth"; // Ensure this path is correct
 
-export const GET = async (req) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
 
-    const userId = session?.userId;
-    const accessToken = session?.accessToken;
+    const userId = session.userId;
+    const accessToken = session.accessToken;
+
+    console.log("userId: ", userId);
+    console.log("accessToken: ", accessToken);
 
     const query = gql`
       query GetBikes($id: uuid!) {
@@ -40,3 +48,5 @@ export const GET = async (req) => {
     return new Response("Something went wrong", { status: 500 });
   }
 };
+
+export { handler as GET, handler as POST };

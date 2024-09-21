@@ -1,23 +1,18 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
+import { auth } from "@/auth";
 import { fetchBikes } from "@/utils/requests";
 import BikeCard from "@/components/BikeCard";
 import ListCard from "@/components/ListCard";
 import Card from "@/components/Card";
-const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
-export default function Index() {
-  const { data: session, status } = useSession();
-  const [bikes, setBikes] = useState([]);
+export default async function Index() {
+  const session = await auth();
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      fetchBikes(setBikes);
-    }
-  }, [status]);
+  let bikes = [];
+  if (session) {
+    bikes = await fetchBikes(session);
+  }
 
   return (
     <section className="bg-slate-50 pt-6">
