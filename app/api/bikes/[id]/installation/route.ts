@@ -36,6 +36,12 @@ export const GET = async (req, { params }) => {
             parts_type {
               name
             }
+            installations {
+              bike {
+                name
+                id
+              }
+            }
           }
           installed_at
           uninstalled_at
@@ -56,7 +62,7 @@ export const GET = async (req, { params }) => {
       status: 200,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return new Response("Something went wrong", { status: 500 });
   }
 };

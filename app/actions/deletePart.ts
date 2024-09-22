@@ -8,8 +8,6 @@ async function deletePart(installationId: string, partId: string) {
 
   const userId = session?.userId;
 
-  console.log("DeletePart");
-
   const accessToken = session?.accessToken;
 
   const query = gql`

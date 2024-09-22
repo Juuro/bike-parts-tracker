@@ -8,8 +8,6 @@ async function deleteInstallation(installationId: string) {
 
   const userId = session?.userId;
 
-  console.log("deleteInstallation");
-
   const accessToken = session?.accessToken;
 
   const query = gql`

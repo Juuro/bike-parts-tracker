@@ -1,5 +1,6 @@
 import ListCard from "@/components/ListCard";
 import HomeBikes from "@/components/HomeBikes";
+import Link from "next/link";
 
 export default async function Index() {
   return (
@@ -13,6 +14,7 @@ export default async function Index() {
           <ListCard heading="Parts for sale" />
           <ListCard heading="Maintenance" />
         </div>
+        <Link href={`/parts`}>All your parts ...</Link>
       </div>
     </section>
   );

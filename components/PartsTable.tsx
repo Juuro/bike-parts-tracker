@@ -1,19 +1,24 @@
 import Image from "next/image";
-import { fetchBikeParts } from "@/utils/requests";
-import DeletePartButton from "../DeletePartButton";
-import DeleteInstallationButton from "../DeleteInstallationButton";
+import { fetchBikeParts, fetchParts } from "@/utils/requests";
+import DeletePartButton from "./DeletePartButton";
+import DeleteInstallationButton from "./DeleteInstallationButton";
 import { Edit } from "lucide-react";
 
 type DeleteInstallationButtonProps = {
-  bikeName: string;
-  bikeId: string;
+  bikeName?: string;
+  bikeId?: string;
 };
 
 const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
   bikeName,
   bikeId,
 }) => {
-  const bikeParts = await fetchBikeParts(bikeId);
+  let bikeParts;
+  if (bikeId) {
+    bikeParts = await fetchBikeParts(bikeId);
+  } else {
+    bikeParts = await fetchParts();
+  }
 
   return (
     <div className="flow-root">
@@ -21,7 +26,12 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
         <div className="rounded-lg bg-gray-50 md:pt-0">
           <div className="md:hidden">
             {bikeParts?.map((installation: InstalledPart) => {
-              const { part } = installation;
+              let part;
+              if (bikeId) {
+                part = installation.part;
+              } else {
+                part = installation;
+              }
 
               return (
                 <div
@@ -61,6 +71,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
           </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
+              {/* TODO: calculated weight, measured weight */}
               <tr>
                 <th scope="col" className="px-3 py-5 font-medium sm:pl-6">
                   Manufacturer
@@ -87,7 +98,12 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
             </thead>
             <tbody className="bg-white">
               {bikeParts?.map((installation: InstalledPart) => {
-                const { part } = installation;
+                let part;
+                if (bikeId) {
+                  part = installation.part;
+                } else {
+                  part = installation;
+                }
 
                 return (
                   <tr
@@ -110,7 +126,9 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.parts_type.name}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3">{bikeName}</td>
+                    <td className="whitespace-nowrap px-3 py-3">
+                      {part.installations[0]?.bike.name}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.buy_price}
                     </td>
@@ -126,10 +144,12 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                         >
                           <Edit />
                         </button>
-                        <DeleteInstallationButton
-                          installationId={installation.id}
-                          bikeName={bikeName}
-                        />
+                        {bikeName && (
+                          <DeleteInstallationButton
+                            installationId={installation.id}
+                            bikeName={bikeName}
+                          />
+                        )}
                         <DeletePartButton
                           installationId={installation.id}
                           partId={part.id}

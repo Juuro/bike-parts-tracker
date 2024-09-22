@@ -15,9 +15,7 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
 }) => {
   const handleDeletePart = async () => {
     try {
-      await deletePart(installationId, partId); // Call the server action
-      // Optionally refresh state or show success message here
-      console.log("SUCCESS");
+      await deletePart(installationId, partId);
     } catch (error) {
       console.error("Error deleting part:", error);
     }

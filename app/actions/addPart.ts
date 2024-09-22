@@ -5,16 +5,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { stringToBoolean } from "@/utils/functions";
 
-async function addInstallation(formData) {
+async function addPart(formData) {
   const session = await auth();
   const userId = session?.userId;
   const accessToken = session?.accessToken;
 
-  const bikeId = formData.get("bike");
-
   const query = gql`
-    mutation AddInstallation(
-      $bike_id: uuid = ""
+    mutation InsertPart(
       $manufacturer_id: uuid = ""
       $model_year: Int = 10
       $buy_price: float8 = ""
@@ -27,28 +24,21 @@ async function addInstallation(formData) {
       $user_id: uuid = ""
       $weight: Int = 10
       $name: String = ""
-      $installed_at: timestamptz = ""
     ) {
-      insert_installation(
+      insert_part(
         objects: {
-          bike_id: $bike_id
-          installed_at: $installed_at
-          part: {
-            data: {
-              manufacturer_id: $manufacturer_id
-              model_year: $model_year
-              buy_price: $buy_price
-              purchase_date: $purchase_date
-              secondhand: $secondhand
-              sell_status_id: $sell_status_id
-              sell_price: $sell_price
-              shop_url: $shop_url
-              type_id: $type_id
-              user_id: $user_id
-              weight: $weight
-              name: $name
-            }
-          }
+          manufacturer_id: $manufacturer_id
+          model_year: $model_year
+          buy_price: $buy_price
+          purchase_date: $purchase_date
+          secondhand: $secondhand
+          sell_status_id: $sell_status_id
+          sell_price: $sell_price
+          shop_url: $shop_url
+          type_id: $type_id
+          user_id: $user_id
+          weight: $weight
+          name: $name
         }
       ) {
         returning {
@@ -63,7 +53,6 @@ async function addInstallation(formData) {
     query,
     {
       user_id: userId,
-      bike_id: bikeId,
       manufacturer_id: formData.get("manufacturer"),
       model_year: parseInt(formData.get("year")),
       buy_price: parseFloat(formData.get("price")),
@@ -74,7 +63,6 @@ async function addInstallation(formData) {
       type_id: formData.get("type"),
       weight: parseInt(formData.get("weight")),
       name: formData.get("name"),
-      installed_at: formData.get("installed_at"),
     },
     {
       authorization: `Bearer ${accessToken}`,
@@ -82,10 +70,10 @@ async function addInstallation(formData) {
   );
 
   try {
-    await revalidatePath(`/bikes/${bikeId}`, "layout");
+    await revalidatePath(`/parts`, "layout");
   } catch (error) {
     console.error(error);
   }
 }
 
-export default addInstallation;
+export default addPart;

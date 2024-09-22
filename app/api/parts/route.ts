@@ -15,20 +15,44 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const accessToken = session.accessToken;
 
     const query = gql`
-      query GetBikes($id: uuid!) {
-        bike(where: { user_id: { _eq: $id } }) {
-          id
+      query GetParts($id: uuid!) {
+        part(where: { user_id: { _eq: $id } }) {
+          secondhand
+          buy_price
+          sell_price
+          model_year
+          weight
           name
-          strava_bike
-          discipline {
-            abbr
+          receipt
+          shop_url
+          created_at
+          purchase_date
+          updated_at
+          id
+          manufacturer_id
+          sell_status_id
+          type_id
+          user_id
+          manufacturer {
             name
+          }
+          sell_status {
+            name
+          }
+          parts_type {
+            name
+          }
+          installations(limit: 1, order_by: { installed_at: asc }) {
+            bike {
+              name
+              id
+            }
           }
         }
       }
     `;
 
-    const { bike: userResponse } = await request(
+    const { part: userResponse } = await request(
       process.env.AUTH_HASURA_GRAPHQL_URL!,
       query,
       { id: userId },

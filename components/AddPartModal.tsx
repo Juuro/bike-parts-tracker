@@ -12,15 +12,16 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./SubmitButton";
+import addPart from "@/app/actions/addPart";
 
 type ModalProps = {
   showCloseButton?: boolean;
-  bike: Bike;
+  bike?: Bike;
 };
 
 const AddPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
-  bike,
+  bike = null,
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
   const [bikes, setBikes] = useState<Bike[]>([]);
@@ -56,11 +57,19 @@ const AddPartModal: React.FC<ModalProps> = ({
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      await addInstallation(formData);
+      if (bike) {
+        await addInstallation(formData);
+      } else {
+        await addPart(formData);
+      }
     } catch (error) {
       console.error(error);
     }
-    redirect(`/bikes/${bike.id}`);
+    if (bike) {
+      redirect(`/bikes/${bike.id}`);
+    } else {
+      redirect("/parts");
+    }
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -133,14 +142,18 @@ const AddPartModal: React.FC<ModalProps> = ({
                       <select
                         name="bike"
                         id="bike"
-                        defaultValue={bike.id}
-                        required
+                        defaultValue={bike?.id}
+                        required={bike ? true : false}
                         disabled={false}
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       >
-                        <option value="" disabled hidden>
-                          Select bike
-                        </option>
+                        {bike ? (
+                          <option value="" disabled hidden>
+                            Select bike
+                          </option>
+                        ) : (
+                          <option value="">Not assigned to a bike</option>
+                        )}
                         {bikes.length == 0 ? (
                           <option value="" disabled hidden>
                             No bikes found

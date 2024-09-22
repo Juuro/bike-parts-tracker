@@ -15,9 +15,7 @@ const DeleteInstallationButton: React.FC<DeleteInstallationButtonProps> = ({
 }) => {
   const handleDeleteInstallation = async () => {
     try {
-      await deleteInstallation(installationId); // Call the server action
-      // Optionally refresh state or show success message here
-      console.log("SUCCESS");
+      await deleteInstallation(installationId);
     } catch (error) {
       console.error("Error deleting installation:", error);
     }
