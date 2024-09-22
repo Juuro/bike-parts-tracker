@@ -12,7 +12,12 @@ export const GET = async (req, { params }) => {
 
     const query = gql`
       query GetInstallation($bike_id: uuid!) {
-        installation(where: { bike_id: { _eq: $bike_id } }) {
+        installation(
+          where: {
+            bike_id: { _eq: $bike_id }
+            uninstalled_at: { _is_null: true }
+          }
+        ) {
           id
           part {
             id

@@ -26,6 +26,21 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
 
   const bikes = await fetchBikes();
 
+  const hasInstallationWhereUninstalledAtIsNull = (installations) => {
+    console.log(
+      "hasInstallationWhereUninstalledAtIsNull",
+      installations.filter((installation) => !installation.uninstalled_at)
+    );
+    return installations.some(
+      (installation: any) => !installation.uninstalled_at
+    );
+  };
+
+  const bikeIdOfCurrentInstallation = (installations) => {
+    return installations.find((installation) => !installation.uninstalled_at)
+      ?.bike.name;
+  };
+
   return (
     <div className="flow-root">
       <div className="inline-block min-w-full align-middle">
@@ -133,7 +148,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                       {part.parts_type.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {part.installations[0]?.bike.name}
+                      {bikeIdOfCurrentInstallation(part.installations)}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.buy_price}
@@ -143,7 +158,9 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-1">
-                        {part.installations.length > 0 ? (
+                        {hasInstallationWhereUninstalledAtIsNull(
+                          part.installations
+                        ) ? (
                           <DeleteInstallationButton
                             installationId={part.installations[0]?.id}
                             bikeName={part.installations[0]?.bike.name}
