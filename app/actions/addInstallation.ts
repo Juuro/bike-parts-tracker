@@ -2,6 +2,7 @@
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { stringToBoolean } from "@/utils/functions";
 
 async function addInstallation(formData) {

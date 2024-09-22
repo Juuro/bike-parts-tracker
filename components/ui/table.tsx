@@ -2,6 +2,7 @@ import Image from "next/image";
 import { fetchBikeParts } from "@/utils/requests";
 import DeletePartButton from "../DeletePartButton";
 import DeleteInstallationButton from "../DeleteInstallationButton";
+import { Edit } from "lucide-react";
 
 type DeleteInstallationButtonProps = {
   bikeName: string;
@@ -15,7 +16,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
   const bikeParts = await fetchBikeParts(bikeId);
 
   return (
-    <div className="mt-6 flow-root">
+    <div className="flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 md:pt-0">
           <div className="md:hidden">
@@ -119,13 +120,15 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
                         <button
-                          className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                           type="button"
+                          title="Edit this part"
                         >
-                          Edit
+                          <Edit />
                         </button>
                         <DeleteInstallationButton
                           installationId={installation.id}
+                          bikeName={bikeName}
                         />
                         <DeletePartButton
                           installationId={installation.id}

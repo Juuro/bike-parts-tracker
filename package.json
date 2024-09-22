@@ -35,7 +35,7 @@
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
     "jose": "^5.8.0",
-    "lucide-react": "^0.274.0",
+    "lucide-react": "^0.445.0",
     "next": "latest",
     "next-auth": "beta",
     "react": "^18.2.0",

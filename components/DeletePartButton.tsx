@@ -1,7 +1,8 @@
 "use client";
 
-import deletePart from "@/app/actions/deletePart";
 import React from "react";
+import { Trash2 } from "lucide-react";
+import deletePart from "@/app/actions/deletePart";
 
 type DeletePartButtonProps = {
   installationId: string;
@@ -25,10 +26,11 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
   return (
     <button
       onClick={handleDeletePart}
-      className="mx-5 py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+      className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
       type="button"
+      title="Delete this part"
     >
-      Delete
+      <Trash2 color="#ff0000" />
     </button>
   );
 };

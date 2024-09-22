@@ -7,9 +7,11 @@ import {
   fetchPartsType,
   fetchSellStatus,
 } from "@/utils/requests";
+import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import SubmitButton from "./SubmitButton";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -31,10 +33,9 @@ const AddPartModal: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        if (session) {
-          const bikes = await fetchBikes();
-          setBikes(bikes);
-        }
+        const bikes = await fetchBikes();
+        setBikes(bikes);
+
         fetchManufacturers(setManufacturers);
         fetchSellStatus(setSellStatus);
         fetchPartsType(setPartsType);
@@ -44,7 +45,7 @@ const AddPartModal: React.FC<ModalProps> = ({
     fetchData().catch((error) => {
       console.error("Error fetching bikes: ", error);
     });
-  }, [status]);
+  }, [status, isModalOpen]);
 
   useEffect(() => {
     const today = new Date();
@@ -54,7 +55,11 @@ const AddPartModal: React.FC<ModalProps> = ({
   }, []);
 
   const handleSubmit = async (formData: FormData) => {
-    await addInstallation(formData);
+    try {
+      await addInstallation(formData);
+    } catch (error) {
+      console.error(error);
+    }
     redirect(`/bikes/${bike.id}`);
   };
 
@@ -71,18 +76,7 @@ const AddPartModal: React.FC<ModalProps> = ({
         className="my-5 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         type="button"
       >
-        <svg
-          className="me-1 -ms-1 w-5 h-5"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-            clipRule="evenodd"
-          ></path>
-        </svg>
+        <Plus strokeWidth={3} className="mr-2" />
         Add new part
       </button>
       {isModalOpen && (
@@ -403,24 +397,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                       />
                     </div>
                   </div>
-                  <button
-                    type="submit"
-                    className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  >
-                    <svg
-                      className="me-1 -ms-1 w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                    Add new part
-                  </button>
+                  <SubmitButton text="Add new part" />
                 </form>
               </div>
             </div>
