@@ -1,7 +1,15 @@
+import { auth } from "@/auth";
 import AddPartModal from "@/components/AddPartModal";
 import PartsTable from "@/components/PartsTable";
+import { redirect } from "next/navigation";
 
-const PartsPage = () => {
+const PartsPage = async () => {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/");
+  }
+
   return (
     <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
