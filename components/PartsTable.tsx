@@ -136,7 +136,13 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                       {part.sell_status.name}
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                      <div className="flex justify-end gap-3">
+                      <div className="flex justify-end gap-1">
+                        {part.installations[0]?.bike.name && (
+                          <DeleteInstallationButton
+                            installationId={part.installations[0]?.id}
+                            bikeName={part.installations[0]?.bike.name}
+                          />
+                        )}
                         <button
                           className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                           type="button"
@@ -144,12 +150,6 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                         >
                           <Edit />
                         </button>
-                        {part.installations[0]?.bike.name && (
-                          <DeleteInstallationButton
-                            installationId={part.installations[0]?.id}
-                            bikeName={part.installations[0]?.bike.name}
-                          />
-                        )}
                         <DeletePartButton
                           installationId={installation.id}
                           partId={part.id}

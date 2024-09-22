@@ -16,7 +16,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const query = gql`
       query GetBikes($id: uuid!) {
-        bike(where: { user_id: { _eq: $id } }) {
+        bike(
+          where: { user_id: { _eq: $id } }
+          order_by: { updated_at: desc_nulls_last }
+        ) {
           id
           name
           strava_bike
