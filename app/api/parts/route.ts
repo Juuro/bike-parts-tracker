@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const query = gql`
       query GetParts($id: uuid!) {
-        part(where: { user_id: { _eq: $id } }) {
+        part(where: { user_id: { _eq: $id } }, order_by: { updated_at: asc }) {
           secondhand
           buy_price
           sell_price
@@ -43,6 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             name
           }
           installations(limit: 1, order_by: { installed_at: asc }) {
+            id
             bike {
               name
               id

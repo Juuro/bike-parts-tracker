@@ -16,7 +16,7 @@ const HomeBikes = async () => {
   return (
     <section>
       <h2 className="text-2xl mb-4">Bikes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 rounded-lg mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 rounded-lg mb-8">
         {bikes.length === 0 ? (
           <p>No bikes yet ...</p>
         ) : (

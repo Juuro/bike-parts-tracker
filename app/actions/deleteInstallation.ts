@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 async function deleteInstallation(installationId: string) {
   const session = await auth();
 
-  const userId = session?.userId;
+  console.log("deleteInstallation", installationId);
 
   const accessToken = session?.accessToken;
 
@@ -26,6 +26,8 @@ async function deleteInstallation(installationId: string) {
       authorization: `Bearer ${accessToken}`,
     }
   );
+
+  console.log("data: ", data);
 
   try {
     await revalidatePath(`/`, "layout");

@@ -144,10 +144,10 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                         >
                           <Edit />
                         </button>
-                        {bikeName && (
+                        {part.installations[0]?.bike.name && (
                           <DeleteInstallationButton
-                            installationId={installation.id}
-                            bikeName={bikeName}
+                            installationId={part.installations[0]?.id}
+                            bikeName={part.installations[0]?.bike.name}
                           />
                         )}
                         <DeletePartButton
