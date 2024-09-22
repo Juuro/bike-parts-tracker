@@ -27,7 +27,6 @@ async function addInstallation(formData) {
       $weight: Int = 10
       $name: String = ""
       $installed_at: timestamptz = ""
-      $updated_at: timestamptz = ""
     ) {
       insert_installation(
         objects: {
@@ -47,7 +46,6 @@ async function addInstallation(formData) {
               user_id: $user_id
               weight: $weight
               name: $name
-              updated_at: $updated_at
             }
           }
         }
@@ -76,7 +74,6 @@ async function addInstallation(formData) {
       weight: parseInt(formData.get("weight")),
       name: formData.get("name"),
       installed_at: formData.get("installed_at"),
-      updated_at: getFormattedTimestamp(),
     },
     {
       authorization: `Bearer ${accessToken}`,
