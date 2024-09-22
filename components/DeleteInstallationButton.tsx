@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FolderX } from "lucide-react";
+import { PackageMinus } from "lucide-react";
 import deleteInstallation from "@/app/actions/deleteInstallation";
 
 type DeleteInstallationButtonProps = {
@@ -28,7 +28,7 @@ const DeleteInstallationButton: React.FC<DeleteInstallationButtonProps> = ({
       type="button"
       title={`Remove this part from ${bikeName}`}
     >
-      <FolderX />
+      <PackageMinus />
     </button>
   );
 };

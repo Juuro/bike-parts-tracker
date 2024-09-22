@@ -1,8 +1,12 @@
 import Image from "next/image";
-import { fetchBikeParts, fetchParts } from "@/utils/requests";
+import { fetchBikeParts, fetchBikes, fetchParts } from "@/utils/requests";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { Edit } from "lucide-react";
+import { Edit, PackagePlus } from "lucide-react";
+import Popover from "./Popover";
+import insertInstallation from "@/app/actions/insertInstallation";
+import BikeAssignmentForm from "./BikeAssignmentForm";
+import AssignPartButton from "./AssignPartButton";
 
 type DeleteInstallationButtonProps = {
   bikeName?: string;
@@ -19,6 +23,8 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
   } else {
     bikeParts = await fetchParts();
   }
+
+  const bikes = await fetchBikes();
 
   return (
     <div className="flow-root">
@@ -137,11 +143,13 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-1">
-                        {part.installations[0]?.bike.name && (
+                        {part.installations.length > 0 ? (
                           <DeleteInstallationButton
                             installationId={part.installations[0]?.id}
                             bikeName={part.installations[0]?.bike.name}
                           />
+                        ) : (
+                          <AssignPartButton bikes={bikes} partId={part.id} />
                         )}
                         <button
                           className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -154,6 +162,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                           installationId={installation.id}
                           partId={part.id}
                         />
+                        {part.id}
                       </div>
                     </td>
                   </tr>

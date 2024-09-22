@@ -23,7 +23,6 @@ async function addPart(formData) {
       $user_id: uuid = ""
       $weight: Int = 10
       $name: String = ""
-      $updated_at: timestamptz = ""
     ) {
       insert_part(
         objects: {
@@ -39,7 +38,6 @@ async function addPart(formData) {
           user_id: $user_id
           weight: $weight
           name: $name
-          updated_at: $updated_at
         }
       ) {
         returning {
@@ -48,10 +46,6 @@ async function addPart(formData) {
       }
     }
   `;
-
-  const currentDate = new Date();
-  const isoString = currentDate.toISOString();
-  const formattedTimestamp = isoString.replace("Z", "+00:00");
 
   const data = await request(
     process.env.AUTH_HASURA_GRAPHQL_URL!,
@@ -68,7 +62,6 @@ async function addPart(formData) {
       type_id: formData.get("type"),
       weight: parseInt(formData.get("weight")),
       name: formData.get("name"),
-      updated_at: getFormattedTimestamp(),
     },
     {
       authorization: `Bearer ${accessToken}`,
