@@ -29,6 +29,7 @@ const AddPartModal: React.FC<ModalProps> = ({
   const [sellStatus, setSellStatus] = useState<SellStatus[]>([]);
   const [partsType, setPartsType] = useState<PartsType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBikeId, setSelectedBikeId] = useState("");
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -76,6 +77,10 @@ const AddPartModal: React.FC<ModalProps> = ({
     if (event.target === event.currentTarget) {
       setIsModalOpen(false);
     }
+  };
+
+  const handleBikeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBikeId(event.target.value);
   };
 
   return (
@@ -146,6 +151,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         required={bike ? true : false}
                         disabled={false}
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        onChange={handleBikeChange}
                       >
                         {bike ? (
                           <option value="" disabled hidden>
@@ -176,33 +182,41 @@ const AddPartModal: React.FC<ModalProps> = ({
                       >
                         Manufacturer
                       </label>
-                      <select
-                        name="manufacturer"
-                        id="manufacturer"
-                        defaultValue=""
-                        required
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      >
-                        <option value="" disabled hidden>
-                          Select manufacturer
-                        </option>
-                        {manufacturers.length == 0 ? (
+                      <div className="flex items-center">
+                        <select
+                          name="manufacturer"
+                          id="manufacturer"
+                          defaultValue=""
+                          required
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        >
                           <option value="" disabled hidden>
-                            No parts found
+                            Select manufacturer
                           </option>
-                        ) : (
-                          manufacturers.map((manufacturer) => {
-                            return (
-                              <option
-                                key={manufacturer.id}
-                                value={manufacturer.id}
-                              >
-                                {manufacturer.name}
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
+                          {manufacturers.length == 0 ? (
+                            <option value="" disabled hidden>
+                              No parts found
+                            </option>
+                          ) : (
+                            manufacturers.map((manufacturer) => {
+                              return (
+                                <option
+                                  key={manufacturer.id}
+                                  value={manufacturer.id}
+                                >
+                                  {manufacturer.name}
+                                </option>
+                              );
+                            })
+                          )}
+                        </select>
+                        <button
+                          type="button"
+                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                        >
+                          <Plus strokeWidth={3} className="mr-2" />
+                        </button>
+                      </div>
                     </div>
                     <div className="col-span-1">
                       <label
@@ -391,24 +405,26 @@ const AddPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="installed_at"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Installation date
-                      </label>
-                      <input
-                        type="date"
-                        name="installed_at"
-                        id="installed_at"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        required
-                      />
-                    </div>
+                    {selectedBikeId && (
+                      <div className="col-span-1">
+                        <label
+                          htmlFor="installed_at"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Installation date
+                        </label>
+                        <input
+                          type="date"
+                          name="installed_at"
+                          id="installed_at"
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          placeholder=""
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
                   <SubmitButton text="Add new part" />
                 </form>
