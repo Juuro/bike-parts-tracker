@@ -213,7 +213,6 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                   {calculateWeight()}
                 </td>
                 <td className="px-3 py-5 text-sm font-medium"></td>
-                <td className="px-3 py-5 text-sm font-medium"></td>
               </tr>
             </tfoot>
           </table>
