@@ -8,15 +8,12 @@ import insertInstallation from "@/app/actions/insertInstallation";
 import BikeAssignmentForm from "./BikeAssignmentForm";
 import AssignPartButton from "./AssignPartButton";
 
-type DeleteInstallationButtonProps = {
+type PartsTableProps = {
   bikeName?: string;
   bikeId?: string;
 };
 
-const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
-  bikeName,
-  bikeId,
-}) => {
+const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
   let bikeParts;
   if (bikeId) {
     bikeParts = await fetchBikeParts(bikeId);
@@ -27,10 +24,6 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
   const bikes = await fetchBikes();
 
   const hasInstallationWhereUninstalledAtIsNull = (installations) => {
-    console.log(
-      "hasInstallationWhereUninstalledAtIsNull",
-      installations.filter((installation) => !installation.uninstalled_at)
-    );
     return installations.some(
       (installation: any) => !installation.uninstalled_at
     );
@@ -46,7 +39,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 md:pt-0">
           <div className="md:hidden">
-            {bikeParts?.map((installation: InstalledPart) => {
+            {bikeParts?.map((installation: Installation) => {
               let part;
               if (bikeId) {
                 part = installation.part;
@@ -56,7 +49,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
 
               return (
                 <div
-                  key={part.id}
+                  key={part.id + installation.id}
                   className="mb-2 w-full rounded-md bg-white p-4"
                 >
                   <div className="flex items-center justify-between border-b pb-4">
@@ -118,7 +111,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {bikeParts?.map((installation: InstalledPart) => {
+              {bikeParts?.map((installation: Installation) => {
                 let part;
                 if (bikeId) {
                   part = installation.part;
@@ -128,7 +121,7 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
 
                 return (
                   <tr
-                    key={part.id}
+                    key={part.id + installation.id}
                     className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                   >
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
@@ -166,7 +159,11 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                             bikeName={part.installations[0]?.bike.name}
                           />
                         ) : (
-                          <AssignPartButton bikes={bikes} partId={part.id} />
+                          <AssignPartButton
+                            bikes={bikes}
+                            partId={part.id}
+                            titleText={`Assign part to a bike`}
+                          />
                         )}
                         <button
                           className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -179,7 +176,6 @@ const PartsTable: React.FC<DeleteInstallationButtonProps> = async ({
                           installationId={installation.id}
                           partId={part.id}
                         />
-                        {part.id}
                       </div>
                     </td>
                   </tr>

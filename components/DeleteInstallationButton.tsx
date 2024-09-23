@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PackageMinus } from "lucide-react";
-import uninstallInstallation from "@/app/actions/deleteInstallation";
+import uninstallInstallation from "@/app/actions/uninstallInstallation";
 
 type DeleteInstallationButtonProps = {
   installationId: string;

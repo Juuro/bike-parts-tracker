@@ -6,11 +6,13 @@ import { PackagePlus } from "lucide-react";
 interface AssignPartButtonProps {
   bikes: Bike[];
   partId: string;
+  titleText: string;
 }
 
 const AssignPartButton: React.FC<AssignPartButtonProps> = ({
   bikes,
   partId,
+  titleText,
 }) => {
   return (
     <Popover
@@ -26,7 +28,7 @@ const AssignPartButton: React.FC<AssignPartButtonProps> = ({
       <button
         className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
         type="button"
-        title="Assign this part to a bike"
+        title={titleText}
       >
         <PackagePlus color="#00ff00" />
       </button>

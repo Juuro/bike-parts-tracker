@@ -2,14 +2,18 @@
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import uninstallInstallation from "./uninstallInstallation";
 
 async function insertInstallation(formData: FormData) {
   const session: any = await auth();
 
-  console.log("insertInstallation", formData);
-
   const partId = formData.get("part_id");
   const bikeId = formData.get("bike_id");
+  const currentInstallationId = formData.get("current_installation_id");
+
+  if (currentInstallationId) {
+    await uninstallInstallation(currentInstallationId.toString());
+  }
 
   const accessToken = session?.accessToken;
 

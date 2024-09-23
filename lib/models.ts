@@ -54,13 +54,15 @@ declare global {
     manufacturer: Manufacturer;
     sell_status: SellStatus;
     parts_type: PartsType;
+    installations: Installation[];
   };
 
-  type InstalledPart = {
+  type Installation = {
     id: string;
     part: Part;
     installed_at: string;
     uninstalled_at: string | null;
+    bike: Bike;
   };
 }
 
