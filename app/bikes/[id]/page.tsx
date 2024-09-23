@@ -1,6 +1,6 @@
 import { fetchBike } from "@/utils/requests";
 import AddPartModal from "@/components/AddPartModal";
-import PartsTable from "@/components/PartsTable";
+import InstallationsTable from "@/components/InstallationsTable";
 
 const BikePage = async ({ params }) => {
   const { id: bikeId } = params;
@@ -12,7 +12,7 @@ const BikePage = async ({ params }) => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold mb-6">{bike.name}</h1>
         <AddPartModal showCloseButton={true} bike={bike} />
-        <PartsTable bikeName={bike.name} bikeId={bikeId} />
+        <InstallationsTable bikeId={bikeId} />
         <AddPartModal showCloseButton={true} bike={bike} />
       </div>
     </section>

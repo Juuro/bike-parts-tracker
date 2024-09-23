@@ -51,6 +51,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               name
               id
             }
+            installed_at
+            uninstalled_at
           }
         }
       }

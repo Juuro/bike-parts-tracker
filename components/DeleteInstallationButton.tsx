@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PackageMinus } from "lucide-react";
-import deleteInstallation from "@/app/actions/deleteInstallation";
+import uninstallInstallation from "@/app/actions/uninstallInstallation";
 
 type DeleteInstallationButtonProps = {
   installationId: string;
@@ -15,7 +15,7 @@ const DeleteInstallationButton: React.FC<DeleteInstallationButtonProps> = ({
 }) => {
   const handleDeleteInstallation = async () => {
     try {
-      await deleteInstallation(installationId);
+      await uninstallInstallation(installationId);
     } catch (error) {
       console.error("Error deleting installation:", error);
     }

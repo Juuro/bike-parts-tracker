@@ -37,14 +37,23 @@ export const GET = async (req, { params }) => {
               name
             }
             installations {
-              bike {
-                name
+              id
+              uninstalled_at
+              part {
                 id
+              }
+              bike {
+                id
+                name
               }
             }
           }
           installed_at
           uninstalled_at
+          bike {
+            id
+            name
+          }
         }
       }
     `;

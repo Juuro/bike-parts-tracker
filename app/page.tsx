@@ -19,10 +19,7 @@ export default async function Index() {
             <ListCard heading="Parts for sale" />
             <ListCard heading="Maintenance" />
           </div>
-          <Link
-            href={`/parts`}
-            className="block my-2 text-blue-500 hover:text-blue-700 hover:underline"
-          >
+          <Link href={`/parts`} className="block my-2">
             All your parts <ArrowRight size={16} className="inline" />
           </Link>
         </div>

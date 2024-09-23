@@ -3,7 +3,7 @@ import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-async function deleteInstallation(installationId: string) {
+async function uninstallInstallation(installationId: string) {
   const session = await auth();
 
   console.log("deleteInstallation", installationId);
@@ -11,9 +11,19 @@ async function deleteInstallation(installationId: string) {
   const accessToken = session?.accessToken;
 
   const query = gql`
-    mutation DeleteInstallation {
-      delete_installation_by_pk(id: "${installationId}") {
-        id
+    mutation UninstallInstallation {
+      update_installation(
+        where: { id: { _eq: "${installationId}" }, uninstalled_at: { _is_null: true } }
+        _set: { uninstalled_at: "now()" }
+      ) {
+        affected_rows
+        returning {
+          id
+          part_id
+          bike_id
+          installed_at
+          uninstalled_at
+        }
       }
     }
   `;
@@ -36,4 +46,4 @@ async function deleteInstallation(installationId: string) {
   }
 }
 
-export default deleteInstallation;
+export default uninstallInstallation;
