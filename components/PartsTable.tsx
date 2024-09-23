@@ -83,7 +83,7 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
               );
             })}
           </div>
-          <table className="hidden min-w-full text-gray-900 md:table">
+          <table className="hidden mb-3 min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               {/* TODO: calculated weight, measured weight */}
               <tr>

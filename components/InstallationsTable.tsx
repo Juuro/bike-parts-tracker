@@ -2,9 +2,10 @@ import Image from "next/image";
 import { fetchBikeParts } from "@/utils/requests";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { Edit, PackagePlus } from "lucide-react";
+import { Edit, PackagePlus, Plus } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
 import Link from "next/link";
+import AddPartModal from "./AddPartModal";
 
 type InstallationsTableProps = {
   bikeId?: string;
@@ -201,10 +202,10 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
             </tbody>
             <tfoot className="bg-gray-50">
               <tr>
-                <td className="px-3 py-5 text-sm font-medium"></td>
-                <td className="px-3 py-5 text-sm font-medium"></td>
-                <td className="px-3 py-5 text-sm font-medium"></td>
-                <td className="px-3 py-5 text-sm font-medium"></td>
+                <td
+                  colSpan={3}
+                  className="pl-6 pr-3 py-3 text-sm font-medium"
+                ></td>
                 <td className="px-3 py-5 text-sm font-medium">
                   {calculatePurchasePrice()}
                 </td>
@@ -212,6 +213,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                 <td className="px-3 py-5 text-sm font-medium">
                   {calculateWeight()}
                 </td>
+                <td className="px-3 py-5 text-sm font-medium"></td>
                 <td className="px-3 py-5 text-sm font-medium"></td>
               </tr>
             </tfoot>

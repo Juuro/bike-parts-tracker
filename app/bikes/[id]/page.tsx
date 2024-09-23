@@ -13,7 +13,6 @@ const BikePage = async ({ params }) => {
         <h1 className="text-4xl font-bold mb-6">{bike.name}</h1>
         <AddPartModal showCloseButton={true} bike={bike} />
         <InstallationsTable bikeId={bikeId} />
-        <AddPartModal showCloseButton={true} bike={bike} />
       </div>
     </section>
   );
