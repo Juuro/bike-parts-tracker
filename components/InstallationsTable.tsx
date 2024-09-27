@@ -171,7 +171,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                       {part.buy_price}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {part.sell_status.name}
+                      {part.part_status.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.weight}
@@ -295,7 +295,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                       {part.buy_price}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {part.sell_status.name}
+                      {part.part_status.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.weight}

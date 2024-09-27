@@ -16,7 +16,7 @@ async function addPart(formData) {
       $buy_price: float8 = ""
       $purchase_date: timestamptz = ""
       $secondhand: Boolean = false
-      $sell_status_id: uuid = ""
+      $part_status_slug: String = ""
       $sell_price: float8 = null
       $shop_url: String = ""
       $type_id: uuid = ""
@@ -31,7 +31,7 @@ async function addPart(formData) {
           buy_price: $buy_price
           purchase_date: $purchase_date
           secondhand: $secondhand
-          sell_status_id: $sell_status_id
+          part_status_slug: $part_status_slug
           sell_price: $sell_price
           shop_url: $shop_url
           type_id: $type_id
@@ -57,7 +57,7 @@ async function addPart(formData) {
       buy_price: parseFloat(formData.get("price")),
       purchase_date: formData.get("purchase_date"),
       secondhand: stringToBoolean(formData.get("secondhand")),
-      sell_status_id: formData.get("sell_status"),
+      part_status_slug: formData.get("part_status"),
       shop_url: formData.get("shop_url"),
       type_id: formData.get("type"),
       weight: parseInt(formData.get("weight")),

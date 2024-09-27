@@ -52,7 +52,7 @@ declare global {
     user_id: string;
     weight: number;
     manufacturer: Manufacturer;
-    sell_status: SellStatus;
+    part_status: SellStatus;
     parts_type: PartsType;
     installations: Installation[];
   };

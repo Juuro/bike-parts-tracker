@@ -30,7 +30,7 @@ export const GET = async (req, { params }) => {
             manufacturer {
               name
             }
-            sell_status {
+            part_status {
               name
             }
             parts_type {

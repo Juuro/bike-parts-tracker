@@ -82,7 +82,7 @@ const fetchManufacturers = async (setManufacturers) => {
 
 const fetchSellStatus = async (setSellStatus) => {
   try {
-    const response = await fetch("/api/sell_status");
+    const response = await fetch("/api/part_status");
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
     setSellStatus(data);

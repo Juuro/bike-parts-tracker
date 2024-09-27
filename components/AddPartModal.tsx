@@ -296,7 +296,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                           return (
                             <p key={status.slug}>
                               <input
-                                name="sell_status"
+                                name="part_status"
                                 type="radio"
                                 id={status.slug}
                                 className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:ring-primary-600 focus:border-primary-600"

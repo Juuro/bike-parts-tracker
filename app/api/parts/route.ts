@@ -33,13 +33,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           updated_at
           id
           manufacturer_id
-          sell_status_id
+          part_status_slug
           type_id
           user_id
           manufacturer {
             name
           }
-          sell_status {
+          part_status {
             name
           }
           parts_type {

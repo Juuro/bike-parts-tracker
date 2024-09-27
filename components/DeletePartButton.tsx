@@ -3,9 +3,10 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
 import deletePart from "@/app/actions/deletePart";
+import uninstallInstallation from "@/app/actions/uninstallInstallation";
 
 type DeletePartButtonProps = {
-  installationId: string;
+  installationId?: string;
   partId: string;
 };
 
@@ -15,7 +16,10 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
 }) => {
   const handleDeletePart = async () => {
     try {
-      await deletePart(installationId, partId);
+      if (installationId) {
+        await uninstallInstallation(installationId);
+      }
+      await deletePart(partId);
     } catch (error) {
       console.error("Error deleting part:", error);
     }

@@ -7,6 +7,7 @@ import Popover from "./Popover";
 import insertInstallation from "@/app/actions/insertInstallation";
 import BikeAssignmentForm from "./BikeAssignmentForm";
 import AssignPartButton from "./AssignPartButton";
+import Link from "next/link";
 
 type PartsTableProps = {
   bikeName?: string;
@@ -14,24 +15,32 @@ type PartsTableProps = {
 };
 
 const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
-  let bikeParts;
-  if (bikeId) {
-    bikeParts = await fetchBikeParts(bikeId);
-  } else {
-    bikeParts = await fetchParts();
-  }
-
+  const bikeParts = await fetchParts();
   const bikes = await fetchBikes();
 
-  const hasInstallationWhereUninstalledAtIsNull = (installations) => {
+  const hasInstallationWhereUninstalledAtIsNull = (
+    installations: Installation[]
+  ) => {
     return installations.some(
       (installation: any) => !installation.uninstalled_at
     );
   };
 
-  const bikeIdOfCurrentInstallation = (installations) => {
+  const installationIdOfCurrentInstallation = (
+    installations: Installation[]
+  ) => {
+    return installations.find((installation) => !installation.uninstalled_at)
+      ?.id;
+  };
+
+  const bikeNameOfCurrentInstallation = (installations: Installation[]) => {
     return installations.find((installation) => !installation.uninstalled_at)
       ?.bike.name;
+  };
+
+  const bikeIdOfCurrentInstallation = (installations: Installation[]) => {
+    return installations.find((installation) => !installation.uninstalled_at)
+      ?.bike.id;
   };
 
   return (
@@ -39,17 +48,10 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 md:pt-0">
           <div className="md:hidden">
-            {bikeParts?.map((installation: Installation) => {
-              let part;
-              if (bikeId) {
-                part = installation.part;
-              } else {
-                part = installation;
-              }
-
+            {bikeParts?.map((part: Part) => {
               return (
                 <div
-                  key={part.id + installation.id}
+                  key={part.id}
                   className="mb-2 w-full rounded-md bg-white p-4"
                 >
                   <div className="flex items-center justify-between border-b pb-4">
@@ -73,7 +75,7 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                   <div className="flex w-full items-center justify-between pt-4">
                     <div>
                       <p className="text-xl font-medium">{part.buy_price}</p>
-                      <p>{installation.installed_at}</p>
+                      <p>{}</p>
                     </div>
                     <div className="flex justify-end gap-2">
                       Update <br /> Delete
@@ -111,17 +113,10 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {bikeParts?.map((installation: Installation) => {
-                let part;
-                if (bikeId) {
-                  part = installation.part;
-                } else {
-                  part = installation;
-                }
-
+              {bikeParts?.map((part: Part) => {
                 return (
                   <tr
-                    key={part.id + installation.id}
+                    key={part.id}
                     className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                   >
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
@@ -141,13 +136,19 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                       {part.parts_type.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {bikeIdOfCurrentInstallation(part.installations)}
+                      <Link
+                        href={`/bikes/${bikeIdOfCurrentInstallation(
+                          part.installations
+                        )}`}
+                      >
+                        {bikeNameOfCurrentInstallation(part.installations)}
+                      </Link>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.buy_price}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {part.sell_status.name}
+                      {part.part_status.name}
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-1">
@@ -173,7 +174,9 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                           <Edit />
                         </button>
                         <DeletePartButton
-                          installationId={installation.id}
+                          installationId={installationIdOfCurrentInstallation(
+                            part.installations
+                          )}
                           partId={part.id}
                         />
                       </div>

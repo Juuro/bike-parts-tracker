@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import uninstallInstallation from "./uninstallInstallation";
 
 async function insertInstallation(formData: FormData) {
-  const session: any = await auth();
+  const session = await auth();
 
   const partId = formData.get("part_id");
   const bikeId = formData.get("bike_id");

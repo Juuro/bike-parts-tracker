@@ -3,7 +3,7 @@ import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-async function deletePart(installationId: string, partId: string) {
+async function deletePart(partId: string) {
   const session = await auth();
 
   const userId = session?.userId;
@@ -11,12 +11,16 @@ async function deletePart(installationId: string, partId: string) {
   const accessToken = session?.accessToken;
 
   const query = gql`
-    mutation DeletePart {
-      delete_installation_by_pk(id: "${installationId}") {
-        id
-      }
-      delete_part_by_pk(id: "${partId}") {
-        id
+    mutation SetPartStatusBroken {
+      update_part(
+        where: { id: { _eq: "${partId}" }, user_id: { _eq: "${userId}" } }
+        _set: { part_status_slug: "broken" }
+      ) {
+        affected_rows
+        returning {
+          id
+          part_status_slug
+        }
       }
     }
   `;
