@@ -3,6 +3,10 @@ import { headers } from "next/headers";
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
 const fetchBikes = async () => {
+  console.log(
+    "process.env.NEXT_PUBLIC_API_DOMAIN:",
+    process.env.NEXT_PUBLIC_API_DOMAIN
+  );
   try {
     const response = await fetch(`${apiDomain}/bikes`, {
       method: "GET",
