@@ -48,7 +48,7 @@ async function addPart(formData) {
   `;
 
   const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
+    process.env.HASURA_PROJECT_ENDPOINT!,
     query,
     {
       user_id: userId,

@@ -1,14 +1,17 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { request, gql } from "graphql-request";
-import { getToken } from "next-auth/jwt";
 import { auth } from "@/auth";
 
-export const GET = async (req, { params }) => {
+export const GET = async (req: Request, { params }: { params: any }) => {
   try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+    const session = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
 
-    const userId = token?.sub;
-    const accessToken = token?.accessToken;
+    const userId = session.userId;
+    const accessToken = session.accessToken;
 
     const query = gql`
       query GetInstallation($bike_id: uuid!) {
@@ -59,7 +62,7 @@ export const GET = async (req, { params }) => {
     `;
 
     const { installation: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
+      process.env.HASURA_PROJECT_ENDPOINT!,
       query,
       { bike_id: params.id },
       {

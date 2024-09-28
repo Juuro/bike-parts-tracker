@@ -19,7 +19,7 @@ export const GET = async (req) => {
     `;
 
     const { manufacturer: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
+      process.env.HASURA_PROJECT_ENDPOINT!,
       query,
       {},
       {

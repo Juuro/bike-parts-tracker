@@ -1,20 +1,17 @@
-// This is an example of to protect an API route
-import { getSession } from "next-auth/react";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getToken } from "next-auth/jwt";
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await auth({ req });
+export const GET = async (req) => {
+  try {
+    const session = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
 
-  if (session) {
-    const secret = process.env.NEXTAUTH_SECRET;
-
-    const token = await auth({
-      req,
-      secret,
-    });
+    const accessToken = session.accessToken;
 
     const query = gql`
       query GetUserName($id: uuid!) {
@@ -28,15 +25,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       process.env.HASURA_PROJECT_ENDPOINT!,
       query,
       { id: session.user?.id },
-      { authorization: `Bearer ${token}` }
+      {
+        authorization: `Bearer ${accessToken}`,
+      }
     );
-    res.send({
-      content: `This is protected content. Your name is ${user.name}`,
+    return new Response(JSON.stringify(user), {
+      status: 200,
     });
-  } else {
-    res.send({
-      error:
-        "You must be signed in to view the protected content on this page.",
-    });
+  } catch (error) {
+    console.error(error);
+    return new Response("Something went wrong", { status: 500 });
   }
 };

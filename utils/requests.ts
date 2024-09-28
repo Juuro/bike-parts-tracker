@@ -80,12 +80,12 @@ const fetchManufacturers = async (setManufacturers) => {
   }
 };
 
-const fetchSellStatus = async (setSellStatus) => {
+const fetchPartStatus = async (setPartStatus) => {
   try {
     const response = await fetch("/api/part_status");
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setSellStatus(data);
+    setPartStatus(data);
   } catch (error) {
     console.error("Error fetching sell status:", error);
   }
@@ -107,7 +107,7 @@ export {
   fetchBike,
   fetchBikeParts,
   fetchManufacturers,
-  fetchSellStatus,
+  fetchPartStatus,
   fetchPartsType,
   fetchParts,
 };

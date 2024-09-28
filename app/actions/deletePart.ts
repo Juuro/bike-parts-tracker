@@ -26,7 +26,7 @@ async function deletePart(partId: string) {
   `;
 
   const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
+    process.env.HASURA_PROJECT_ENDPOINT!,
     query,
     {},
     {

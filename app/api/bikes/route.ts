@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { request, gql } from "graphql-request";
 import { auth } from "@/auth"; // Ensure this path is correct
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export const GET = async () => {
   try {
     const session = await auth();
     if (!session) {
@@ -32,7 +32,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     `;
 
     const { bike: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
+      process.env.HASURA_PROJECT_ENDPOINT!,
       query,
       { id: userId },
       {
@@ -48,5 +48,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return new Response("Something went wrong", { status: 500 });
   }
 };
-
-export { handler as GET, handler as POST };

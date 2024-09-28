@@ -1,16 +1,14 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { request, gql } from "graphql-request";
+import fetch from "node-fetch";
 import { auth } from "@/auth";
 
-export const GET = async (req) => {
+export const GET = async () => {
   try {
     const session = await auth();
 
-    const userId = session?.userId;
     const accessToken = session?.accessToken;
 
-    const query = gql`
-      query GetPartStatus {
+    const query = `
+      query {
         part_status {
           slug
           name
@@ -18,14 +16,19 @@ export const GET = async (req) => {
       }
     `;
 
-    const { part_status: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
-      query,
-      {},
-      {
-        authorization: `Bearer ${accessToken}`,
-      }
-    );
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const result = (await response.json()) as {
+      data: { part_status: PartStatus[] };
+    };
+    const { part_status: userResponse } = result.data;
 
     return new Response(JSON.stringify(userResponse), {
       status: 200,

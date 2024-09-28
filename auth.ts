@@ -7,8 +7,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   providers: [Google],
   adapter: HasuraAdapter({
-    endpoint: process.env.AUTH_HASURA_GRAPHQL_URL!,
-    adminSecret: process.env.AUTH_HASURA_GRAPHQL_ADMIN_SECRET!,
+    endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
+    adminSecret: process.env.HASURA_ADMIN_SECRET!,
   }),
   session: {
     strategy: "jwt",

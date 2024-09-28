@@ -1,10 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { request, gql } from "graphql-request";
-import { auth } from "@/auth"; // Ensure this path is correct
+import { auth } from "@/auth";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export const GET = async () => {
   try {
-    const session = await auth();
+    const session: any = await auth();
     if (!session) {
       return new Response("Unauthorized", {
         status: 401,
@@ -41,6 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
           part_status {
             name
+            slug
           }
           parts_type {
             name
@@ -59,7 +59,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     `;
 
     const { part: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
+      process.env.HASURA_PROJECT_ENDPOINT!,
       query,
       { id: userId },
       {
@@ -75,5 +75,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return new Response("Something went wrong", { status: 500 });
   }
 };
-
-export { handler as GET, handler as POST };
