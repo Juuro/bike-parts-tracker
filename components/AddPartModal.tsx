@@ -49,9 +49,14 @@ const AddPartModal: React.FC<ModalProps> = ({
         const bikes = await fetchBikes();
         setBikes(bikes);
 
-        fetchManufacturers(setManufacturers);
-        fetchPartStatus(setPartStatus);
-        fetchPartsType(setPartsType);
+        const manufacturers = await fetchManufacturers();
+        setManufacturers(manufacturers);
+
+        const partStatus = await fetchPartStatus();
+        setPartStatus(partStatus);
+
+        const partsType = await fetchPartsType();
+        setPartsType(partsType);
       }
     };
 

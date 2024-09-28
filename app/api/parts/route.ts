@@ -1,4 +1,3 @@
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 
 export const GET = async () => {
@@ -13,10 +12,10 @@ export const GET = async () => {
     const userId = session.userId;
     const accessToken = session.accessToken;
 
-    const query = gql`
-      query GetParts($id: uuid!) {
+    const query = `
+      query GetParts {
         part(
-          where: { user_id: { _eq: $id } }
+          where: { user_id: { _eq: "${userId}" } }
           order_by: { updated_at: desc_nulls_last }
         ) {
           secondhand
@@ -58,16 +57,21 @@ export const GET = async () => {
       }
     `;
 
-    const { part: userResponse } = await request(
-      process.env.HASURA_PROJECT_ENDPOINT!,
-      query,
-      { id: userId },
-      {
-        authorization: `Bearer ${accessToken}`,
-      }
-    );
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
 
-    return new Response(JSON.stringify(userResponse), {
+    const result = (await response.json()) as {
+      data: { part: Part[] };
+    };
+    const { part: partResponse } = result.data;
+
+    return new Response(JSON.stringify(partResponse), {
       status: 200,
     });
   } catch (error) {

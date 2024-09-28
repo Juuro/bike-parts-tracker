@@ -1,15 +1,17 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 
-export const GET = async (req) => {
+export const GET = async () => {
   try {
-    const session = await auth();
+    const session: any = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
 
-    const userId = session?.userId;
     const accessToken = session?.accessToken;
 
-    const query = gql`
+    const query = `
       query GetPartsType {
         parts_type {
           id
@@ -18,16 +20,21 @@ export const GET = async (req) => {
       }
     `;
 
-    const { parts_type: userResponse } = await request(
-      process.env.HASURA_PROJECT_ENDPOINT!,
-      query,
-      {},
-      {
-        authorization: `Bearer ${accessToken}`,
-      }
-    );
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
 
-    return new Response(JSON.stringify(userResponse), {
+    const result = (await response.json()) as {
+      data: { parts_type: PartsType[] };
+    };
+    const { parts_type: partTypeResponse } = result.data;
+
+    return new Response(JSON.stringify(partTypeResponse), {
       status: 200,
     });
   } catch (error) {

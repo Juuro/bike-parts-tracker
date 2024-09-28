@@ -52,10 +52,6 @@ async function addInstallation(formData: FormData): Promise<void> {
     body: JSON.stringify({ query }),
   });
 
-  const result = (await response.json()) as {
-    data: { part_status: PartStatus[] };
-  };
-
   try {
     await revalidatePath(`/bikes/${bikeId}`, "layout");
   } catch (error) {

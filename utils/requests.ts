@@ -4,8 +4,9 @@ let headers;
 if (typeof window === "undefined") {
   headers = (await import("next/headers")).headers;
 } else {
-  headers = () => {};
+  headers = () => ({});
 }
+// import { headers } from "next/headers";
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
@@ -39,7 +40,7 @@ const fetchParts = async () => {
   }
 };
 
-const fetchBike = async (bikeId) => {
+const fetchBike = async (bikeId: string) => {
   try {
     const response = await fetch(`${apiDomain}/bikes/${bikeId}`, {
       method: "GET",
@@ -54,49 +55,50 @@ const fetchBike = async (bikeId) => {
   }
 };
 
-const fetchBikeParts = async (bikeId) => {
+const fetchBikeParts = async (bikeId?: string) => {
+  if (!bikeId) return [];
   try {
     const response = await fetch(`${apiDomain}/bikes/${bikeId}/installation`, {
       method: "GET",
       headers: headers(),
     });
-    if (!response.ok) throw new Error("Failed to fetch");
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching parts:", error);
+    console.error("Error fetching bike parts:", error);
     return [];
   }
 };
 
-const fetchManufacturers = async (setManufacturers) => {
+const fetchManufacturers = async () => {
   try {
     const response = await fetch("/api/manufacturers");
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setManufacturers(data);
+    return data;
   } catch (error) {
     console.error("Error fetching manufacturers:", error);
   }
 };
 
-const fetchPartStatus = async (setPartStatus) => {
+const fetchPartStatus = async () => {
   try {
     const response = await fetch("/api/part_status");
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setPartStatus(data);
+    return data;
   } catch (error) {
     console.error("Error fetching sell status:", error);
   }
 };
 
-const fetchPartsType = async (setPartsType) => {
+const fetchPartsType = async () => {
   try {
     const response = await fetch("/api/parts_type");
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
-    setPartsType(data);
+    return data;
   } catch (error) {
     console.error("Error fetching part types:", error);
   }

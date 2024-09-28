@@ -1,11 +1,8 @@
 import Image from "next/image";
-import { fetchBikeParts, fetchBikes, fetchParts } from "@/utils/requests";
+import { fetchBikes, fetchParts } from "@/utils/requests";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
 import { Edit, PackagePlus } from "lucide-react";
-import Popover from "./Popover";
-import insertInstallation from "@/app/actions/insertInstallation";
-import BikeAssignmentForm from "./BikeAssignmentForm";
 import AssignPartButton from "./AssignPartButton";
 import Link from "next/link";
 

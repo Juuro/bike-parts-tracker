@@ -3,7 +3,12 @@ import { auth } from "@/auth";
 
 export const GET = async () => {
   try {
-    const session = await auth();
+    const session: any = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
 
     const accessToken = session?.accessToken;
 
@@ -28,9 +33,9 @@ export const GET = async () => {
     const result = (await response.json()) as {
       data: { part_status: PartStatus[] };
     };
-    const { part_status: userResponse } = result.data;
+    const { part_status: partStatusResponse } = result.data;
 
-    return new Response(JSON.stringify(userResponse), {
+    return new Response(JSON.stringify(partStatusResponse), {
       status: 200,
     });
   } catch (error) {

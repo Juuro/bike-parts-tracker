@@ -1,23 +1,21 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { request, gql } from "graphql-request";
-import { auth } from "@/auth"; // Ensure this path is correct
+import { auth } from "@/auth";
 
 export const GET = async () => {
   try {
-    const session = await auth();
+    const session: any = await auth();
     if (!session) {
       return new Response("Unauthorized", {
         status: 401,
       });
     }
 
-    const userId = session.userId;
-    const accessToken = session.accessToken;
+    const userId = session?.userId;
+    const accessToken = session?.accessToken;
 
-    const query = gql`
-      query GetBikes($id: uuid!) {
+    const query = `
+      query GetBikes {
         bike(
-          where: { user_id: { _eq: $id } }
+          where: { user_id: { _eq: "${userId}" } }
           order_by: { updated_at: desc_nulls_last }
         ) {
           id
@@ -31,16 +29,21 @@ export const GET = async () => {
       }
     `;
 
-    const { bike: userResponse } = await request(
-      process.env.HASURA_PROJECT_ENDPOINT!,
-      query,
-      { id: userId },
-      {
-        authorization: `Bearer ${accessToken}`,
-      }
-    );
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
 
-    return new Response(JSON.stringify(userResponse), {
+    const result = (await response.json()) as {
+      data: { bike: Bike[] };
+    };
+    const { bike: bikeResponse } = result.data;
+
+    return new Response(JSON.stringify(bikeResponse), {
       status: 200,
     });
   } catch (error) {

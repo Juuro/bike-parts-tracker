@@ -2,7 +2,7 @@ import { fetchBike } from "@/utils/requests";
 import AddPartModal from "@/components/AddPartModal";
 import InstallationsTable from "@/components/InstallationsTable";
 
-const BikePage = async ({ params }) => {
+const BikePage = async ({ params }: { params: any }) => {
   const { id: bikeId } = params;
 
   const bike = await fetchBike(bikeId);
