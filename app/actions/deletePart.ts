@@ -1,16 +1,17 @@
 "use server";
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-async function deletePart(partId: string) {
-  const session = await auth();
+async function deletePart(partId: string): Promise<void> {
+  const session: any = await auth();
+  if (!session) {
+    console.error("Unauthorized");
+  }
 
   const userId = session?.userId;
-
   const accessToken = session?.accessToken;
 
-  const query = gql`
+  const query = `
     mutation SetPartStatusBroken {
       update_part(
         where: { id: { _eq: "${partId}" }, user_id: { _eq: "${userId}" } }
@@ -25,14 +26,14 @@ async function deletePart(partId: string) {
     }
   `;
 
-  const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
-    query,
-    {},
-    {
-      authorization: `Bearer ${accessToken}`,
-    }
-  );
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ query }),
+  });
 
   try {
     await revalidatePath(`/`, "layout");

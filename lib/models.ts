@@ -27,8 +27,7 @@ declare global {
     name: string;
   };
 
-  type SellStatus = {
-    id: string;
+  type PartStatus = {
     slug: string;
     name: string;
   };
@@ -52,7 +51,7 @@ declare global {
     user_id: string;
     weight: number;
     manufacturer: Manufacturer;
-    part_status: SellStatus;
+    part_status: PartStatus;
     parts_type: PartsType;
     installations: Installation[];
   };

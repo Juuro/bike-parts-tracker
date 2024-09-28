@@ -7,8 +7,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   providers: [Google],
   adapter: HasuraAdapter({
-    endpoint: process.env.AUTH_HASURA_GRAPHQL_URL!,
-    adminSecret: process.env.AUTH_HASURA_GRAPHQL_ADMIN_SECRET!,
+    endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
+    adminSecret: process.env.HASURA_ADMIN_SECRET!,
   }),
   session: {
     strategy: "jwt",
@@ -38,8 +38,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     // Add user ID to the session
     session: async ({ session, token, user }) => {
-      session.accessToken = token.accessToken; // Pass accessToken to the session
-      session.userId = token.sub;
+      (session as any).accessToken = token.accessToken; // Pass accessToken to the session
+      session.userId = token.sub ?? "";
       return session;
     },
   },

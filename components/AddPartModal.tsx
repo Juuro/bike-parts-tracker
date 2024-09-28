@@ -2,11 +2,10 @@
 
 import addInstallation from "@/app/actions/addInstallation";
 import {
-  fetchBikes,
   fetchManufacturers,
   fetchPartsType,
-  fetchSellStatus,
-} from "@/utils/requests";
+  fetchPartStatus,
+} from "@/utils/requestsClient";
 import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -17,30 +16,44 @@ import addPart from "@/app/actions/addPart";
 type ModalProps = {
   showCloseButton?: boolean;
   bike?: Bike;
+  bikes?: Bike[];
 };
 
 const AddPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   bike = null,
+  bikes = [],
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
-  const [bikes, setBikes] = useState<Bike[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [sellStatus, setSellStatus] = useState<SellStatus[]>([]);
+  const [PartStatus, setPartStatus] = useState<PartStatus[]>([]);
   const [partsType, setPartsType] = useState<PartsType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBikeId, setSelectedBikeId] = useState("");
   const { data: session, status } = useSession();
 
   useEffect(() => {
+    const today = new Date();
+    // TODO: This is wrong between 0 and 1 o'clock during summer time.
+    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    setSelectedDate(formattedDate);
+
+    if (bike) {
+      setSelectedBikeId(bike.id);
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        const bikes = await fetchBikes();
-        setBikes(bikes);
+        const manufacturers = await fetchManufacturers();
+        setManufacturers(manufacturers);
 
-        fetchManufacturers(setManufacturers);
-        fetchSellStatus(setSellStatus);
-        fetchPartsType(setPartsType);
+        const partStatus = await fetchPartStatus();
+        setPartStatus(partStatus);
+
+        const partsType = await fetchPartsType();
+        setPartsType(partsType);
       }
     };
 
@@ -48,13 +61,6 @@ const AddPartModal: React.FC<ModalProps> = ({
       console.error("Error fetching bikes: ", error);
     });
   }, [status, isModalOpen]);
-
-  useEffect(() => {
-    const today = new Date();
-    // TODO: This is wrong between 0 and 1 o'clock during summer time.
-    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    setSelectedDate(formattedDate);
-  }, []);
 
   const handleSubmit = async (formData: FormData) => {
     try {
@@ -289,18 +295,19 @@ const AddPartModal: React.FC<ModalProps> = ({
                         For sale
                       </legend>
 
-                      {sellStatus.length == 0 ? (
+                      {PartStatus.length == 0 ? (
                         <p>No sell status found</p>
                       ) : (
-                        sellStatus.map((status) => {
+                        PartStatus.map((status) => {
                           return (
                             <p key={status.slug}>
                               <input
+                                tabIndex={0}
                                 name="part_status"
                                 type="radio"
                                 id={status.slug}
                                 className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:ring-primary-600 focus:border-primary-600"
-                                value={status.id}
+                                value={status.slug}
                               />
                               <label htmlFor={status.slug}>{status.name}</label>
                             </p>
@@ -333,6 +340,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         Secondhand
                       </label>
                       <input
+                        tabIndex={0}
                         type="checkbox"
                         name="secondhand"
                         id="secondhand"

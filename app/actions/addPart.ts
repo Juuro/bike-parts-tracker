@@ -1,15 +1,17 @@
 "use server";
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { getFormattedTimestamp, stringToBoolean } from "@/utils/functions";
 
-async function addPart(formData) {
-  const session = await auth();
-  const userId = session?.userId;
+async function addPart(formData: FormData): Promise<void> {
+  const session: any = await auth();
+  if (!session) {
+    console.error("Unauthorized");
+  }
+
+  const bikeId = formData.get("bike");
   const accessToken = session?.accessToken;
 
-  const query = gql`
+  const query = `
     mutation InsertPart(
       $manufacturer_id: uuid = ""
       $model_year: Int = 10
@@ -26,18 +28,18 @@ async function addPart(formData) {
     ) {
       insert_part(
         objects: {
-          manufacturer_id: $manufacturer_id
-          model_year: $model_year
-          buy_price: $buy_price
-          purchase_date: $purchase_date
-          secondhand: $secondhand
-          part_status_slug: $part_status_slug
-          sell_price: $sell_price
-          shop_url: $shop_url
-          type_id: $type_id
-          user_id: $user_id
-          weight: $weight
-          name: $name
+          manufacturer_id: "${formData.get("manufacturer")}"
+          model_year: ${formData.get("year")}
+          buy_price: ${formData.get("price")}
+          purchase_date: "${formData.get("purchase_date")}"
+          secondhand: ${formData.get("secondhand")}
+          part_status_slug: "${formData.get("part_status")}"
+          sell_price: ${formData.get("sell_price") || null}
+          shop_url: "${formData.get("shop_url")}"
+          type_id: "${formData.get("type")}"
+          user_id: "${session?.userId}"
+          weight: ${formData.get("weight")}
+          name: "${formData.get("name")}"
         }
       ) {
         returning {
@@ -47,26 +49,14 @@ async function addPart(formData) {
     }
   `;
 
-  const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
-    query,
-    {
-      user_id: userId,
-      manufacturer_id: formData.get("manufacturer"),
-      model_year: parseInt(formData.get("year")),
-      buy_price: parseFloat(formData.get("price")),
-      purchase_date: formData.get("purchase_date"),
-      secondhand: stringToBoolean(formData.get("secondhand")),
-      part_status_slug: formData.get("part_status"),
-      shop_url: formData.get("shop_url"),
-      type_id: formData.get("type"),
-      weight: parseInt(formData.get("weight")),
-      name: formData.get("name"),
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
-    {
-      authorization: `Bearer ${accessToken}`,
-    }
-  );
+    body: JSON.stringify({ query }),
+  });
 
   try {
     await revalidatePath(`/parts`, "layout");

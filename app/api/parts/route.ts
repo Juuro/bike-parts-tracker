@@ -1,10 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { request, gql } from "graphql-request";
-import { auth } from "@/auth"; // Ensure this path is correct
+import { auth } from "@/auth";
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export const dynamic = "force-dynamic";
+
+export const GET = async () => {
   try {
-    const session = await auth();
+    const session: any = await auth();
     if (!session) {
       return new Response("Unauthorized", {
         status: 401,
@@ -14,10 +14,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const userId = session.userId;
     const accessToken = session.accessToken;
 
-    const query = gql`
-      query GetParts($id: uuid!) {
+    const query = `
+      query GetParts {
         part(
-          where: { user_id: { _eq: $id } }
+          where: { user_id: { _eq: "${userId}" } }
           order_by: { updated_at: desc_nulls_last }
         ) {
           secondhand
@@ -41,6 +41,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
           part_status {
             name
+            slug
           }
           parts_type {
             name
@@ -58,16 +59,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     `;
 
-    const { part: userResponse } = await request(
-      process.env.AUTH_HASURA_GRAPHQL_URL!,
-      query,
-      { id: userId },
-      {
-        authorization: `Bearer ${accessToken}`,
-      }
-    );
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ query }),
+    });
 
-    return new Response(JSON.stringify(userResponse), {
+    const result = (await response.json()) as {
+      data: { part: Part[] };
+    };
+    const { part: partResponse } = result.data;
+
+    return new Response(JSON.stringify(partResponse), {
       status: 200,
     });
   } catch (error) {
@@ -75,5 +81,3 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return new Response("Something went wrong", { status: 500 });
   }
 };
-
-export { handler as GET, handler as POST };

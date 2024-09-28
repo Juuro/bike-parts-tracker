@@ -2,7 +2,7 @@
 import { SignIn, SignOut } from "./auth-components";
 import { useSession } from "next-auth/react";
 
-export default function UserButton() {
+const UserButton = () => {
   const { data: session } = useSession();
   if (!session?.user) return <SignIn />;
 
@@ -14,4 +14,6 @@ export default function UserButton() {
       <SignOut />
     </div>
   );
-}
+};
+
+export default UserButton;

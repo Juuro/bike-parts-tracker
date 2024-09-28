@@ -1,16 +1,16 @@
 "use server";
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
 async function uninstallInstallation(installationId: string) {
-  const session = await auth();
-
-  console.log("deleteInstallation", installationId);
+  const session: any = await auth();
+  if (!session) {
+    console.error("Unauthorized");
+  }
 
   const accessToken = session?.accessToken;
 
-  const query = gql`
+  const query = `
     mutation UninstallInstallation {
       update_installation(
         where: { id: { _eq: "${installationId}" }, uninstalled_at: { _is_null: true } }
@@ -28,16 +28,14 @@ async function uninstallInstallation(installationId: string) {
     }
   `;
 
-  const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
-    query,
-    {},
-    {
-      authorization: `Bearer ${accessToken}`,
-    }
-  );
-
-  console.log("data: ", data);
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ query }),
+  });
 
   try {
     await revalidatePath(`/`, "layout");

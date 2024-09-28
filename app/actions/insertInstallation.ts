@@ -1,11 +1,15 @@
 "use server";
-import { request, gql } from "graphql-request";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import uninstallInstallation from "./uninstallInstallation";
 
 async function insertInstallation(formData: FormData) {
-  const session = await auth();
+  const session: any = await auth();
+  if (!session) {
+    console.error("Unauthorized");
+  }
+
+  const accessToken = session?.accessToken;
 
   const partId = formData.get("part_id");
   const bikeId = formData.get("bike_id");
@@ -15,11 +19,9 @@ async function insertInstallation(formData: FormData) {
     await uninstallInstallation(currentInstallationId.toString());
   }
 
-  const accessToken = session?.accessToken;
-
-  const query = gql`
+  const query = `
     mutation InsertInstallation($part_id: uuid, $bike_id: uuid) {
-      insert_installation(objects: { part_id: $part_id, bike_id: $bike_id }) {
+      insert_installation(objects: { part_id: "${partId}", bike_id: "${bikeId}" }) {
         affected_rows
         returning {
           id
@@ -32,19 +34,14 @@ async function insertInstallation(formData: FormData) {
     }
   `;
 
-  const data = await request(
-    process.env.AUTH_HASURA_GRAPHQL_URL!,
-    query,
-    {
-      part_id: partId,
-      bike_id: bikeId,
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
-    {
-      authorization: `Bearer ${accessToken}`,
-    }
-  );
-
-  console.log("data: ", data);
+    body: JSON.stringify({ query }),
+  });
 
   try {
     await revalidatePath(`/`, "layout");
