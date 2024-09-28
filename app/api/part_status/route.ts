@@ -1,6 +1,8 @@
 import fetch from "node-fetch";
 import { auth } from "@/auth";
 
+export const dynamic = "force-dynamic";
+
 export const GET = async () => {
   try {
     const session: any = await auth();
