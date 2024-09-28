@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { fetchBikes, fetchParts } from "@/utils/requests";
+import { fetchBikes, fetchParts } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
 import { Edit, PackagePlus } from "lucide-react";

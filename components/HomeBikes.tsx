@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { fetchBikes } from "@/utils/requests";
+import { fetchBikes } from "@/utils/requestsServer";
 import React from "react";
 import Card from "./Card";
 import BikeCard from "@/components/BikeCard";

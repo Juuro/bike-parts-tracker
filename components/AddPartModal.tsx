@@ -2,11 +2,10 @@
 
 import addInstallation from "@/app/actions/addInstallation";
 import {
-  fetchBikes,
   fetchManufacturers,
   fetchPartsType,
   fetchPartStatus,
-} from "@/utils/requests";
+} from "@/utils/requestsClient";
 import { Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
@@ -17,14 +16,15 @@ import addPart from "@/app/actions/addPart";
 type ModalProps = {
   showCloseButton?: boolean;
   bike?: Bike;
+  bikes?: Bike[];
 };
 
 const AddPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   bike = null,
+  bikes = [],
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
-  const [bikes, setBikes] = useState<Bike[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [PartStatus, setPartStatus] = useState<PartStatus[]>([]);
   const [partsType, setPartsType] = useState<PartsType[]>([]);
@@ -46,9 +46,6 @@ const AddPartModal: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        const bikes = await fetchBikes();
-        setBikes(bikes);
-
         const manufacturers = await fetchManufacturers();
         setManufacturers(manufacturers);
 

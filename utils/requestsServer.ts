@@ -1,12 +1,4 @@
-// TODO: Remove this conditional loading of headers()
-// Replace with `import { headers } from "next/headers"` as soon as every fetch happens in a server component.
-let headers;
-if (typeof window === "undefined") {
-  headers = (await import("next/headers")).headers;
-} else {
-  headers = () => ({});
-}
-// import { headers } from "next/headers";
+import { headers } from "next/headers";
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
@@ -71,45 +63,4 @@ const fetchBikeParts = async (bikeId?: string) => {
   }
 };
 
-const fetchManufacturers = async () => {
-  try {
-    const response = await fetch("/api/manufacturers");
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching manufacturers:", error);
-  }
-};
-
-const fetchPartStatus = async () => {
-  try {
-    const response = await fetch("/api/part_status");
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching sell status:", error);
-  }
-};
-
-const fetchPartsType = async () => {
-  try {
-    const response = await fetch("/api/parts_type");
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching part types:", error);
-  }
-};
-
-export {
-  fetchBikes,
-  fetchBike,
-  fetchBikeParts,
-  fetchManufacturers,
-  fetchPartStatus,
-  fetchPartsType,
-  fetchParts,
-};
+export { fetchBikes, fetchBike, fetchBikeParts, fetchParts };

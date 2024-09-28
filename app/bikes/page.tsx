@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { redirect, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { fetchBike, fetchBikeParts } from "@/utils/requests";
+import { fetchBike, fetchBikeParts } from "@/utils/requestsServer";
 import Link from "next/link";
 import deletePart from "@/app/actions/deletePart";
 import { NextResponse } from "next/server";

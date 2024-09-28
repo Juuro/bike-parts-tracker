@@ -1,4 +1,4 @@
-import { fetchBike } from "@/utils/requests";
+import { fetchBike } from "@/utils/requestsServer";
 import AddPartModal from "@/components/AddPartModal";
 import InstallationsTable from "@/components/InstallationsTable";
 
