@@ -1,20 +1,8 @@
 "use client";
 
-import Image from "next/image";
-
 import { cn } from "@/utils/functions";
-import CustomLink from "./custom-link";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "./ui/navigation-menu";
+import { NavigationMenuLink } from "./ui/navigation-menu";
 import React from "react";
-import { Button } from "./ui/button";
 import Link from "next/link";
 import { Bike } from "lucide-react";
 
@@ -38,6 +26,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
+        hä?
         <a
           ref={ref}
           className={cn(
