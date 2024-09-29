@@ -35,6 +35,10 @@ async function deletePart(partId: string): Promise<void> {
     body: JSON.stringify({ query }),
   });
 
+  if (!response.ok) {
+    console.error("Failed to delete part");
+  }
+
   try {
     await revalidatePath(`/`, "layout");
   } catch (error) {

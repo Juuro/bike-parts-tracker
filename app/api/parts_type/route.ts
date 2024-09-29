@@ -15,7 +15,7 @@ export const GET = async () => {
 
     const query = `
       query GetPartsType {
-        parts_type {
+        parts_type(order_by: {name: asc}) {
           id
           name
         }

@@ -15,7 +15,7 @@ export const GET = async () => {
 
     const query = `
       query GetManufacturers {
-        manufacturer {
+        manufacturer(order_by: {name: asc}) {
           id
           name
         }

@@ -37,6 +37,10 @@ async function uninstallInstallation(installationId: string) {
     body: JSON.stringify({ query }),
   });
 
+  if (!response.ok) {
+    console.error("Failed to uninstall installation");
+  }
+
   try {
     await revalidatePath(`/`, "layout");
   } catch (error) {

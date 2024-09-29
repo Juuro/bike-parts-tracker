@@ -1,12 +1,11 @@
 "use client";
-
 import addInstallation from "@/app/actions/addInstallation";
 import {
   fetchManufacturers,
   fetchPartsType,
   fetchPartStatus,
 } from "@/utils/requestsClient";
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -30,7 +29,9 @@ const AddPartModal: React.FC<ModalProps> = ({
   const [partsType, setPartsType] = useState<PartsType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBikeId, setSelectedBikeId] = useState("");
+  const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const { data: session, status } = useSession();
+  const [newManufacturer, setNewManufacturer] = useState("");
 
   useEffect(() => {
     const today = new Date();
@@ -89,6 +90,25 @@ const AddPartModal: React.FC<ModalProps> = ({
     setSelectedBikeId(event.target.value);
   };
 
+  const replaceManufacturerDropdownWithInputField = (): void => {
+    setShowManufacturerInput(!showManufacturerInput);
+  };
+
+  const handleNewManufacturerChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setNewManufacturer(event.target.value);
+    if (
+      manufacturers.some(
+        (manufacturer) => manufacturer.name === event.target.value
+      )
+    ) {
+      event.target.setCustomValidity("Manufacturer already exists");
+    } else {
+      event.target.setCustomValidity("");
+    }
+  };
+
   return (
     <>
       <button
@@ -106,7 +126,7 @@ const AddPartModal: React.FC<ModalProps> = ({
           className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
           onClick={closeModal}
         >
-          <div className="relative p-4 w-full max-w-md max-h-full">
+          <div className="relative p-4 w-full max-w-prose max-h-full">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -155,8 +175,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="bike"
                         defaultValue={bike?.id}
                         required={bike ? true : false}
-                        disabled={false}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         onChange={handleBikeChange}
                       >
                         {bike ? (
@@ -189,39 +208,89 @@ const AddPartModal: React.FC<ModalProps> = ({
                         Manufacturer
                       </label>
                       <div className="flex items-center">
-                        <select
-                          name="manufacturer"
-                          id="manufacturer"
-                          defaultValue=""
-                          required
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        >
-                          <option value="" disabled hidden>
-                            Select manufacturer
-                          </option>
-                          {manufacturers.length == 0 ? (
-                            <option value="" disabled hidden>
-                              No parts found
-                            </option>
-                          ) : (
-                            manufacturers.map((manufacturer) => {
-                              return (
-                                <option
-                                  key={manufacturer.id}
-                                  value={manufacturer.id}
-                                >
-                                  {manufacturer.name}
+                        {!showManufacturerInput && (
+                          <>
+                            <select
+                              name="manufacturer"
+                              id="manufacturer"
+                              defaultValue=""
+                              required
+                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            >
+                              <option value="" disabled hidden>
+                                Select manufacturer
+                              </option>
+                              {manufacturers.length == 0 ? (
+                                <option value="" disabled hidden>
+                                  No parts found
                                 </option>
-                              );
-                            })
-                          )}
-                        </select>
-                        <button
-                          type="button"
-                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          <Plus strokeWidth={3} className="mr-2" />
-                        </button>
+                              ) : (
+                                manufacturers.map((manufacturer) => {
+                                  return (
+                                    <option
+                                      key={manufacturer.id}
+                                      value={manufacturer.id}
+                                    >
+                                      {manufacturer.name}
+                                    </option>
+                                  );
+                                })
+                              )}
+                            </select>
+                            <button
+                              type="button"
+                              className="py-2 px-3 ml-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                              title="Add new manufacturer"
+                              onClick={
+                                replaceManufacturerDropdownWithInputField
+                              }
+                            >
+                              <Plus strokeWidth={3} />
+                            </button>
+                          </>
+                        )}
+                        {showManufacturerInput && (
+                          <>
+                            <input
+                              type="text"
+                              name="newManufacturer"
+                              id="newManufacturer"
+                              className={`mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`}
+                              placeholder="Manufacturer"
+                              value={newManufacturer}
+                              onChange={(event) =>
+                                handleNewManufacturerChange(event)
+                              }
+                              required
+                            />
+                            <input
+                              type="text"
+                              name="manufacturerCountry"
+                              id="manufacturerCountry"
+                              className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                              placeholder="Country"
+                              required
+                            />
+                            <input
+                              type="url"
+                              name="manufacturerUrl"
+                              id="manufacturerUrl"
+                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                              placeholder="Url"
+                              required
+                            />
+                            <button
+                              type="button"
+                              className="py-2 px-3 ml-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                              title="Add new manufacturer"
+                              onClick={
+                                replaceManufacturerDropdownWithInputField
+                              }
+                            >
+                              <Minus strokeWidth={3} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="col-span-1">
@@ -235,7 +304,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         type="text"
                         name="name"
                         id="name"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
                         required
                       />
@@ -252,7 +321,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         name="year"
                         min="1910"
                         id="year"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="1985"
                         required
                       />
@@ -269,7 +338,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         name="price"
                         min="0"
                         id="price"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="399"
                         required
                       />
@@ -285,7 +354,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         type="date"
                         name="purchase_date"
                         id="purchase_date"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
                         required
                       />
@@ -306,7 +375,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                                 name="part_status"
                                 type="radio"
                                 id={status.slug}
-                                className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:ring-primary-600 focus:border-primary-600"
+                                className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600"
                                 value={status.slug}
                               />
                               <label htmlFor={status.slug}>{status.name}</label>
@@ -328,7 +397,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         name="sell_price"
                         min="1"
                         id="sell_price"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="299"
                       />
                     </div>
@@ -344,7 +413,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         type="checkbox"
                         name="secondhand"
                         id="secondhand"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
                         value="true"
                       />
@@ -357,10 +426,10 @@ const AddPartModal: React.FC<ModalProps> = ({
                         Shop url
                       </label>
                       <input
-                        type="text"
+                        type="url"
                         name="shop_url"
                         id="shop_url"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
                       />
                     </div>
@@ -376,7 +445,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="type"
                         defaultValue=""
                         required
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       >
                         <option value="" disabled hidden>
                           Select type of part
@@ -408,7 +477,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         name="weight"
                         min="0"
                         id="weight"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
                         required
                       />
@@ -425,7 +494,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                           type="date"
                           name="installed_at"
                           id="installed_at"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                           placeholder=""
                           value={selectedDate}
                           onChange={(e) => setSelectedDate(e.target.value)}

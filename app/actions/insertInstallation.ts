@@ -43,6 +43,10 @@ async function insertInstallation(formData: FormData) {
     body: JSON.stringify({ query }),
   });
 
+  if (!response.ok) {
+    console.error("Failed to insert installation");
+  }
+
   try {
     await revalidatePath(`/`, "layout");
   } catch (error) {

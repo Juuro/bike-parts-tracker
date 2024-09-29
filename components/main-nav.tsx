@@ -9,7 +9,7 @@ import { Bike } from "lucide-react";
 export function MainNav() {
   return (
     <div className="flex gap-4 items-center">
-      <Link href="/">
+      <Link href="/" title="Dashboard">
         <Bike />
       </Link>
       <Link href="/">
@@ -25,8 +25,8 @@ const ListItem = React.forwardRef<
 >(({ className, title, children, ...props }, ref) => {
   return (
     <li>
+      dingens
       <NavigationMenuLink asChild>
-        hä?
         <a
           ref={ref}
           className={cn(
