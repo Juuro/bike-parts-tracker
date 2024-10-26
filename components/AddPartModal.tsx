@@ -5,12 +5,13 @@ import {
   fetchPartsType,
   fetchPartStatus,
 } from "@/utils/requestsClient";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./SubmitButton";
 import addPart from "@/app/actions/addPart";
+import ManufacturerForm from "./ManufacturerForm";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -31,7 +32,6 @@ const AddPartModal: React.FC<ModalProps> = ({
   const [selectedBikeId, setSelectedBikeId] = useState("");
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const { data: session, status } = useSession();
-  const [newManufacturer, setNewManufacturer] = useState("");
 
   useEffect(() => {
     const today = new Date();
@@ -94,21 +94,6 @@ const AddPartModal: React.FC<ModalProps> = ({
     setShowManufacturerInput(!showManufacturerInput);
   };
 
-  const handleNewManufacturerChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    setNewManufacturer(event.target.value);
-    if (
-      manufacturers.some(
-        (manufacturer) => manufacturer.name === event.target.value
-      )
-    ) {
-      event.target.setCustomValidity("Manufacturer already exists");
-    } else {
-      event.target.setCustomValidity("");
-    }
-  };
-
   return (
     <>
       <button
@@ -140,21 +125,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                     data-modal-hide="authentication-modal"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    <svg
-                      className="w-3 h-3"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 14 14"
-                    >
-                      <path
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                      />
-                    </svg>
+                    <X />
                     <span className="sr-only">Close modal</span>
                   </button>
                 )}
@@ -251,34 +222,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         )}
                         {showManufacturerInput && (
                           <>
-                            <input
-                              type="text"
-                              name="newManufacturer"
-                              id="newManufacturer"
-                              className={`mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`}
-                              placeholder="Manufacturer"
-                              value={newManufacturer}
-                              onChange={(event) =>
-                                handleNewManufacturerChange(event)
-                              }
-                              required
-                            />
-                            <input
-                              type="text"
-                              name="manufacturerCountry"
-                              id="manufacturerCountry"
-                              className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="Country"
-                              required
-                            />
-                            <input
-                              type="url"
-                              name="manufacturerUrl"
-                              id="manufacturerUrl"
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                              placeholder="Url"
-                              required
-                            />
+                            <ManufacturerForm manufacturers={manufacturers} />
                             <button
                               type="button"
                               className="py-2 px-3 ml-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -361,7 +305,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                     </div>
                     <fieldset className="col-span-1">
                       <legend className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        For sale
+                        State
                       </legend>
 
                       {PartStatus.length == 0 ? (
