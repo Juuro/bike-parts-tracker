@@ -37,6 +37,7 @@ export const GET = async (req: Request, { params }: { params: any }) => {
             }
             part_status {
               name
+              available
             }
             parts_type {
               name
