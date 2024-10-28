@@ -157,11 +157,13 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                             bikeName={part.installations[0]?.bike.name}
                           />
                         ) : (
-                          <AssignPartButton
-                            bikes={bikes}
-                            partId={part.id}
-                            titleText={`Assign part to a bike`}
-                          />
+                          part.part_status.available && (
+                            <AssignPartButton
+                              bikes={bikes}
+                              partId={part.id}
+                              titleText={`Assign part to a bike`}
+                            />
+                          )
                         )}
                         <button
                           className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"

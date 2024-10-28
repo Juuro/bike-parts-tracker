@@ -42,6 +42,7 @@ export const GET = async () => {
           part_status {
             name
             slug
+            available
           }
           parts_type {
             name
