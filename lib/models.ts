@@ -30,6 +30,7 @@ declare global {
   type PartStatus = {
     slug: string;
     name: string;
+    available: boolean;
   };
 
   type PartsType = {
