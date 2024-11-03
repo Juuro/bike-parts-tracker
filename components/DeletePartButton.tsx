@@ -36,7 +36,7 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
           <p className="p-3 font-bold text-center">Select status</p>
 
           {partStatus
-            ?.filter((status) => status.available === true)
+            ?.filter((status) => status.available === false)
             .map((status) => (
               <form action={handleDeletePart} key={status.slug}>
                 <input type="hidden" name="part_id" value={partId} />
