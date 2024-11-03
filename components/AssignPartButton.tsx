@@ -18,7 +18,7 @@ const AssignPartButton: React.FC<AssignPartButtonProps> = ({
     <Popover
       content={
         <div className="pb-4" role="none">
-          <p className="p-3">Assign to bike</p>
+          <p className="p-3 font-bold text-center">Assign to bike</p>
           {bikes?.map((bike: Bike) => (
             <BikeAssignmentForm key={bike.id} bike={bike} partId={partId} />
           ))}

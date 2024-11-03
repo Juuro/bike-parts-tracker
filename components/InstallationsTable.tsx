@@ -1,11 +1,10 @@
 import Image from "next/image";
-import { fetchBikeParts } from "@/utils/requestsServer";
+import { fetchBikeParts, fetchPartStatus } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
 import { Edit, PackagePlus, Plus } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
 import Link from "next/link";
-import AddPartModal from "./AddPartModal";
 
 type InstallationsTableProps = {
   bikeId?: string;
@@ -15,6 +14,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
   bikeId,
 }) => {
   const bikeParts = await fetchBikeParts(bikeId);
+  const partStatus = await fetchPartStatus();
 
   const uninstalledBikeParts = bikeParts.filter(
     (installation: Installation) => installation.uninstalled_at
@@ -190,10 +190,6 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                         >
                           <Edit />
                         </button>
-                        <DeletePartButton
-                          installationId={installation.id}
-                          partId={part.id}
-                        />
                       </div>
                     </td>
                   </tr>
@@ -341,6 +337,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                           <Edit />
                         </button>
                         <DeletePartButton
+                          partStatus={partStatus}
                           installationId={installation.id}
                           partId={part.id}
                         />

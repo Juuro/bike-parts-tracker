@@ -2,7 +2,7 @@
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-async function deletePart(partId: string): Promise<void> {
+async function deletePart(partId: string, status: string): Promise<void> {
   const session: any = await auth();
   if (!session) {
     console.error("Unauthorized");
@@ -15,7 +15,7 @@ async function deletePart(partId: string): Promise<void> {
     mutation SetPartStatusBroken {
       update_part(
         where: { id: { _eq: "${partId}" }, user_id: { _eq: "${userId}" } }
-        _set: { part_status_slug: "broken" }
+        _set: { part_status_slug: "${status}" }
       ) {
         affected_rows
         returning {
