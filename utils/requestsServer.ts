@@ -63,4 +63,18 @@ const fetchBikeParts = async (bikeId?: string) => {
   }
 };
 
-export { fetchBikes, fetchBike, fetchBikeParts, fetchParts };
+const fetchPartStatus = async () => {
+  try {
+    const response = await fetch(`${apiDomain}/part_status`, {
+      method: "GET",
+      headers: headers(),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching part status:", error);
+  }
+};
+
+export { fetchBikes, fetchBike, fetchBikeParts, fetchParts, fetchPartStatus };
