@@ -1,6 +1,12 @@
 declare global {
   type Discipline = {
+    id: string;
     abbr: string;
+    name: string;
+  };
+
+  type Category = {
+    id: string;
     name: string;
   };
 

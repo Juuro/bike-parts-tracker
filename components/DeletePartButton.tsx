@@ -38,12 +38,16 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
           {partStatus
             ?.filter((status) => status.available === false)
             .map((status) => (
-              <form action={handleDeletePart} key={status.slug}>
+              <form
+                action={handleDeletePart}
+                key={status.slug}
+                className="border-t last-of-type:border-b"
+              >
                 <input type="hidden" name="part_id" value={partId} />
                 <input type="hidden" name="part_status" value={status.slug} />
                 <button
                   key={status.slug}
-                  className="block p-3 hover:bg-gray-200 hover:text-gray-900 text-center w-full border-t last-of-type:border-b"
+                  className="block p-3 hover:bg-gray-200 hover:text-gray-900 text-center w-full"
                 >
                   {status.name}
                 </button>
