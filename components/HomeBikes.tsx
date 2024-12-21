@@ -4,6 +4,8 @@ import React from "react";
 import Card from "./Card";
 import BikeCard from "@/components/BikeCard";
 import Link from "next/link";
+import { Plus } from "lucide-react";
+import AddBikeModal from "./AddBikeModal";
 
 const HomeBikes = async () => {
   const session = await auth();
@@ -23,7 +25,7 @@ const HomeBikes = async () => {
           bikes.map((bike) => <BikeCard key={bike.id} bike={bike} />)
         )}
         <Card>
-          <Link href="">Add bike +</Link>
+          <AddBikeModal showCloseButton={true} />
         </Card>
       </div>
     </section>

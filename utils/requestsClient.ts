@@ -31,4 +31,32 @@ const fetchPartsType = async () => {
   }
 };
 
-export { fetchManufacturers, fetchPartStatus, fetchPartsType };
+const fetchDisciplines = async () => {
+  try {
+    const response = await fetch("/api/disciplines");
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching disciplines:", error);
+  }
+};
+
+const fetchCategories = async () => {
+  try {
+    const response = await fetch("/api/categories");
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+};
+
+export {
+  fetchManufacturers,
+  fetchPartStatus,
+  fetchPartsType,
+  fetchDisciplines,
+  fetchCategories,
+};

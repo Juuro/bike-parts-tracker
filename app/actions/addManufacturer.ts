@@ -45,8 +45,6 @@ async function addManufacturer(
     insert_manufacturer: { returning: manufacturerResponse },
   } = result.data;
 
-  console.log("addManufacturer response", manufacturerResponse);
-
   return manufacturerResponse;
 
   try {
