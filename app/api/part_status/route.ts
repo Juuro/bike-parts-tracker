@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +24,7 @@ export const GET = async () => {
     `;
 
     const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      cache: "force-cache",
       method: "POST",
       headers: {
         "Content-Type": "application/json",

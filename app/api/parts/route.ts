@@ -61,6 +61,7 @@ export const GET = async () => {
     `;
 
     const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      cache: "force-cache",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
