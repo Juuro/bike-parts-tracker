@@ -6,7 +6,7 @@ const fetchBikes = async () => {
   try {
     const response = await fetch(`${apiDomain}/bikes`, {
       method: "GET",
-      headers: headers(),
+      headers: new Headers(headers()),
     });
     if (!response.ok) throw new Error("Failed to fetch");
     const data: Bike[] = await response.json();
@@ -21,7 +21,7 @@ const fetchParts = async () => {
   try {
     const response = await fetch(`${apiDomain}/parts`, {
       method: "GET",
-      headers: headers(),
+      headers: new Headers(headers()),
     });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
@@ -36,7 +36,7 @@ const fetchBike = async (bikeId: string) => {
   try {
     const response = await fetch(`${apiDomain}/bikes/${bikeId}`, {
       method: "GET",
-      headers: headers(),
+      headers: new Headers(headers()),
     });
     if (!response.ok) throw new Error("Failed to fetch");
     const data = await response.json();
@@ -52,7 +52,7 @@ const fetchBikeParts = async (bikeId?: string) => {
   try {
     const response = await fetch(`${apiDomain}/bikes/${bikeId}/installation`, {
       method: "GET",
-      headers: headers(),
+      headers: new Headers(headers()),
     });
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     const data = await response.json();
@@ -67,7 +67,7 @@ const fetchPartStatus = async () => {
   try {
     const response = await fetch(`${apiDomain}/part_status`, {
       method: "GET",
-      headers: headers(),
+      headers: new Headers(headers()),
     });
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     const data = await response.json();

@@ -25,8 +25,8 @@ const BikePage = async ({ params }: { params: any }) => {
             <h1 className="text-4xl font-bold">{bike.name}</h1>
           </div>
           <div className="flex justify-end items-center gap-2">
-            <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
             <EditBikeModal showCloseButton={true} bike={bike} />
+            <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
           </div>
         </div>
         <InstallationsTable bikeId={bikeId} />
