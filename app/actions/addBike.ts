@@ -45,7 +45,7 @@ async function addBike(formData: FormData): Promise<Bike> {
   });
 
   if (!response.ok) {
-    console.error("Failed to add part");
+    console.error("Failed to update bike");
   }
 
   const result = (await response.json()) as {

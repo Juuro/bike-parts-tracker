@@ -23,8 +23,10 @@ export const GET = async (req: Request, { params }: { params: any }) => {
           name
           strava_bike
           discipline {
+            id
             name
           }
+          category_id
         }
       }
     `;

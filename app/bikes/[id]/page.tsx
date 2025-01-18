@@ -1,6 +1,8 @@
 import { fetchBike, fetchBikes } from "@/utils/requestsServer";
-import AddPartModal from "@/components/AddPartModal";
+import Image from "next/image";
 import InstallationsTable from "@/components/InstallationsTable";
+import AddPartModal from "@/components/AddPartModal";
+import EditBikeModal from "@/components/EditBikeModal";
 
 const BikePage = async ({ params }: { params: any }) => {
   const { id: bikeId } = params;
@@ -11,8 +13,22 @@ const BikePage = async ({ params }: { params: any }) => {
   return (
     <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold mb-6">{bike.name}</h1>
-        <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-start items-center gap-2">
+            <Image
+              src={`https://picsum.photos/50/50?random=${bike.id}`}
+              className="mr-2 rounded-full"
+              width={50}
+              height={50}
+              alt={`${bike.name}`}
+            />
+            <h1 className="text-4xl font-bold">{bike.name}</h1>
+          </div>
+          <div className="flex justify-end items-center gap-2">
+            <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
+            <EditBikeModal showCloseButton={true} bike={bike} />
+          </div>
+        </div>
         <InstallationsTable bikeId={bikeId} />
       </div>
     </section>

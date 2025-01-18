@@ -15,6 +15,8 @@ declare global {
     name: string;
     strava_bike: string;
     discipline: Discipline;
+    category_id: string;
+    ebike: boolean;
   };
 
   type Session = {

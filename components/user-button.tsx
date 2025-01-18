@@ -8,8 +8,8 @@ const UserButton = () => {
 
   return (
     <div className="flex gap-2 items-center">
-      <span className="hidden text-sm sm:inline-flex">
-        {session.user.email}
+      <span className="hidden text-sm sm:inline-flex text-nowrap">
+        {session.user.name}
       </span>
       <SignOut />
     </div>
