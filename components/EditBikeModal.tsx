@@ -1,21 +1,25 @@
 "use client";
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
-import { Plus, X } from "lucide-react";
+import { SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./SubmitButton";
-import Link from "next/link";
-import addBike from "@/app/actions/addBike";
+import updateBike from "@/app/actions/updateBike";
 
 type ModalProps = {
   showCloseButton?: boolean;
+  bike?: Bike;
 };
 
-const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
+const EditBikeModal: React.FC<ModalProps> = ({
+  showCloseButton = true,
+  bike = null,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -35,17 +39,12 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
   }, [status, isModalOpen]);
 
   const handleSubmit = async (formData: FormData) => {
-    let bike: Bike | null = null;
     try {
-      bike = await addBike(formData);
+      await updateBike(formData);
     } catch (error) {
       console.error(error);
     }
-    if (bike) {
-      redirect(`/bikes/${bike.id}`);
-    } else {
-      redirect("/");
-    }
+    redirect(`/bikes/${bike?.id}`);
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -54,16 +53,20 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
     }
   };
 
+  const replaceManufacturerDropdownWithInputField = (): void => {
+    setShowManufacturerInput(!showManufacturerInput);
+  };
+
   return (
     <>
-      <Link
-        href=""
+      <button
         onClick={() => setIsModalOpen(true)}
-        className="flex flex-col items-center justify-center h-full"
+        className="my-0 px-3 py-2 text-white inline-flex items-center bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        type="button"
       >
-        <span>Add bike</span>
-        <Plus size={120} />
-      </Link>
+        <SquarePen strokeWidth={2} size={20} className="mr-2" />
+        Edit
+      </button>
       {isModalOpen && (
         <div
           tabIndex={-1}
@@ -75,7 +78,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Add bike
+                  Edit {bike?.name}
                 </h3>
 
                 {showCloseButton && (
@@ -107,6 +110,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                         id="name"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={bike?.name}
                         required
                       />
                     </div>
@@ -124,6 +128,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                         id="strava_bike"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={bike?.strava_bike}
                         required
                       />
                     </div>
@@ -139,7 +144,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                         <select
                           name="discipline"
                           id="discipline"
-                          defaultValue=""
+                          defaultValue={bike?.discipline.id}
                           required
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         >
@@ -177,7 +182,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                         <select
                           name="category"
                           id="category"
-                          defaultValue=""
+                          defaultValue={bike?.category_id}
                           required
                           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         >
@@ -215,11 +220,18 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                         id="ebike"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
-                        value="true"
+                        defaultChecked={bike?.ebike}
+                        defaultValue="true"
                       />
                     </div>
+                    <input
+                      type="hidden"
+                      name="bike_id"
+                      value={bike?.id}
+                      readOnly
+                    />
                   </div>
-                  <SubmitButton text="Add new bike" />
+                  <SubmitButton text="Confirm edit" />
                 </form>
               </div>
             </div>
@@ -230,4 +242,4 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
   );
 };
 
-export default AddBikeModal;
+export default EditBikeModal;

@@ -6,10 +6,9 @@ import {
 } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { Edit, PackagePlus } from "lucide-react";
+import { Edit } from "lucide-react";
 import AssignPartButton from "./AssignPartButton";
 import Link from "next/link";
-import { useEffect } from "react";
 
 type PartsTableProps = {
   bikeName?: string;
@@ -44,6 +43,15 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
   const bikeIdOfCurrentInstallation = (installations: Installation[]) => {
     return installations.find((installation) => !installation.uninstalled_at)
       ?.bike.id;
+  };
+
+  const isPartCurrentlyInstalledOnAnyBike = (
+    partId: string,
+    installations: Installation[]
+  ) => {
+    return installations.find((installation: Installation) => {
+      return installation.part.id === partId && !installation.uninstalled_at;
+    })?.id;
   };
 
   return (
@@ -139,13 +147,18 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                       {part.parts_type.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      <Link
-                        href={`/bikes/${bikeIdOfCurrentInstallation(
-                          part.installations
-                        )}`}
-                      >
-                        {bikeNameOfCurrentInstallation(part.installations)}
-                      </Link>
+                      {isPartCurrentlyInstalledOnAnyBike(
+                        part.id,
+                        part.installations
+                      ) && (
+                        <Link
+                          href={`/bikes/${bikeIdOfCurrentInstallation(
+                            part.installations
+                          )}`}
+                        >
+                          {bikeNameOfCurrentInstallation(part.installations)}
+                        </Link>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.buy_price}

@@ -55,6 +55,9 @@ export const GET = async () => {
             }
             installed_at
             uninstalled_at
+            part {
+              id
+            }
           }
         }
       }

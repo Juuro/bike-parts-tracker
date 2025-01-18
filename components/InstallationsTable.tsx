@@ -279,13 +279,18 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                       {part.parts_type.name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      <Link
-                        href={`/bikes/${bikeIdOfCurrentInstallation(
-                          part.installations
-                        )}`}
-                      >
-                        {bikeNameOfCurrentInstallation(part.installations)}
-                      </Link>
+                      {isPartCurrentlyInstalledOnAnyBike(
+                        part.id,
+                        part.installations
+                      ) && (
+                        <Link
+                          href={`/bikes/${bikeIdOfCurrentInstallation(
+                            part.installations
+                          )}`}
+                        >
+                          {bikeNameOfCurrentInstallation(part.installations)}
+                        </Link>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {part.buy_price}
