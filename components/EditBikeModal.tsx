@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./SubmitButton";
 import updateBike from "@/app/actions/updateBike";
+import Image from "next/image";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -21,6 +22,10 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
+
+  let images = bike?.images
+    ?.split(",")
+    .filter((image: string) => image.length > 0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +60,11 @@ const EditBikeModal: React.FC<ModalProps> = ({
 
   const replaceManufacturerDropdownWithInputField = (): void => {
     setShowManufacturerInput(!showManufacturerInput);
+  };
+
+  const handleRemoveImage = (index: number): void => {
+    images?.splice(index, 1);
+    console.log("images", images);
   };
 
   return (
@@ -207,6 +217,30 @@ const EditBikeModal: React.FC<ModalProps> = ({
                     </div>
 
                     <div className="col-span-2">
+                      <div className="flex items-center justify-start gap-2">
+                        {images?.map((image: string, index: number) => {
+                          return (
+                            <div key={index} className="relative">
+                              <Image
+                                src={image}
+                                className="rounded-lg object-cover h-24 w-24"
+                                width={150}
+                                height={150}
+                                alt=""
+                              />
+                              <button
+                                className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity"
+                                onClick={() => handleRemoveImage(index)}
+                                type="button"
+                              >
+                                <X />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="col-span-2">
                       <label
                         htmlFor="images"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -220,6 +254,12 @@ const EditBikeModal: React.FC<ModalProps> = ({
                         className="border rounded w-full py-2 px-3"
                         accept="image/*"
                         multiple
+                      />
+                      <input
+                        type="hidden"
+                        name="old_images"
+                        value={images?.toString()}
+                        readOnly
                       />
                     </div>
 

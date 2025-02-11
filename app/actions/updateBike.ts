@@ -10,6 +10,8 @@ async function updateBike(formData: FormData): Promise<Bike> {
 
   const accessToken = session?.accessToken;
 
+  const oldImages = formData.getAll("old_images") as string[];
+
   const images: File[] = formData
     .getAll("images")
     .filter(
@@ -32,6 +34,10 @@ async function updateBike(formData: FormData): Promise<Bike> {
     );
 
     imageUrls.push(result.secure_url);
+  }
+
+  if (oldImages.length > 0) {
+    imageUrls.push(...oldImages);
   }
 
   const query = `
