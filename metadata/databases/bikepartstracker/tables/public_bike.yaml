@@ -1,0 +1,59 @@
+table:
+  name: bike
+  schema: public
+object_relationships:
+  - name: discipline
+    using:
+      foreign_key_constraint_on: discipline_id
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - ebike
+        - name
+        - strava_bike
+        - created_at
+        - updated_at
+        - category_id
+        - discipline_id
+        - id
+        - user_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - ebike
+        - name
+        - strava_bike
+        - created_at
+        - updated_at
+        - category_id
+        - discipline_id
+        - id
+        - user_id
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - ebike
+        - name
+        - strava_bike
+        - created_at
+        - updated_at
+        - category_id
+        - discipline_id
+        - id
+        - user_id
+      filter: {}
+      check: null
+    comment: ""
+delete_permissions:
+  - role: user
+    permission:
+      filter: {}
+    comment: ""

@@ -1,0 +1,3 @@
+table:
+  name: weight_unit
+  schema: public

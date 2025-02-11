@@ -27,6 +27,7 @@ export const GET = async () => {
             abbr
             name
           }
+          images
         }
       }
     `;

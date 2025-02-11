@@ -1,0 +1,46 @@
+table:
+  name: parts_type
+  schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - max_amount
+        - service_interval
+        - name
+        - created_at
+        - updated_at
+        - id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - max_amount
+        - service_interval
+        - name
+        - created_at
+        - updated_at
+        - id
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - max_amount
+        - service_interval
+        - name
+        - created_at
+        - updated_at
+        - id
+      filter: {}
+      check: null
+    comment: ""
+delete_permissions:
+  - role: user
+    permission:
+      filter: {}
+    comment: ""

@@ -1,0 +1,11 @@
+table:
+  name: category
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - name
+        - id
+      filter: {}
+    comment: ""

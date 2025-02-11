@@ -1,0 +1,100 @@
+table:
+  name: part
+  schema: public
+object_relationships:
+  - name: manufacturer
+    using:
+      foreign_key_constraint_on: manufacturer_id
+  - name: part_status
+    using:
+      manual_configuration:
+        column_mapping:
+          part_status_slug: slug
+        insertion_order: null
+        remote_table:
+          name: part_status
+          schema: public
+  - name: parts_type
+    using:
+      foreign_key_constraint_on: type_id
+array_relationships:
+  - name: installations
+    using:
+      foreign_key_constraint_on:
+        column: part_id
+        table:
+          name: installation
+          schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - secondhand
+        - buy_price
+        - sell_price
+        - model_year
+        - weight
+        - name
+        - receipt
+        - shop_url
+        - created_at
+        - purchase_date
+        - updated_at
+        - id
+        - manufacturer_id
+        - part_status_slug
+        - type_id
+        - user_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - secondhand
+        - buy_price
+        - sell_price
+        - model_year
+        - weight
+        - name
+        - part_status_slug
+        - receipt
+        - shop_url
+        - created_at
+        - purchase_date
+        - updated_at
+        - id
+        - manufacturer_id
+        - type_id
+        - user_id
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - secondhand
+        - buy_price
+        - sell_price
+        - model_year
+        - weight
+        - name
+        - receipt
+        - shop_url
+        - created_at
+        - purchase_date
+        - updated_at
+        - id
+        - manufacturer_id
+        - part_status_slug
+        - type_id
+        - user_id
+      filter: {}
+      check: {}
+    comment: ""
+delete_permissions:
+  - role: user
+    permission:
+      filter: {}
+    comment: ""

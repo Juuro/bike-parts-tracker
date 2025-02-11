@@ -1,0 +1,7 @@
+table:
+  name: sessions
+  schema: public
+object_relationships:
+  - name: sessions_userId_fkey
+    using:
+      foreign_key_constraint_on: userId

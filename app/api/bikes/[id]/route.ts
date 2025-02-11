@@ -27,6 +27,7 @@ export const GET = async (req: Request, { params }: { params: any }) => {
             name
           }
           category_id
+          images
         }
       }
     `;

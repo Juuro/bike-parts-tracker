@@ -1,0 +1,12 @@
+table:
+  name: part_status
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - available
+        - name
+        - slug
+      filter: {}
+    comment: ""

@@ -8,12 +8,14 @@ type BikeCardProps = {
 };
 
 const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
+  const images = bike.images?.split(",");
+
   return (
     <Card>
       <Link href={`/bikes/${bike.id}`}>
         <Image
           className="w-full"
-          src={`https://picsum.photos/400/300?random=${bike.id}`}
+          src={images ? images[0] : ""}
           alt=""
           width={790}
           height={592}

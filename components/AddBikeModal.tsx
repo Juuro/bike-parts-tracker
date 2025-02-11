@@ -201,6 +201,23 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                       </div>
                     </div>
 
+                    <div className="col-span-2">
+                      <label
+                        htmlFor="images"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        Images (Select up to 4 images)
+                      </label>
+                      <input
+                        type="file"
+                        id="images"
+                        name="images"
+                        className="border rounded w-full py-2 px-3"
+                        accept="image/*"
+                        multiple
+                      />
+                    </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="ebike"
