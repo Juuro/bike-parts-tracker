@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { CircleArrowLeft, CircleArrowRight } from "lucide-react";
 
 type CarouselProps = {
@@ -31,7 +32,16 @@ const Carousel: React.FC<CarouselProps> = ({ slides }: CarouselProps) => {
         }}
       >
         {slides.map((image: string, index: number) => {
-          return <img src={image} key={index} />;
+          return (
+            <Image
+              src={image}
+              key={index}
+              className="min-w-full"
+              width={3000}
+              height={1000}
+              alt=""
+            />
+          );
         })}
       </div>
 
