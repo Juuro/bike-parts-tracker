@@ -22,10 +22,14 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
+  const [images, setImages] = useState<string[]>([]);
 
-  let images = bike?.images
-    ?.split(",")
-    .filter((image: string) => image.length > 0);
+  useEffect(() => {
+    const imagesArray =
+      bike?.images?.split(",").filter((image: string) => image.length > 0) ||
+      [];
+    setImages(imagesArray);
+  }, [isModalOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,8 +67,9 @@ const EditBikeModal: React.FC<ModalProps> = ({
   };
 
   const handleRemoveImage = (index: number): void => {
-    images?.splice(index, 1);
-    console.log("images", images);
+    const remainingImages = [...images];
+    remainingImages.splice(index, 1);
+    setImages(remainingImages);
   };
 
   return (
