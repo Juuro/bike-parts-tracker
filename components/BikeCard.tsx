@@ -16,24 +16,25 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
   return (
     <Card>
       <Link href={`/bikes/${bike.id}`}>
-        {images && images[0] ? (
-          images[0] && (
-            <Image
-              className="w-full"
-              src={images[0]}
-              alt=""
+        <div className="aspect-[3/2] relative">
+          {images && images[0] ? (
+            images[0] && (
+              <Image
+                className="w-full h-auto object-cover"
+                src={images[0]}
+                alt=""
+                fill={true}
+              />
+            )
+          ) : (
+            <Bike
+              strokeWidth={2}
+              size={110}
+              className="w-full h-full bg-gray-200"
               width={790}
-              height={592}
             />
-          )
-        ) : (
-          <Bike
-            strokeWidth={2}
-            size={110}
-            className="w-full bg-gray-200"
-            width={790}
-          />
-        )}
+          )}
+        </div>
       </Link>
       <div className="px-6 py-4">
         <div className="font-bold text-xl mb-2">

@@ -1,13 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 // import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SessionProvider } from "next-auth/react";
 import { MainNav } from "@/components/main-nav";
 import UserButton from "@/components/user-button";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Bike Parts Tracker",
@@ -18,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: React.PropsWithChildren) {
   return (
     <html lang="en">
-      <body className={`h-full ${inter.className}`}>
+      <body className={`h-full`}>
         <SessionProvider>
           {/* <Header /> */}
 

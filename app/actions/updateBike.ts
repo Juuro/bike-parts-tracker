@@ -11,6 +11,9 @@ async function updateBike(formData: FormData): Promise<Bike> {
   const accessToken = session?.accessToken;
 
   const oldImages = formData.getAll("old_images") as string[];
+  const initialImages = formData.getAll("initial_images") as string[];
+
+  deleteImages(oldImages, initialImages);
 
   const images: File[] = formData
     .getAll("images")
@@ -21,7 +24,6 @@ async function updateBike(formData: FormData): Promise<Bike> {
   const imageUrls = [];
 
   for (const imageFile of images) {
-    console.log("imageFile", imageFile);
     const imageBuffer = await imageFile.arrayBuffer();
     const imageArray = Array.from(new Uint8Array(imageBuffer));
     const imageData = Buffer.from(imageArray);
@@ -81,5 +83,21 @@ async function updateBike(formData: FormData): Promise<Bike> {
 
   return bikeResponse[0];
 }
+
+const deleteImages = async (oldImages: string[], initialImages: string[]) => {
+  const oldImagesArr = oldImages[0]?.split(",") ?? [];
+  const initialImagesArr = initialImages[0]?.split(",") ?? [];
+  const removedImages = initialImagesArr.filter(
+    (image) => !oldImagesArr.includes(image)
+  );
+
+  for (const removedImage of removedImages) {
+    const publicId = removedImage?.split("/").pop()?.split(".")[0] ?? "";
+
+    await cloudinary.uploader.destroy(`bike-parts-tracker/${publicId}`, {
+      resource_type: "image",
+    });
+  }
+};
 
 export default updateBike;

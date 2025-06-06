@@ -23,12 +23,14 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
   const [images, setImages] = useState<string[]>([]);
+  const [initialImages, setInitialImages] = useState<string[]>([]);
 
   useEffect(() => {
     const imagesArray =
       bike?.images?.split(",").filter((image: string) => image.length > 0) ||
       [];
     setImages(imagesArray);
+    setInitialImages(imagesArray);
   }, [isModalOpen]);
 
   useEffect(() => {
@@ -66,9 +68,14 @@ const EditBikeModal: React.FC<ModalProps> = ({
     setShowManufacturerInput(!showManufacturerInput);
   };
 
-  const handleRemoveImage = (index: number): void => {
+  const handleRemoveImage = async (
+    index: number,
+    image: string
+  ): Promise<void> => {
+    const initialImages = [...images];
     const remainingImages = [...images];
     remainingImages.splice(index, 1);
+
     setImages(remainingImages);
   };
 
@@ -235,7 +242,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                               />
                               <button
                                 className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity"
-                                onClick={() => handleRemoveImage(index)}
+                                onClick={() => handleRemoveImage(index, image)}
                                 type="button"
                               >
                                 <X />
@@ -264,6 +271,12 @@ const EditBikeModal: React.FC<ModalProps> = ({
                         type="hidden"
                         name="old_images"
                         value={images?.toString()}
+                        readOnly
+                      />
+                      <input
+                        type="hidden"
+                        name="initial_images"
+                        value={initialImages?.toString()}
                         readOnly
                       />
                     </div>
