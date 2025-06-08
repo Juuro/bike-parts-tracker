@@ -173,8 +173,32 @@ export async function executeBikeDelete(
   }
 
   const result = (await response.json()) as {
-    data: { delete_bike?: { affected_rows: number }; update_part?: { affected_rows: number } };
+    data: { delete_bike?: { affected_rows: number } };
   };
 
-  return result.data.delete_bike?.affected_rows || result.data.update_part?.affected_rows || 0;
+  return result.data.delete_bike?.affected_rows || 0;
+}
+
+export async function executePartUpdate(
+  query: string,
+  accessToken: string
+): Promise<number> {
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to execute update operation");
+  }
+
+  const result = (await response.json()) as {
+    data: { update_part?: { affected_rows: number } };
+  };
+
+  return result.data.update_part?.affected_rows || 0;
 }
