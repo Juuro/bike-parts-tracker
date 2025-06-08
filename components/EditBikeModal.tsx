@@ -50,6 +50,25 @@ const EditBikeModal: React.FC<ModalProps> = ({
     });
   }, [status, isModalOpen]);
 
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = ""; // Restore scrolling
+    };
+  }, [isModalOpen]);
+
   const handleSubmit = async (formData: FormData) => {
     try {
       await updateBike(formData);
@@ -99,9 +118,17 @@ const EditBikeModal: React.FC<ModalProps> = ({
           onClick={closeModal}
         >
           <div className="relative p-4 w-full max-w-prose max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <article
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="edit-bike-title"
+              className="relative bg-white rounded-lg shadow dark:bg-gray-700"
+            >
+              <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3
+                  id="edit-bike-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Edit {bike?.name}
                 </h3>
 
@@ -116,7 +143,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                     <span className="sr-only">Close modal</span>
                   </Button>
                 )}
-              </div>
+              </header>
 
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
@@ -313,7 +340,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                   <SubmitButton text="Confirm edit" />
                 </form>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       )}

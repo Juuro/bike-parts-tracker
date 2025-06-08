@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 import deleteBike from "@/app/actions/deleteBike";
 import { Button } from "./ui/button";
@@ -37,6 +37,25 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
     }
   };
 
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.body.style.overflow = ""; // Restore scrolling
+    };
+  }, [isModalOpen]);
+
   return (
     <>
       <Button
@@ -54,12 +73,15 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
         <div
           onClick={closeModal}
           className="bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-bike-modal-title"
         >
           <div className="flex items-center justify-center min-h-screen px-4">
             <div className="relative w-full max-w-2xl max-h-full">
-              <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                  <h3 id="delete-bike-modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
                     Delete Bike: {bike.name}
                   </h3>
                   {showCloseButton && (
@@ -72,7 +94,7 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
                       <span className="sr-only">Close modal</span>
                     </Button>
                   )}
-                </div>
+                </header>
 
                 <div className="p-4 md:p-5">
                   <div className="mb-6">
@@ -123,7 +145,7 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
                     </Button>
                   </div>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
         </div>
