@@ -5,6 +5,7 @@ import { Trash2, X } from "lucide-react";
 import deleteBike from "@/app/actions/deleteBike";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type DeleteBikeModalProps = {
   bike: Bike;
@@ -21,10 +22,12 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
   const handleDeleteBike = async () => {
     try {
       await deleteBike(bike.id);
+      toast.success(`Bike "${bike.name}" deleted successfully`);
       // Redirect to home page after successful deletion
       router.push("/");
     } catch (error) {
       console.error("Error deleting bike:", error);
+      toast.error(`Failed to delete bike "${bike.name}". Please try again.`);
     }
   };
 
@@ -83,13 +86,18 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
                             Warning: This action cannot be undone
                           </h3>
                           <div className="mt-2 text-sm text-red-700">
-                            <p>
-                              Deleting this bike will:
-                            </p>
+                            <p>Deleting this bike will:</p>
                             <ul className="list-disc list-inside mt-2 space-y-1">
-                              <li>Permanently remove the bike from your collection</li>
-                              <li>Set all currently installed parts to "not for sale" status</li>
-                              <li>Remove all installation history for this bike</li>
+                              <li>
+                                Permanently remove the bike from your collection
+                              </li>
+                              <li>
+                                Set all currently installed parts to "not for
+                                sale" status
+                              </li>
+                              <li>
+                                Remove all installation history for this bike
+                              </li>
                             </ul>
                           </div>
                         </div>

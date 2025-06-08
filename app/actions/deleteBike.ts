@@ -1,6 +1,10 @@
 "use server";
 import { authenticateUser } from "@/lib/authUtils";
-import { buildUpdatePartsToNotForSaleMutation, buildDeleteBikeMutation, executeBikeDelete } from "@/lib/bikeGraphql";
+import {
+  buildUpdatePartsToNotForSaleMutation,
+  buildDeleteBikeMutation,
+  executeBikeDelete,
+} from "@/lib/bikeGraphql";
 import { revalidatePath } from "next/cache";
 
 async function deleteBike(bikeId: string): Promise<void> {
@@ -9,7 +13,10 @@ async function deleteBike(bikeId: string): Promise<void> {
     const session = await authenticateUser();
 
     // 2. Update all parts assigned to this bike to "not for sale" status
-    const updatePartsQuery = buildUpdatePartsToNotForSaleMutation(bikeId, session);
+    const updatePartsQuery = buildUpdatePartsToNotForSaleMutation(
+      bikeId,
+      session
+    );
     await executeBikeDelete(updatePartsQuery, session.accessToken);
 
     // 3. Delete the bike
