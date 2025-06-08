@@ -8,6 +8,7 @@ import SubmitButton from "./ui/SubmitButton";
 import updateBike from "@/app/actions/updateBike";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -50,24 +51,8 @@ const EditBikeModal: React.FC<ModalProps> = ({
     });
   }, [status, isModalOpen]);
 
-  // Handle ESC key press to close modal
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isModalOpen) {
-        setIsModalOpen(false);
-      }
-    };
-
-    if (isModalOpen) {
-      document.addEventListener("keydown", handleEscapeKey);
-      document.body.style.overflow = "hidden"; // Prevent background scrolling
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-      document.body.style.overflow = ""; // Restore scrolling
-    };
-  }, [isModalOpen]);
+  // Handle ESC key press to close modal and prevent body scrolling
+  useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
 
   const handleSubmit = async (formData: FormData) => {
     try {
