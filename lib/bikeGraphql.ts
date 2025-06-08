@@ -59,6 +59,46 @@ export function buildInsertBikeMutation(
   `;
 }
 
+export function buildDeleteBikeMutation(
+  bikeId: string,
+  session: AuthSession
+): string {
+  return `
+    mutation DeleteBike {
+      delete_bike(
+        where: { 
+          id: { _eq: "${bikeId}" }, 
+          user_id: { _eq: "${session.userId}" } 
+        }
+      ) {
+        affected_rows
+      }
+    }
+  `;
+}
+
+export function buildUpdatePartsToNotForSaleMutation(
+  bikeId: string,
+  session: AuthSession
+): string {
+  return `
+    mutation UpdatePartsToNotForSale {
+      update_part(
+        where: { 
+          installations: { 
+            bike_id: { _eq: "${bikeId}" }, 
+            uninstalled_at: { _is_null: true } 
+          },
+          user_id: { _eq: "${session.userId}" }
+        }
+        _set: { part_status_slug: "not-for-sale" }
+      ) {
+        affected_rows
+      }
+    }
+  `;
+}
+
 export async function executeBikeUpdate(
   query: string,
   accessToken: string
@@ -113,4 +153,28 @@ export async function executeBikeInsert(
   } = result.data;
 
   return bikeResponse[0];
+}
+
+export async function executeBikeDelete(
+  query: string,
+  accessToken: string
+): Promise<number> {
+  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to execute delete operation");
+  }
+
+  const result = (await response.json()) as {
+    data: { delete_bike?: { affected_rows: number }; update_part?: { affected_rows: number } };
+  };
+
+  return result.data.delete_bike?.affected_rows || result.data.update_part?.affected_rows || 0;
 }
