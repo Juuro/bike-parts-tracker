@@ -4,9 +4,10 @@ import { SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "./ui/SubmitButton";
 import updateBike from "@/app/actions/updateBike";
 import Image from "next/image";
+import { Button } from "./ui/button";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -81,14 +82,15 @@ const EditBikeModal: React.FC<ModalProps> = ({
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setIsModalOpen(true)}
-        className="my-0 px-3 py-2 text-white inline-flex items-center bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        variant="secondary"
+        size="default"
         type="button"
       >
         <SquarePen strokeWidth={2} size={20} className="mr-2" />
-        Edit
-      </button>
+        Edit bike
+      </Button>
       {isModalOpen && (
         <div
           tabIndex={-1}
@@ -104,15 +106,15 @@ const EditBikeModal: React.FC<ModalProps> = ({
                 </h3>
 
                 {showCloseButton && (
-                  <button
+                  <Button
                     type="button"
-                    className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="authentication-modal"
+                    variant="close"
+                    size="close"
                     onClick={() => setIsModalOpen(false)}
                   >
                     <X />
                     <span className="sr-only">Close modal</span>
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -240,13 +242,15 @@ const EditBikeModal: React.FC<ModalProps> = ({
                                 height={150}
                                 alt=""
                               />
-                              <button
-                                className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity"
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity h-6 w-6"
                                 onClick={() => handleRemoveImage(index, image)}
                                 type="button"
                               >
-                                <X />
-                              </button>
+                                <X className="h-4 w-4" />
+                              </Button>
                             </div>
                           );
                         })}
@@ -257,7 +261,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                         htmlFor="images"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
-                        Images (Select up to 4 images)
+                        Images (Select up to 4 images, 10 MB max. each)
                       </label>
                       <input
                         type="file"

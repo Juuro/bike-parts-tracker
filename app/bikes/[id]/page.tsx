@@ -40,10 +40,18 @@ const BikePage = async ({ params }: { params: any }) => {
 
           <h1 className="text-4xl font-bold">{bike.name}</h1>
         </div>
-        <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] grid-rows-[masonry] rounded-lg">
+        <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] rounded-lg mb-6">
           {images?.map((image: string, index: number) => {
             return (
-              <Image key={index} src={image} width={300} height={200} alt="" />
+              <div key={index} className="h-48 w-full overflow-hidden rounded-lg">
+                <Image 
+                  src={image} 
+                  width={300} 
+                  height={200} 
+                  alt={`Bike image ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             );
           })}
         </div>

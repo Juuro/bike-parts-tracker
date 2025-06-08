@@ -2,6 +2,7 @@ import React from "react";
 import BikeAssignmentForm from "./BikeAssignmentForm";
 import Popover from "./Popover";
 import { PackagePlus } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface AssignPartButtonProps {
   bikes: Bike[];
@@ -25,13 +26,9 @@ const AssignPartButton: React.FC<AssignPartButtonProps> = ({
         </div>
       }
     >
-      <button
-        className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-        type="button"
-        title={titleText}
-      >
+      <Button variant="icon" size="icon" type="button" title={titleText}>
         <PackagePlus color="#00ff00" />
-      </button>
+      </Button>
     </Popover>
   );
 };

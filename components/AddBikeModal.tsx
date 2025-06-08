@@ -4,9 +4,10 @@ import { Plus, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "./ui/SubmitButton";
 import Link from "next/link";
 import addBike from "@/app/actions/addBike";
+import { Button } from "./ui/button";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -79,15 +80,15 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                 </h3>
 
                 {showCloseButton && (
-                  <button
+                  <Button
                     type="button"
-                    className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="authentication-modal"
+                    variant="close"
+                    size="close"
                     onClick={() => setIsModalOpen(false)}
                   >
                     <X />
                     <span className="sr-only">Close modal</span>
-                  </button>
+                  </Button>
                 )}
               </div>
 
