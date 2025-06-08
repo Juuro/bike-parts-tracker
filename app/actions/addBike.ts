@@ -1,62 +1,27 @@
 "use server";
-import { auth } from "@/auth";
+import { authenticateUser } from "@/lib/authUtils";
+import { processNewBikeImages } from "@/lib/imageUtils";
+import { buildInsertBikeMutation, executeBikeInsert } from "@/lib/bikeGraphql";
 
 async function addBike(formData: FormData): Promise<Bike> {
-  const session: any = await auth();
-  if (!session) {
-    console.error("Unauthorized");
+  try {
+    // 1. Authenticate user
+    const session = await authenticateUser();
+
+    // 2. Process images
+    const imageUrls = await processNewBikeImages(formData);
+
+    // 3. Build GraphQL mutation
+    const query = buildInsertBikeMutation(formData, session, imageUrls);
+
+    // 4. Execute insert
+    const newBike = await executeBikeInsert(query, session.accessToken);
+
+    return newBike;
+  } catch (error) {
+    console.error("Error adding bike:", error);
+    throw error;
   }
-
-  const accessToken = session?.accessToken;
-
-  const query = `
-    mutation InsertBike(
-      $name: String = ""
-      $strava_bike: String = ""
-      $ebike: Boolean = false
-      $discipline_id: uuid = ""
-      $user_id: uuid = ""
-      $category_id: uuid = ""
-    ) {
-      insert_bike(
-        objects: {
-          name: "${formData.get("name")}", 
-          strava_bike: "${formData.get("strava_bike")}", 
-          ebike: ${formData.get("ebike") || false}, 
-          discipline_id: "${formData.get("discipline")}",
-          user_id: "${session?.userId}"
-          category_id: "${formData.get("category")}"
-        }
-      ) {
-        returning {
-          id
-        }
-      }
-    }
-  `;
-
-  const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  if (!response.ok) {
-    console.error("Failed to add bike");
-  }
-
-  const result = (await response.json()) as {
-    data: { insert_bike: { returning: Bike[] } };
-  };
-
-  const {
-    insert_bike: { returning: bikeResponse },
-  } = result.data;
-
-  return bikeResponse[0];
 }
 
 export default addBike;

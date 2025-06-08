@@ -1,0 +1,11 @@
+table:
+  name: currency_unit
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - unit
+      filter: {}
+      allow_aggregations: true
+    comment: ""

@@ -9,9 +9,10 @@ import { Minus, Plus, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "./ui/SubmitButton";
 import addPart from "@/app/actions/addPart";
 import ManufacturerForm from "./ManufacturerForm";
+import { Button } from "./ui/button";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -96,14 +97,15 @@ const AddPartModal: React.FC<ModalProps> = ({
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setIsModalOpen(true)}
-        className="my-0 px-3 py-2 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        variant="default"
+        size="default"
         type="button"
       >
         <Plus strokeWidth={2} size={20} className="mr-2" />
         Add new part
-      </button>
+      </Button>
       {isModalOpen && (
         <div
           tabIndex={-1}
@@ -119,15 +121,15 @@ const AddPartModal: React.FC<ModalProps> = ({
                 </h3>
 
                 {showCloseButton && (
-                  <button
+                  <Button
                     type="button"
-                    className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="authentication-modal"
+                    variant="close"
+                    size="close"
                     onClick={() => setIsModalOpen(false)}
                   >
                     <X />
                     <span className="sr-only">Close modal</span>
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -208,31 +210,33 @@ const AddPartModal: React.FC<ModalProps> = ({
                                 })
                               )}
                             </select>
-                            <button
+                            <Button
                               type="button"
-                              className="py-2 px-3 ml-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                              variant="icon"
+                              size="icon"
                               title="Add new manufacturer"
                               onClick={
                                 replaceManufacturerDropdownWithInputField
                               }
                             >
                               <Plus strokeWidth={3} />
-                            </button>
+                            </Button>
                           </>
                         )}
                         {showManufacturerInput && (
                           <>
                             <ManufacturerForm manufacturers={manufacturers} />
-                            <button
+                            <Button
                               type="button"
-                              className="py-2 px-3 ml-2 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                              variant="icon"
+                              size="icon"
                               title="Add new manufacturer"
                               onClick={
                                 replaceManufacturerDropdownWithInputField
                               }
                             >
                               <Minus strokeWidth={3} />
-                            </button>
+                            </Button>
                           </>
                         )}
                       </div>

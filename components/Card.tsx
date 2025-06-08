@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/functions";
 
 const Card = ({
   children,
@@ -9,7 +10,7 @@ const Card = ({
 }>) => {
   return (
     <div
-      className={`rounded-md overflow-hidden shadow-md bg-white ${className}`}
+      className={cn("rounded-md overflow-hidden shadow-md bg-white", className)}
     >
       {children}
     </div>

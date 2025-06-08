@@ -1,0 +1,6 @@
+disabled: false
+rate_limit:
+  global:
+    max_reqs_per_min: 120
+    unique_params: null
+  per_role: {}

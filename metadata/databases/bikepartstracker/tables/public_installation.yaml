@@ -1,0 +1,50 @@
+table:
+  name: installation
+  schema: public
+object_relationships:
+  - name: bike
+    using:
+      foreign_key_constraint_on: bike_id
+  - name: part
+    using:
+      foreign_key_constraint_on: part_id
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - installed_at
+        - uninstalled_at
+        - bike_id
+        - id
+        - part_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - installed_at
+        - uninstalled_at
+        - bike_id
+        - id
+        - part_id
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - installed_at
+        - uninstalled_at
+        - bike_id
+        - id
+        - part_id
+      filter: {}
+      check: {}
+    comment: ""
+delete_permissions:
+  - role: user
+    permission:
+      filter: {}
+    comment: ""

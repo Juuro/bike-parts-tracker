@@ -1,0 +1,28 @@
+table:
+  name: manufacturer
+  schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - country
+        - name
+        - url
+        - created_at
+        - updated_at
+        - id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - country
+        - name
+        - url
+        - created_at
+        - updated_at
+        - id
+      filter: {}
+      allow_aggregations: true
+    comment: ""

@@ -1,0 +1,12 @@
+table:
+  name: discipline
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - abbr
+        - name
+        - id
+      filter: {}
+    comment: ""

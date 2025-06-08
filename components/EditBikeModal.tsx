@@ -4,8 +4,10 @@ import { SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "./ui/SubmitButton";
 import updateBike from "@/app/actions/updateBike";
+import Image from "next/image";
+import { Button } from "./ui/button";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -21,6 +23,16 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
+  const [images, setImages] = useState<string[]>([]);
+  const [initialImages, setInitialImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const imagesArray =
+      bike?.images?.split(",").filter((image: string) => image.length > 0) ||
+      [];
+    setImages(imagesArray);
+    setInitialImages(imagesArray);
+  }, [isModalOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,16 +69,28 @@ const EditBikeModal: React.FC<ModalProps> = ({
     setShowManufacturerInput(!showManufacturerInput);
   };
 
+  const handleRemoveImage = async (
+    index: number,
+    image: string
+  ): Promise<void> => {
+    const initialImages = [...images];
+    const remainingImages = [...images];
+    remainingImages.splice(index, 1);
+
+    setImages(remainingImages);
+  };
+
   return (
     <>
-      <button
+      <Button
         onClick={() => setIsModalOpen(true)}
-        className="my-0 px-3 py-2 text-white inline-flex items-center bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        variant="secondary"
+        size="default"
         type="button"
       >
         <SquarePen strokeWidth={2} size={20} className="mr-2" />
-        Edit
-      </button>
+        Edit bike
+      </Button>
       {isModalOpen && (
         <div
           tabIndex={-1}
@@ -82,15 +106,15 @@ const EditBikeModal: React.FC<ModalProps> = ({
                 </h3>
 
                 {showCloseButton && (
-                  <button
+                  <Button
                     type="button"
-                    className="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="authentication-modal"
+                    variant="close"
+                    size="close"
                     onClick={() => setIsModalOpen(false)}
                   >
                     <X />
                     <span className="sr-only">Close modal</span>
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -204,6 +228,61 @@ const EditBikeModal: React.FC<ModalProps> = ({
                           )}
                         </select>
                       </div>
+                    </div>
+
+                    <div className="col-span-2">
+                      <div className="flex items-center justify-start gap-2">
+                        {images?.map((image: string, index: number) => {
+                          return (
+                            <div key={index} className="relative">
+                              <Image
+                                src={image}
+                                className="rounded-lg object-cover h-24 w-24"
+                                width={150}
+                                height={150}
+                                alt=""
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity h-6 w-6"
+                                onClick={() => handleRemoveImage(index, image)}
+                                type="button"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <label
+                        htmlFor="images"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        Images (Select up to 4 images, 10 MB max. each)
+                      </label>
+                      <input
+                        type="file"
+                        id="images"
+                        name="images"
+                        className="border rounded w-full py-2 px-3"
+                        accept="image/*"
+                        multiple
+                      />
+                      <input
+                        type="hidden"
+                        name="old_images"
+                        value={images?.toString()}
+                        readOnly
+                      />
+                      <input
+                        type="hidden"
+                        name="initial_images"
+                        value={initialImages?.toString()}
+                        readOnly
+                      />
                     </div>
 
                     <div className="col-span-1">

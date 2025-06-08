@@ -17,6 +17,7 @@ declare global {
     discipline: Discipline;
     category_id: string;
     ebike: boolean;
+    images: string;
   };
 
   type Session = {
