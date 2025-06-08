@@ -4,7 +4,6 @@ import InstallationsTable from "@/components/InstallationsTable";
 import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
 import { Bike } from "lucide-react";
-import Carousel from "@/components/carousel";
 
 const BikePage = async ({ params }: { params: any }) => {
   const { id: bikeId } = params;
@@ -43,11 +42,14 @@ const BikePage = async ({ params }: { params: any }) => {
         <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] rounded-lg mb-6">
           {images?.map((image: string, index: number) => {
             return (
-              <div key={index} className="h-48 w-full overflow-hidden rounded-lg">
-                <Image 
-                  src={image} 
-                  width={300} 
-                  height={200} 
+              <div
+                key={index}
+                className="h-48 w-full overflow-hidden rounded-lg"
+              >
+                <Image
+                  src={image}
+                  width={300}
+                  height={200}
                   alt={`Bike image ${index + 1}`}
                   className="h-full w-full object-cover"
                 />
