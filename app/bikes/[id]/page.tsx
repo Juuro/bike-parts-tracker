@@ -3,6 +3,7 @@ import Image from "next/image";
 import InstallationsTable from "@/components/InstallationsTable";
 import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
+import DeleteBikeModal from "@/components/DeleteBikeModal";
 import { Bike } from "lucide-react";
 
 const BikePage = async ({ params }: { params: any }) => {
@@ -59,6 +60,7 @@ const BikePage = async ({ params }: { params: any }) => {
         </div>
 
         <div className="flex justify-end gap-2">
+          <DeleteBikeModal showCloseButton={true} bike={bike} />
           <EditBikeModal showCloseButton={true} bike={bike} />
           <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
         </div>
