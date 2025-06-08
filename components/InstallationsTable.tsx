@@ -2,8 +2,9 @@ import Image from "next/image";
 import { fetchBikeParts, fetchPartStatus } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { Edit, PackagePlus, Plus } from "lucide-react";
+import { PackagePlus, Plus } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
+import EditPartModal from "./EditPartModal";
 import Link from "next/link";
 
 type InstallationsTableProps = {
@@ -183,13 +184,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                           installationId={installation.id}
                           bikeName={installation.bike.name}
                         />
-                        <button
-                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                          type="button"
-                          title="Edit this part"
-                        >
-                          <Edit />
-                        </button>
+                        <EditPartModal showCloseButton={true} part={part} />
                       </div>
                     </td>
                   </tr>
@@ -334,13 +329,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                               </button>
                             </form>
                           )}
-                        <button
-                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                          type="button"
-                          title="Edit this part"
-                        >
-                          <Edit />
-                        </button>
+                        <EditPartModal showCloseButton={true} part={part} />
                         <DeletePartButton
                           partStatus={partStatus}
                           installationId={installation.id}
