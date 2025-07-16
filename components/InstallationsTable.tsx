@@ -145,7 +145,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
             </thead>
             <tbody className="bg-white">
               {installedBikeParts?.map((installation: Installation) => {
-                const part = installation.part;
+                const part: Part = installation.part;
 
                 return (
                   <tr

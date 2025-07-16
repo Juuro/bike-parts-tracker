@@ -33,13 +33,16 @@ export const GET = async (req: Request, { params }: { params: any }) => {
             user_id
             weight
             manufacturer {
+              id
               name
             }
             part_status {
               name
+              slug
               available
             }
             parts_type {
+              id
               name
             }
             installations {

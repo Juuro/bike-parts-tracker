@@ -79,7 +79,7 @@ const EditPartModal: React.FC<ModalProps> = ({
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   return (
@@ -103,7 +103,10 @@ const EditPartModal: React.FC<ModalProps> = ({
           <div className="relative p-4 w-full max-w-prose max-h-full">
             <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 id="edit-part-modal-title" className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3
+                  id="edit-part-modal-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Edit part
                 </h3>
 
@@ -123,7 +126,7 @@ const EditPartModal: React.FC<ModalProps> = ({
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
                   <input type="hidden" name="part_id" value={part.id} />
-                  
+
                   <div className="grid gap-4 mb-4 grid-cols-2">
                     <div className="col-span-2">
                       <label
@@ -193,7 +196,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="name"
@@ -211,7 +214,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="year"
@@ -230,7 +233,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="price"
@@ -250,7 +253,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="purchase_date"
@@ -268,7 +271,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    
+
                     <fieldset className="col-span-1">
                       <legend className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         State
@@ -286,7 +289,9 @@ const EditPartModal: React.FC<ModalProps> = ({
                                 type="radio"
                                 id={status.slug}
                                 value={status.slug}
-                                defaultChecked={part.part_status.slug === status.slug}
+                                defaultChecked={
+                                  part.part_status.slug === status.slug
+                                }
                                 className="mr-2 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                 required
                               />
@@ -301,7 +306,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         })
                       )}
                     </fieldset>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="sell_price"
@@ -320,7 +325,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         defaultValue={part.sell_price || ""}
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="secondhand"
@@ -339,7 +344,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         value="true"
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="shop_url"
@@ -356,7 +361,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         defaultValue={part.shop_url || ""}
                       />
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="type"
@@ -389,7 +394,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         )}
                       </select>
                     </div>
-                    
+
                     <div className="col-span-1">
                       <label
                         htmlFor="weight"
@@ -409,7 +414,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                       />
                     </div>
                   </div>
-                  
+
                   <SubmitButton text="Update part" />
                 </form>
               </div>
