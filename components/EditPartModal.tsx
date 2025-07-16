@@ -277,7 +277,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         State
                       </legend>
 
-                      {partStatus.length == 0 ? (
+                      {partStatus.length === 0 ? (
                         <p>No part status found</p>
                       ) : (
                         partStatus.map((status) => {
