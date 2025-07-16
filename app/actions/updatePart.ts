@@ -25,33 +25,34 @@ async function updatePart(formData: FormData): Promise<void> {
 
   const query = `
     mutation UpdatePart(
-      $manufacturer_id: uuid = ""
-      $model_year: Int = 10
-      $buy_price: float8 = ""
-      $purchase_date: timestamptz = ""
-      $secondhand: Boolean = false
-      $part_status_slug: String = ""
-      $sell_price: float8 = null
-      $shop_url: String = ""
-      $type_id: uuid = ""
-      $weight: Int = 10
-      $name: String = ""
-      $part_id: uuid = ""
+      $manufacturer_id: uuid
+      $model_year: Int
+      $buy_price: float8
+      $purchase_date: timestamptz
+      $secondhand: Boolean
+      $part_status_slug: String
+      $sell_price: float8
+      $shop_url: String
+      $type_id: uuid
+      $weight: Int
+      $name: String
+      $part_id: uuid
+      $user_id: uuid
     ) {
       update_part(
-        where: { id: { _eq: "${partId}" }, user_id: { _eq: "${session?.userId}" } }
+        where: { id: { _eq: $part_id }, user_id: { _eq: $user_id } }
         _set: {
-          manufacturer_id: "${manufacturerId}"
-          model_year: ${formData.get("year")}
-          buy_price: ${formData.get("price")}
-          purchase_date: "${formData.get("purchase_date")}"
-          secondhand: ${formData.get("secondhand") === "true"}
-          part_status_slug: "${formData.get("part_status")}"
-          sell_price: ${formData.get("sell_price") ? parseFloat(formData.get("sell_price") as string) : null}
-          shop_url: "${formData.get("shop_url")}"
-          type_id: "${formData.get("type")}"
-          weight: ${formData.get("weight")}
-          name: "${formData.get("name")}"
+          manufacturer_id: $manufacturer_id
+          model_year: $model_year
+          buy_price: $buy_price
+          purchase_date: $purchase_date
+          secondhand: $secondhand
+          part_status_slug: $part_status_slug
+          sell_price: $sell_price
+          shop_url: $shop_url
+          type_id: $type_id
+          weight: $weight
+          name: $name
         }
       ) {
         affected_rows
