@@ -6,7 +6,7 @@ import addManufacturer from "./addManufacturer";
 async function updatePart(formData: FormData): Promise<void> {
   const session: any = await auth();
   if (!session) {
-    console.error("Unauthorized");
+    throw new Error("Unauthorized");
   }
 
   const accessToken = session?.accessToken;
