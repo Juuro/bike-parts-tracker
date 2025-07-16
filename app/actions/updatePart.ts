@@ -45,7 +45,7 @@ async function updatePart(formData: FormData): Promise<void> {
           model_year: ${formData.get("year")}
           buy_price: ${formData.get("price")}
           purchase_date: "${formData.get("purchase_date")}"
-          secondhand: ${formData.get("secondhand") || false}
+          secondhand: ${formData.get("secondhand") === "true"}
           part_status_slug: "${formData.get("part_status")}"
           sell_price: ${formData.get("sell_price") ? parseFloat(formData.get("sell_price") as string) : null}
           shop_url: "${formData.get("shop_url")}"
