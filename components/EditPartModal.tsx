@@ -148,7 +148,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                               <option value="" disabled hidden>
                                 Select manufacturer
                               </option>
-                              {manufacturers.length == 0 ? (
+                              {manufacturers.length === 0 ? (
                                 <option value="" disabled hidden>
                                   No manufacturers found
                                 </option>
