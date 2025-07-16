@@ -61,7 +61,7 @@ const EditPartModal: React.FC<ModalProps> = ({
       setIsModalOpen(false);
       router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Update error:", error);
       toast.error("Failed to update part. Please try again.");
     }
   };

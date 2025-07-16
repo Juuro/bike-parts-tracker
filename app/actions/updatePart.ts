@@ -23,21 +23,44 @@ async function updatePart(formData: FormData): Promise<void> {
     manufacturerId = newManufacturerId[0].id;
   }
 
+  // Prepare variables with proper type casting
+  const sellPriceValue = formData.get("sell_price");
+  const secondhandValue = formData.get("secondhand");
+  const yearValue = formData.get("year");
+  const priceValue = formData.get("price");
+  const weightValue = formData.get("weight");
+
+  const variables = {
+    part_id: partId,
+    user_id: session?.userId,
+    manufacturer_id: manufacturerId as string,
+    model_year: yearValue ? parseInt(yearValue as string, 10) : null,
+    buy_price: priceValue ? parseFloat(priceValue as string) : null,
+    purchase_date: formData.get("purchase_date") as string,
+    secondhand: secondhandValue === "on" || secondhandValue === "true",
+    part_status_slug: formData.get("part_status") as string,
+    sell_price: sellPriceValue ? parseFloat(sellPriceValue as string) : null,
+    shop_url: formData.get("shop_url") as string,
+    type_id: formData.get("type") as string,
+    weight: weightValue ? parseInt(weightValue as string, 10) : null,
+    name: formData.get("name") as string,
+  };
+
   const query = `
     mutation UpdatePart(
-      $manufacturer_id: uuid
+      $part_id: uuid!
+      $user_id: uuid!
+      $manufacturer_id: uuid!
       $model_year: Int
       $buy_price: float8
-      $purchase_date: timestamptz
-      $secondhand: Boolean
-      $part_status_slug: String
+      $purchase_date: timestamptz!
+      $secondhand: Boolean!
+      $part_status_slug: String!
       $sell_price: float8
-      $shop_url: String
-      $type_id: uuid
+      $shop_url: String!
+      $type_id: uuid!
       $weight: Int
-      $name: String
-      $part_id: uuid
-      $user_id: uuid
+      $name: String!
     ) {
       update_part(
         where: { id: { _eq: $part_id }, user_id: { _eq: $user_id } }
@@ -69,11 +92,22 @@ async function updatePart(formData: FormData): Promise<void> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ 
+      query,
+      variables 
+    }),
   });
 
   if (!response.ok) {
-    console.error("Failed to update part");
+    const errorText = await response.text();
+    console.error("Failed to update part:", errorText);
+    throw new Error("Failed to update part");
+  }
+
+  const result = await response.json();
+  if (result.errors) {
+    console.error("GraphQL errors:", result.errors);
+    throw new Error("Failed to update part due to GraphQL errors");
   }
 
   try {
