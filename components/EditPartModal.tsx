@@ -379,7 +379,7 @@ const EditPartModal: React.FC<ModalProps> = ({
                         <option value="" disabled hidden>
                           Select type of part
                         </option>
-                        {partsType.length == 0 ? (
+                        {partsType.length === 0 ? (
                           <option value="" disabled hidden>
                             No part types found
                           </option>
