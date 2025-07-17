@@ -2,13 +2,14 @@
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
 import { SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
 import updateBike from "@/app/actions/updateBike";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
+import toast from "react-hot-toast";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -24,6 +25,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [initialImages, setInitialImages] = useState<string[]>([]);
 
@@ -57,10 +59,13 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const handleSubmit = async (formData: FormData) => {
     try {
       await updateBike(formData);
+      toast.success("Bike updated successfully!");
+      setIsModalOpen(false);
+      router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Update error:", error);
+      toast.error("Failed to update bike. Please try again.");
     }
-    redirect(`/bikes/${bike?.id}`);
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
