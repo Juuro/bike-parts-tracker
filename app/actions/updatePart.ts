@@ -111,7 +111,7 @@ async function updatePart(formData: FormData): Promise<void> {
   }
 
   try {
-    await revalidatePath(`/parts`, "layout");
+    await revalidatePath(`/parts`);
   } catch (error) {
     console.error(error);
   }
