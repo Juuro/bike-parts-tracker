@@ -2,7 +2,7 @@ import Image from "next/image";
 import { fetchBikeParts, fetchPartStatus } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { PackagePlus, Plus } from "lucide-react";
+import { PackagePlus } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
 import EditPartModal from "./EditPartModal";
 import Link from "next/link";

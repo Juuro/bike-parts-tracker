@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Trash2, X } from "lucide-react";
 import deleteBike from "@/app/actions/deleteBike";
 import { Button } from "./ui/button";
@@ -66,7 +66,10 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
             <div className="relative w-full max-w-2xl max-h-full">
               <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                  <h3 id="delete-bike-modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3
+                    id="delete-bike-modal-title"
+                    className="text-lg font-semibold text-gray-900 dark:text-white"
+                  >
                     Delete Bike: {bike.name}
                   </h3>
                   {showCloseButton && (
