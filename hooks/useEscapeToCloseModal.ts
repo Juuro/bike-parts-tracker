@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 /**
  * Custom hook to handle ESC key press to close modal and prevent body scrolling
