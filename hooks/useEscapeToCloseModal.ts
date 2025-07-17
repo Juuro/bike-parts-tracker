@@ -9,13 +9,16 @@ export const useEscapeToCloseModal = (
   isModalOpen: boolean,
   onClose: () => void
 ) => {
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
+  const handleEscapeKey = useCallback(
+    (event: KeyboardEvent) => {
       if (event.key === "Escape" && isModalOpen) {
         onClose();
       }
-    };
+    },
+    [isModalOpen, onClose]
+  );
 
+  useEffect(() => {
     if (isModalOpen) {
       document.addEventListener("keydown", handleEscapeKey);
       document.body.style.overflow = "hidden"; // Prevent background scrolling
