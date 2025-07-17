@@ -284,7 +284,6 @@ const EditPartModal: React.FC<ModalProps> = ({
                           return (
                             <p key={status.slug}>
                               <input
-                                tabIndex={0}
                                 name="part_status"
                                 type="radio"
                                 id={status.slug}
