@@ -40,7 +40,7 @@ async function deletePart(partId: string, status: string): Promise<void> {
   }
 
   try {
-    await revalidatePath(`/`, "layout");
+    revalidatePath(`/`, "layout");
   } catch (error) {
     console.error(error);
   }

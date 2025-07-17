@@ -48,7 +48,7 @@ async function addManufacturer(
   return manufacturerResponse;
 
   try {
-    await revalidatePath(`/`, "layout");
+    revalidatePath(`/`, "layout");
   } catch (error) {
     console.error(error);
   }

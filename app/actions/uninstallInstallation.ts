@@ -42,7 +42,7 @@ async function uninstallInstallation(installationId: string) {
   }
 
   try {
-    await revalidatePath(`/`, "layout");
+    revalidatePath(`/`, "layout");
   } catch (error) {
     console.error(error);
   }

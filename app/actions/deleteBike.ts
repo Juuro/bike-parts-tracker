@@ -24,7 +24,7 @@ async function deleteBike(bikeId: string): Promise<void> {
     await executeBikeDelete(deleteBikeQuery, session.accessToken);
 
     // 4. Revalidate paths
-    await revalidatePath("/", "layout");
+    revalidatePath("/", "layout");
   } catch (error) {
     console.error("Error deleting bike:", error);
     throw error;
