@@ -37,7 +37,7 @@ async function updatePart(formData: FormData): Promise<void> {
     model_year: yearValue ? parseInt(yearValue as string, 10) : null,
     buy_price: priceValue ? parseFloat(priceValue as string) : null,
     purchase_date: formData.get("purchase_date") as string,
-    secondhand: secondhandValue === "on" || secondhandValue === "true",
+    secondhand: secondhandValue === "true",
     part_status_slug: formData.get("part_status") as string,
     sell_price: sellPriceValue ? parseFloat(sellPriceValue as string) : null,
     shop_url: formData.get("shop_url") as string,
@@ -92,9 +92,9 @@ async function updatePart(formData: FormData): Promise<void> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({ 
+    body: JSON.stringify({
       query,
-      variables 
+      variables,
     }),
   });
 
