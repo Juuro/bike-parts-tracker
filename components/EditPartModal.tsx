@@ -49,7 +49,7 @@ const EditPartModal: React.FC<ModalProps> = ({
     fetchData().catch((error) => {
       console.error("Error fetching data: ", error);
     });
-  }, [status, isModalOpen]);
+  }, [status]);
 
   // Handle ESC key press to close modal and prevent body scrolling
   useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
