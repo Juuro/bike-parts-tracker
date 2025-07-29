@@ -80,7 +80,10 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
           <div className="relative p-4 w-full max-w-prose max-h-full">
             <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 id="add-bike-modal-title" className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h3
+                  id="add-bike-modal-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Add bike
                 </h3>
 
