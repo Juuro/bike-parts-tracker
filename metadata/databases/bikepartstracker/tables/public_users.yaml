@@ -29,3 +29,21 @@ select_permissions:
         id:
           _eq: X-Hasura-User-Id
     comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - currency_unit
+        - distance_unit
+        - image
+        - name
+        - strava_user
+        - weight_unit
+        - updated_at
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+      check:
+        id:
+          _eq: X-Hasura-User-Id
+    comment: ""

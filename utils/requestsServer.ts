@@ -77,4 +77,19 @@ const fetchPartStatus = async () => {
   }
 };
 
-export { fetchBikes, fetchBike, fetchBikeParts, fetchParts, fetchPartStatus };
+const fetchUserProfile = async () => {
+  try {
+    const response = await fetch(`${apiDomain}/user/profile`, {
+      method: "GET",
+      headers: new Headers(headers()),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return {};
+  }
+};
+
+export { fetchBikes, fetchBike, fetchBikeParts, fetchParts, fetchPartStatus, fetchUserProfile };
