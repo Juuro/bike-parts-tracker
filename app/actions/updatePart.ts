@@ -57,7 +57,7 @@ async function updatePart(formData: FormData): Promise<void> {
       $secondhand: Boolean!
       $part_status_slug: String!
       $sell_price: float8
-      $shop_url: String!
+      $shop_url: String
       $type_id: uuid!
       $weight: Int
       $name: String!
