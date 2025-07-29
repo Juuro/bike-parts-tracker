@@ -37,6 +37,7 @@ export const GET = async () => {
           type_id
           user_id
           manufacturer {
+            id
             name
           }
           part_status {
@@ -45,6 +46,7 @@ export const GET = async () => {
             available
           }
           parts_type {
+            id
             name
           }
           installations(limit: 1, order_by: { installed_at: desc_nulls_last }) {

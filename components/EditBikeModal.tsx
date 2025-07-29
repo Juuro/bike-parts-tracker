@@ -2,12 +2,14 @@
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
 import { SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
 import updateBike from "@/app/actions/updateBike";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
+import toast from "react-hot-toast";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -23,6 +25,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [initialImages, setInitialImages] = useState<string[]>([]);
 
@@ -50,13 +53,19 @@ const EditBikeModal: React.FC<ModalProps> = ({
     });
   }, [status, isModalOpen]);
 
+  // Handle ESC key press to close modal and prevent body scrolling
+  useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
+
   const handleSubmit = async (formData: FormData) => {
     try {
       await updateBike(formData);
+      toast.success("Bike updated successfully!");
+      setIsModalOpen(false);
+      router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error("Update error:", error);
+      toast.error("Failed to update bike. Please try again.");
     }
-    redirect(`/bikes/${bike?.id}`);
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -99,9 +108,17 @@ const EditBikeModal: React.FC<ModalProps> = ({
           onClick={closeModal}
         >
           <div className="relative p-4 w-full max-w-prose max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <article
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="edit-bike-title"
+              className="relative bg-white rounded-lg shadow dark:bg-gray-700"
+            >
+              <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3
+                  id="edit-bike-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Edit {bike?.name}
                 </h3>
 
@@ -116,7 +133,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                     <span className="sr-only">Close modal</span>
                   </Button>
                 )}
-              </div>
+              </header>
 
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
@@ -313,7 +330,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                   <SubmitButton text="Confirm edit" />
                 </form>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       )}

@@ -5,7 +5,6 @@ import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
 import DeleteBikeModal from "@/components/DeleteBikeModal";
 import { Bike } from "lucide-react";
-import Carousel from "@/components/carousel";
 
 const BikePage = async ({ params }: { params: any }) => {
   const { id: bikeId } = params;

@@ -8,6 +8,7 @@ import SubmitButton from "./ui/SubmitButton";
 import Link from "next/link";
 import addBike from "@/app/actions/addBike";
 import { Button } from "./ui/button";
+import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -34,6 +35,9 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
       console.error("Error fetching disciplines: ", error);
     });
   }, [status, isModalOpen]);
+
+  // Handle ESC key press to close modal and prevent body scrolling
+  useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
 
   const handleSubmit = async (formData: FormData) => {
     let bike: Bike | null = null;
@@ -67,15 +71,19 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
       </Link>
       {isModalOpen && (
         <div
-          tabIndex={-1}
-          aria-hidden="true"
           className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
           onClick={closeModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-bike-modal-title"
         >
           <div className="relative p-4 w-full max-w-prose max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3
+                  id="add-bike-modal-title"
+                  className="text-xl font-semibold text-gray-900 dark:text-white"
+                >
                   Add bike
                 </h3>
 
@@ -90,7 +98,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <span className="sr-only">Close modal</span>
                   </Button>
                 )}
-              </div>
+              </header>
 
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
@@ -240,7 +248,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                   <SubmitButton text="Add new bike" />
                 </form>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       )}

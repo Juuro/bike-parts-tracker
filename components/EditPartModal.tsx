@@ -1,50 +1,36 @@
 "use client";
-import addInstallation from "@/app/actions/addInstallation";
 import {
   fetchManufacturers,
   fetchPartsType,
   fetchPartStatus,
 } from "@/utils/requestsClient";
-import { Minus, Plus, X } from "lucide-react";
+import { X, Edit, Minus, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
-import addPart from "@/app/actions/addPart";
+import updatePart from "@/app/actions/updatePart";
 import ManufacturerForm from "./ManufacturerForm";
 import { Button } from "./ui/button";
+import toast from "react-hot-toast";
 import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 
 type ModalProps = {
   showCloseButton?: boolean;
-  bike?: Bike;
-  bikes?: Bike[];
+  part: Part;
 };
 
-const AddPartModal: React.FC<ModalProps> = ({
+const EditPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
-  bike = null,
-  bikes = [],
+  part,
 }) => {
-  const [selectedDate, setSelectedDate] = useState("");
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [PartStatus, setPartStatus] = useState<PartStatus[]>([]);
+  const [partStatus, setPartStatus] = useState<PartStatus[]>([]);
   const [partsType, setPartsType] = useState<PartsType[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBikeId, setSelectedBikeId] = useState("");
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const { data: session, status } = useSession();
-
-  useEffect(() => {
-    const today = new Date();
-    // TODO: This is wrong between 0 and 1 o'clock during summer time.
-    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    setSelectedDate(formattedDate);
-
-    if (bike) {
-      setSelectedBikeId(bike.id);
-    }
-  }, []);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,24 +47,22 @@ const AddPartModal: React.FC<ModalProps> = ({
     };
 
     fetchData().catch((error) => {
-      console.error("Error fetching bikes: ", error);
+      console.error("Error fetching data: ", error);
     });
-  }, [status, isModalOpen]);
+  }, [status]);
+
+  // Handle ESC key press to close modal and prevent body scrolling
+  useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      if (bike) {
-        await addInstallation(formData);
-      } else {
-        await addPart(formData);
-      }
+      await updatePart(formData);
+      toast.success("Part updated successfully!");
+      setIsModalOpen(false);
+      router.refresh();
     } catch (error) {
-      console.error(error);
-    }
-    if (bike) {
-      redirect(`/bikes/${bike.id}`);
-    } else {
-      redirect("/parts");
+      console.error("Update error:", error);
+      toast.error("Failed to update part. Please try again.");
     }
   };
 
@@ -88,48 +72,42 @@ const AddPartModal: React.FC<ModalProps> = ({
     }
   };
 
-  const handleBikeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBikeId(event.target.value);
-  };
-
   const replaceManufacturerDropdownWithInputField = (): void => {
     setShowManufacturerInput(!showManufacturerInput);
   };
 
-  // Handle ESC key press to close modal and prevent body scrolling
-  useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
 
   return (
     <>
-      <Button
+      <button
         onClick={() => setIsModalOpen(true)}
-        variant="default"
-        size="default"
+        className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
         type="button"
+        title="Edit this part"
       >
-        <Plus strokeWidth={2} size={20} className="mr-2" />
-        Add new part
-      </Button>
+        <Edit />
+      </button>
       {isModalOpen && (
         <div
-          tabIndex={-1}
-          aria-hidden="true"
-          className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
+          className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex"
           onClick={closeModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-part-modal-title"
         >
           <div className="relative p-4 w-full max-w-prose max-h-full">
-            <article
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="add-part-title"
-              className="relative bg-white rounded-lg shadow dark:bg-gray-700"
-            >
+            <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3
-                  id="add-part-title"
+                  id="edit-part-modal-title"
                   className="text-xl font-semibold text-gray-900 dark:text-white"
                 >
-                  Add part
+                  Edit part
                 </h3>
 
                 {showCloseButton && (
@@ -147,44 +125,9 @@ const AddPartModal: React.FC<ModalProps> = ({
 
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
+                  <input type="hidden" name="part_id" value={part.id} />
+
                   <div className="grid gap-4 mb-4 grid-cols-2">
-                    <div className="col-span-2">
-                      <label
-                        htmlFor="bike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Bike
-                      </label>
-                      <select
-                        name="bike"
-                        id="bike"
-                        defaultValue={bike?.id}
-                        required={bike ? true : false}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        onChange={handleBikeChange}
-                      >
-                        {bike ? (
-                          <option value="" disabled hidden>
-                            Select bike
-                          </option>
-                        ) : (
-                          <option value="">Not assigned to a bike</option>
-                        )}
-                        {bikes.length == 0 ? (
-                          <option value="" disabled hidden>
-                            No bikes found
-                          </option>
-                        ) : (
-                          bikes.map((bike: Bike) => {
-                            return (
-                              <option key={bike.id} value={bike.id}>
-                                {bike.name}
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
-                    </div>
                     <div className="col-span-2">
                       <label
                         htmlFor="manufacturer"
@@ -198,16 +141,16 @@ const AddPartModal: React.FC<ModalProps> = ({
                             <select
                               name="manufacturer"
                               id="manufacturer"
-                              defaultValue=""
+                              defaultValue={part.manufacturer.id}
                               required
                               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                             >
                               <option value="" disabled hidden>
                                 Select manufacturer
                               </option>
-                              {manufacturers.length == 0 ? (
+                              {manufacturers.length === 0 ? (
                                 <option value="" disabled hidden>
-                                  No parts found
+                                  No manufacturers found
                                 </option>
                               ) : (
                                 manufacturers.map((manufacturer) => {
@@ -242,7 +185,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                               type="button"
                               variant="icon"
                               size="icon"
-                              title="Add new manufacturer"
+                              title="Cancel new manufacturer"
                               onClick={
                                 replaceManufacturerDropdownWithInputField
                               }
@@ -253,6 +196,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         )}
                       </div>
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="name"
@@ -266,9 +210,11 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="name"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={part.name}
                         required
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="year"
@@ -283,9 +229,11 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="year"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="1985"
+                        defaultValue={part.model_year}
                         required
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="price"
@@ -297,12 +245,15 @@ const AddPartModal: React.FC<ModalProps> = ({
                         type="number"
                         name="price"
                         min="0"
+                        step="0.01"
                         id="price"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="399"
+                        defaultValue={part.buy_price}
                         required
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="purchase_date"
@@ -316,29 +267,39 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="purchase_date"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={formatDateForInput(part.purchase_date)}
                         required
                       />
                     </div>
+
                     <fieldset className="col-span-1">
                       <legend className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         State
                       </legend>
 
-                      {PartStatus.length == 0 ? (
-                        <p>No sell status found</p>
+                      {partStatus.length === 0 ? (
+                        <p>No part status found</p>
                       ) : (
-                        PartStatus.map((status) => {
+                        partStatus.map((status) => {
                           return (
                             <p key={status.slug}>
                               <input
-                                tabIndex={0}
                                 name="part_status"
                                 type="radio"
                                 id={status.slug}
-                                className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600"
                                 value={status.slug}
+                                defaultChecked={
+                                  part.part_status.slug === status.slug
+                                }
+                                className="mr-2 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                required
                               />
-                              <label htmlFor={status.slug}>{status.name}</label>
+                              <label
+                                htmlFor={status.slug}
+                                className="text-sm font-medium text-gray-900 dark:text-gray-300"
+                              >
+                                {status.name}
+                              </label>
                             </p>
                           );
                         })
@@ -355,12 +316,15 @@ const AddPartModal: React.FC<ModalProps> = ({
                       <input
                         type="number"
                         name="sell_price"
-                        min="1"
+                        min="0"
+                        step="0.01"
                         id="sell_price"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder="299"
+                        defaultValue={part.sell_price || ""}
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="secondhand"
@@ -375,9 +339,11 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="secondhand"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultChecked={part.secondhand}
                         value="true"
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="shop_url"
@@ -391,8 +357,10 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="shop_url"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={part.shop_url || ""}
                       />
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="type"
@@ -403,16 +371,16 @@ const AddPartModal: React.FC<ModalProps> = ({
                       <select
                         name="type"
                         id="type"
-                        defaultValue=""
+                        defaultValue={part.parts_type.id}
                         required
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       >
                         <option value="" disabled hidden>
                           Select type of part
                         </option>
-                        {partsType.length == 0 ? (
+                        {partsType.length === 0 ? (
                           <option value="" disabled hidden>
-                            No parts found
+                            No part types found
                           </option>
                         ) : (
                           partsType.map((type) => {
@@ -425,12 +393,13 @@ const AddPartModal: React.FC<ModalProps> = ({
                         )}
                       </select>
                     </div>
+
                     <div className="col-span-1">
                       <label
                         htmlFor="weight"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
-                        Weight
+                        Weight (g)
                       </label>
                       <input
                         type="number"
@@ -439,31 +408,13 @@ const AddPartModal: React.FC<ModalProps> = ({
                         id="weight"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                         placeholder=""
+                        defaultValue={part.weight}
                         required
                       />
                     </div>
-                    {selectedBikeId && (
-                      <div className="col-span-1">
-                        <label
-                          htmlFor="installed_at"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Installation date
-                        </label>
-                        <input
-                          type="date"
-                          name="installed_at"
-                          id="installed_at"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                          placeholder=""
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          required
-                        />
-                      </div>
-                    )}
                   </div>
-                  <SubmitButton text="Add new part" />
+
+                  <SubmitButton text="Update part" />
                 </form>
               </div>
             </article>
@@ -474,4 +425,4 @@ const AddPartModal: React.FC<ModalProps> = ({
   );
 };
 
-export default AddPartModal;
+export default EditPartModal;

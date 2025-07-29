@@ -6,8 +6,8 @@ import {
 } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { Edit } from "lucide-react";
 import AssignPartButton from "./AssignPartButton";
+import EditPartModal from "./EditPartModal";
 import Link from "next/link";
 
 type PartsTableProps = {
@@ -184,13 +184,7 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                             />
                           )
                         )}
-                        <button
-                          className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                          type="button"
-                          title="Edit this part"
-                        >
-                          <Edit />
-                        </button>
+                        <EditPartModal showCloseButton={true} part={part} />
                         <DeletePartButton
                           partStatus={partStatus}
                           installationId={installationIdOfCurrentInstallation(

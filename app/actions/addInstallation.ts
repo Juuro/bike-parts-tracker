@@ -69,7 +69,7 @@ async function addInstallation(formData: FormData): Promise<void> {
   }
 
   try {
-    await revalidatePath(`/bikes/${bikeId}`, "layout");
+    revalidatePath(`/bikes/${bikeId}`, "layout");
   } catch (error) {
     console.error(error);
   }

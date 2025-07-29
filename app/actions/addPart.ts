@@ -74,7 +74,7 @@ async function addPart(formData: FormData): Promise<void> {
   }
 
   try {
-    await revalidatePath(`/parts`, "layout");
+    revalidatePath(`/parts`, "layout");
   } catch (error) {
     console.error(error);
   }

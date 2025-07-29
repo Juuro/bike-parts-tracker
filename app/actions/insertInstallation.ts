@@ -48,7 +48,7 @@ async function insertInstallation(formData: FormData) {
   }
 
   try {
-    await revalidatePath(`/`, "layout");
+    revalidatePath(`/`, "layout");
   } catch (error) {
     console.error(error);
   }
