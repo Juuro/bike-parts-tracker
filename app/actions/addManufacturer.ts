@@ -45,13 +45,13 @@ async function addManufacturer(
     insert_manufacturer: { returning: manufacturerResponse },
   } = result.data;
 
-  return manufacturerResponse;
-
   try {
     revalidatePath(`/`, "layout");
   } catch (error) {
     console.error(error);
   }
+
+  return manufacturerResponse;
 }
 
 export default addManufacturer;
