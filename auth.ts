@@ -36,10 +36,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       };
     },
-    // Add user ID to the session
+    // Add user ID to the session and fetch latest user data
     session: async ({ session, token, user }) => {
       (session as any).accessToken = token.accessToken; // Pass accessToken to the session
       session.userId = token.sub ?? "";
+      
+      // Fetch the latest user data from the database to ensure session is up-to-date
+      if (token.sub) {
+        try {
+          const query = `
+            query GetUser($userId: uuid!) {
+              users_by_pk(id: $userId) {
+                id
+                name
+                email
+                image
+                emailVerified
+              }
+            }
+          `;
+          
+          const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+            },
+            body: JSON.stringify({
+              query,
+              variables: { userId: token.sub }
+            }),
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            const dbUser = result.data?.users_by_pk;
+            
+            if (dbUser) {
+              // Update session with latest data from database
+              session.user = {
+                ...session.user,
+                id: dbUser.id,
+                name: dbUser.name,
+                email: dbUser.email,
+                image: dbUser.image,
+                emailVerified: dbUser.emailVerified,
+              };
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data in session callback:", error);
+          // Fall back to existing session data if there's an error
+        }
+      }
+      
       return session;
     },
   },

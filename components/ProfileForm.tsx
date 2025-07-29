@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { User, Camera, Scale, Route, Coins } from "lucide-react";
-import updateUserProfile from "@/app/actions/updateUserProfile";
+import updateUserProfile from "../app/actions/updateUserProfile";
 import { 
   SUPPORTED_CURRENCIES, 
   SUPPORTED_WEIGHT_UNITS, 
@@ -28,8 +30,8 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ userProfile }: ProfileFormProps) {
+  const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const validateForm = (formData: FormData): boolean => {
@@ -60,7 +62,6 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
-    setMessage("");
     setValidationErrors({});
     
     if (!validateForm(formData)) {
@@ -70,13 +71,15 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
     
     try {
       await updateUserProfile(formData);
-      setMessage("Profile updated successfully!");
-      // Auto-clear success message after 3 seconds
-      setTimeout(() => setMessage(""), 3000);
+      
+      // Force session refresh by calling update with trigger refresh
+      await update();
+      
+      toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Profile update error:", error);
       const errorMessage = error.message || "Failed to update profile. Please try again.";
-      setMessage(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -271,27 +274,6 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
           </div>
         </div>
       </div>
-
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.includes("success") 
-            ? "bg-green-50 text-green-800 border border-green-200" 
-            : "bg-red-50 text-red-800 border border-red-200"
-        }`}>
-          <div className="flex items-center">
-            {message.includes("success") ? (
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            )}
-            {message}
-          </div>
-        </div>
-      )}
 
       <div className="flex justify-end pt-6 border-t">
         <Button 

@@ -92,8 +92,9 @@ async function updateUserProfile(formData: FormData): Promise<void> {
     throw new Error("No data returned from update mutation");
   }
 
-  // Revalidate the profile page to show updated data
+  // Revalidate the profile page and layout to show updated data
   revalidatePath("/profile");
+  revalidatePath("/", "layout"); // This will revalidate the entire layout including the header
 }
 
 export default updateUserProfile;
