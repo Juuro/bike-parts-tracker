@@ -107,6 +107,24 @@ export default function ProfileForm({
     }
   };
 
+  function getDefaultCurrency(): string {
+    // Try to use the browser's locale to guess a default currency
+    if (typeof window !== "undefined" && window.navigator.language) {
+      const locale = window.navigator.language;
+      // Map some common locales to currencies
+      if (locale.startsWith("en-US")) return "USD";
+      if (locale.startsWith("en-GB")) return "GBP";
+      if (locale.startsWith("en-AU")) return "AUD";
+      if (locale.startsWith("de-DE")) return "EUR";
+      if (locale.startsWith("fr-FR")) return "EUR";
+      if (locale.startsWith("ja-JP")) return "JPY";
+      if (locale.startsWith("es-ES")) return "EUR";
+      // Add more as needed
+    }
+    // Fallback to USD
+    return "USD";
+  }
+
   return (
     <form action={handleSubmit} className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -275,7 +293,8 @@ export default function ProfileForm({
                 name="currency_unit"
                 defaultValue={
                   userProfile.currency_unit ||
-                  (availableUnits.currency_unit[0]?.unit ?? getDefaultCurrency())
+                  (availableUnits.currency_unit[0]?.unit ??
+                    getDefaultCurrency())
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { toast } from "react-hot-toast";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,7 @@ export const GET = async () => {
     });
 
     if (!response.ok) {
+      toast.error("Failed to fetch user profile");
       console.error("HTTP Error:", response.status, await response.text());
       return new Response("Failed to fetch user profile", {
         status: response.status,

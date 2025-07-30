@@ -17,15 +17,6 @@ export default async function ProfilePage() {
     fetchAvailableUnits(),
   ]);
 
-  // Debug logging
-  console.log("Session data:", {
-    userId: (session as any).userId,
-    userName: session.user?.name,
-    userEmail: session.user?.email,
-  });
-  console.log("Fetched user profile:", userProfile);
-  console.log("Fetched available units:", availableUnits);
-
   // Fallback to session data if profile fetch fails or returns empty data
   const profileData = userProfile?.id
     ? userProfile
