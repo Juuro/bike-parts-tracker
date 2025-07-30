@@ -35,9 +35,11 @@ export const validateProfileImage = (url: string): boolean => {
     // Allow common image hosting domains even without file extensions
     const imageDomains = ['imgur.com', 'gravatar.com', 'googleusercontent.com', 'githubusercontent.com'];
     const parsedUrl = new URL(url);
-    const hasValidDomain = imageDomains.some(domain => 
-      parsedUrl.hostname === domain
-    );
+    const hasValidDomain = imageDomains.some(domain => {
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const normalizedDomain = domain.toLowerCase();
+      return hostname === normalizedDomain || hostname.endsWith(`.${normalizedDomain}`);
+    });
     
     return hasValidExtension || hasValidDomain;
   } catch {
