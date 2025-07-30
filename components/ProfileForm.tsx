@@ -6,12 +6,9 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { User, Camera, Scale, Route, Coins } from "lucide-react";
 import updateUserProfile from "../app/actions/updateUserProfile";
-import { 
-  SUPPORTED_CURRENCIES, 
-  SUPPORTED_WEIGHT_UNITS, 
-  SUPPORTED_DISTANCE_UNITS,
+import {
   validateProfileImage,
-  validateStravaUsername
+  validateStravaUsername,
 } from "@/utils/profileUtils";
 
 interface UserProfile {
@@ -25,37 +22,50 @@ interface UserProfile {
   strava_user?: string;
 }
 
-interface ProfileFormProps {
-  userProfile: UserProfile;
+interface AvailableUnits {
+  currency_unit: Array<{ unit: string; label: string; symbol: string }>;
+  weight_unit: Array<{ unit: string; label: string }>;
+  distance_unit: Array<{ unit: string; label: string }>;
 }
 
-export default function ProfileForm({ userProfile }: ProfileFormProps) {
+interface ProfileFormProps {
+  userProfile: UserProfile;
+  availableUnits: AvailableUnits;
+}
+
+export default function ProfileForm({
+  userProfile,
+  availableUnits,
+}: ProfileFormProps) {
   const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const validateForm = (formData: FormData): boolean => {
     const errors: Record<string, string> = {};
-    
+
     const name = formData.get("name")?.toString() || "";
     const image = formData.get("image")?.toString() || "";
     const stravaUser = formData.get("strava_user")?.toString() || "";
-    
+
     // Validate name
     if (!name || name.trim().length < 2) {
       errors.name = "Name must be at least 2 characters long";
     }
-    
+
     // Validate profile image URL
     if (image && !validateProfileImage(image)) {
       errors.image = "Please enter a valid image URL";
     }
-    
+
     // Validate Strava username
     if (stravaUser && !validateStravaUsername(stravaUser)) {
-      errors.strava_user = "Strava username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens";
+      errors.strava_user =
+        "Strava username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens";
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -63,27 +73,30 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setValidationErrors({});
-    
+
     if (!validateForm(formData)) {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       await updateUserProfile(formData);
-      
+
       // Force session refresh by calling update with trigger refresh
       try {
         await update();
       } catch (sessionError: any) {
         console.error("Session refresh error:", sessionError);
-        toast.error("Profile updated, but failed to refresh session. Please log out and log back in.");
+        toast.error(
+          "Profile updated, but failed to refresh session. Please log out and log back in."
+        );
       }
-      
+
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Profile update error:", error);
-      const errorMessage = error.message || "Failed to update profile. Please try again.";
+      const errorMessage =
+        error.message || "Failed to update profile. Please try again.";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -104,10 +117,13 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
               Update your personal information and profile settings
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Display Name
               </label>
               <Input
@@ -116,16 +132,23 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
                 type="text"
                 defaultValue={userProfile.name}
                 required
-                className={`w-full ${validationErrors.name ? 'border-red-500' : ''}`}
+                className={`w-full ${
+                  validationErrors.name ? "border-red-500" : ""
+                }`}
                 placeholder="Enter your full name"
               />
               {validationErrors.name && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.name}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.name}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email Address
               </label>
               <Input
@@ -143,7 +166,10 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="image"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <Camera size={16} className="inline mr-1" />
                 Profile Image URL
               </label>
@@ -153,10 +179,14 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
                 type="url"
                 defaultValue={userProfile.image || ""}
                 placeholder="https://example.com/profile.jpg"
-                className={`w-full ${validationErrors.image ? 'border-red-500' : ''}`}
+                className={`w-full ${
+                  validationErrors.image ? "border-red-500" : ""
+                }`}
               />
               {validationErrors.image && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.image}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.image}
+                </p>
               )}
               <p className="text-xs text-gray-500 mt-1">
                 Enter a URL to your profile image
@@ -177,37 +207,26 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
             </p>
           </div>
 
-          {/* Temporary Notice */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-800">
-                  <strong>Unit preferences are temporarily unavailable.</strong> We're setting up the unit tables. For now, you can update your name, profile image, and Strava username.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 opacity-50 pointer-events-none">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="weight_unit" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="weight_unit"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <Scale size={16} className="inline mr-1" />
-                Weight Unit (Coming Soon)
+                Weight Unit
               </label>
               <select
                 id="weight_unit"
                 name="weight_unit"
-                defaultValue={userProfile.weight_unit || "kg"}
-                disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100"
+                defaultValue={
+                  userProfile.weight_unit ||
+                  (availableUnits.weight_unit[0]?.unit ?? "kg")
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                {SUPPORTED_WEIGHT_UNITS.map(unit => (
-                  <option key={unit.value} value={unit.value}>
+                {availableUnits.weight_unit.map((unit) => (
+                  <option key={unit.unit} value={unit.unit}>
                     {unit.label}
                   </option>
                 ))}
@@ -215,19 +234,24 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="distance_unit" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="distance_unit"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <Route size={16} className="inline mr-1" />
-                Distance Unit (Coming Soon)
+                Distance Unit
               </label>
               <select
                 id="distance_unit"
                 name="distance_unit"
-                defaultValue={userProfile.distance_unit || "km"}
-                disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100"
+                defaultValue={
+                  userProfile.distance_unit ||
+                  (availableUnits.distance_unit[0]?.unit ?? "km")
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                {SUPPORTED_DISTANCE_UNITS.map(unit => (
-                  <option key={unit.value} value={unit.value}>
+                {availableUnits.distance_unit.map((unit) => (
+                  <option key={unit.unit} value={unit.unit}>
                     {unit.label}
                   </option>
                 ))}
@@ -235,29 +259,41 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
             </div>
 
             <div>
-              <label htmlFor="currency_unit" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="currency_unit"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 <Coins size={16} className="inline mr-1" />
-                Currency (Coming Soon)
+                Currency
               </label>
               <select
                 id="currency_unit"
                 name="currency_unit"
-                defaultValue={userProfile.currency_unit || "EUR"}
-                disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100"
+                defaultValue={
+                  userProfile.currency_unit ||
+                  (availableUnits.currency_unit[0]?.unit ?? "EUR")
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                {SUPPORTED_CURRENCIES.map(currency => (
-                  <option key={currency.value} value={currency.value}>
-                    {currency.label}
+                {availableUnits.currency_unit.map((currency) => (
+                  <option key={currency.unit} value={currency.unit}>
+                    {currency.label} ({currency.symbol})
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label htmlFor="strava_user" className="block text-sm font-medium text-gray-700 mb-2">
-                <svg className="inline w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.181"/>
+              <label
+                htmlFor="strava_user"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                <svg
+                  className="inline w-4 h-4 mr-1"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.181" />
                 </svg>
                 Strava Username
               </label>
@@ -267,10 +303,14 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
                 type="text"
                 defaultValue={userProfile.strava_user || ""}
                 placeholder="your-strava-username"
-                className={`w-full ${validationErrors.strava_user ? 'border-red-500' : ''}`}
+                className={`w-full ${
+                  validationErrors.strava_user ? "border-red-500" : ""
+                }`}
               />
               {validationErrors.strava_user && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.strava_user}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {validationErrors.strava_user}
+                </p>
               )}
               <p className="text-xs text-gray-500 mt-1">
                 Connect your Strava profile for bike activity integration
@@ -281,16 +321,28 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
       </div>
 
       <div className="flex justify-end pt-6 border-t">
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="px-8 py-2"
-        >
+        <Button type="submit" disabled={isLoading} className="px-8 py-2">
           {isLoading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
               Updating...
             </>

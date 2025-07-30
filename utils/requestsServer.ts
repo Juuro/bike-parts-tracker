@@ -92,4 +92,70 @@ const fetchUserProfile = async () => {
   }
 };
 
-export { fetchBikes, fetchBike, fetchBikeParts, fetchParts, fetchPartStatus, fetchUserProfile };
+const fetchAvailableUnits = async () => {
+  try {
+    const query = `
+      query GetAvailableUnits {
+        currency_unit {
+          unit
+          label
+          symbol
+        }
+        weight_unit {
+          unit
+          label
+        }
+        distance_unit {
+          unit
+          label
+        }
+      }
+    `;
+
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Hasura-Admin-Secret": process.env.HASURA_ADMIN_SECRET!,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      console.error("HTTP Error:", response.status, await response.text());
+      throw new Error(`Failed to fetch units: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL Errors:", result.errors);
+      throw new Error("GraphQL errors occurred");
+    }
+
+    return (
+      result.data || {
+        currency_unit: [],
+        weight_unit: [],
+        distance_unit: [],
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching available units:", error);
+    return {
+      currency_unit: [],
+      weight_unit: [],
+      distance_unit: [],
+    };
+  }
+};
+
+export {
+  fetchBikes,
+  fetchBike,
+  fetchBikeParts,
+  fetchParts,
+  fetchPartStatus,
+  fetchUserProfile,
+  fetchAvailableUnits,
+};

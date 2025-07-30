@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
-import { fetchUserProfile } from "@/utils/requestsServer";
+import { fetchUserProfile, fetchAvailableUnits } from "@/utils/requestsServer";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -12,7 +12,10 @@ export default async function ProfilePage() {
     redirect("/");
   }
 
-  const userProfile = await fetchUserProfile();
+  const [userProfile, availableUnits] = await Promise.all([
+    fetchUserProfile(),
+    fetchAvailableUnits(),
+  ]);
 
   // Debug logging
   console.log("Session data:", {
@@ -21,6 +24,7 @@ export default async function ProfilePage() {
     userEmail: session.user?.email,
   });
   console.log("Fetched user profile:", userProfile);
+  console.log("Fetched available units:", availableUnits);
 
   // Fallback to session data if profile fetch fails or returns empty data
   const profileData = userProfile?.id
@@ -54,7 +58,10 @@ export default async function ProfilePage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border p-8">
-          <ProfileForm userProfile={profileData} />
+          <ProfileForm
+            userProfile={profileData}
+            availableUnits={availableUnits}
+          />
         </div>
       </div>
     </section>

@@ -19,12 +19,14 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   const stravaUser = formData.get("strava_user")?.toString() || null;
 
   // Use proper GraphQL variables instead of string interpolation
-  // Temporarily skip unit fields until unit tables are populated
   const query = `
     mutation UpdateUserProfile(
       $userId: uuid!
       $name: String!
       $image: String
+      $weight_unit: String
+      $distance_unit: String
+      $currency_unit: String
       $strava_user: String
     ) {
       update_users(
@@ -32,6 +34,9 @@ async function updateUserProfile(formData: FormData): Promise<void> {
         _set: {
           name: $name
           image: $image
+          weight_unit: $weight_unit
+          distance_unit: $distance_unit
+          currency_unit: $currency_unit
           strava_user: $strava_user
           updated_at: "now()"
         }
@@ -54,6 +59,9 @@ async function updateUserProfile(formData: FormData): Promise<void> {
     userId,
     name,
     image: image || null,
+    weight_unit: weightUnit || null,
+    distance_unit: distanceUnit || null,
+    currency_unit: currencyUnit || null,
     strava_user: stravaUser || null,
   };
 
