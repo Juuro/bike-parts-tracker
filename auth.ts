@@ -87,7 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         } catch (error) {
           console.error("Error fetching user data in session callback:", error);
           // Fall back to existing session data if there's an error
-          session.error = "Failed to fetch fresh user data. Using existing session data.";
+          // Error is logged, but session object remains unmodified.
         }
       }
       
