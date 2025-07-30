@@ -193,7 +193,7 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
             </div>
           </div>
 
-          <div className="space-y-4 opacity-50 pointer-events-none">
+          <div className="space-y-4 opacity-50" aria-disabled="true">
             <div>
               <label htmlFor="weight_unit" className="block text-sm font-medium text-gray-700 mb-2">
                 <Scale size={16} className="inline mr-1" />
