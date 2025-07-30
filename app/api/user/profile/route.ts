@@ -15,8 +15,8 @@ export const GET = async () => {
     const accessToken = session?.accessToken;
 
     const query = `
-      query GetUserProfile {
-        users(where: { id: { _eq: "${userId}" } }) {
+      query GetUserProfile($userId: String!) {
+        users(where: { id: { _eq: $userId } }) {
           id
           name
           email
