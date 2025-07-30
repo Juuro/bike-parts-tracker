@@ -275,7 +275,7 @@ export default function ProfileForm({
                 name="currency_unit"
                 defaultValue={
                   userProfile.currency_unit ||
-                  (availableUnits.currency_unit[0]?.unit ?? "EUR")
+                  (availableUnits.currency_unit[0]?.unit ?? getDefaultCurrency())
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
