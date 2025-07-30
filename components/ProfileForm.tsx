@@ -73,7 +73,12 @@ export default function ProfileForm({ userProfile }: ProfileFormProps) {
       await updateUserProfile(formData);
       
       // Force session refresh by calling update with trigger refresh
-      await update();
+      try {
+        await update();
+      } catch (sessionError: any) {
+        console.error("Session refresh error:", sessionError);
+        toast.error("Profile updated, but failed to refresh session. Please log out and log back in.");
+      }
       
       toast.success("Profile updated successfully!");
     } catch (error: any) {
