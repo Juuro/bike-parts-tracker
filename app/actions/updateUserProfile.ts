@@ -33,7 +33,6 @@ async function updateUserProfile(formData: FormData): Promise<void> {
           name: $name
           image: $image
           strava_user: $strava_user
-          updated_at: "now()"
         }
       ) {
         affected_rows
