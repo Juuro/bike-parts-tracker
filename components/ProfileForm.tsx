@@ -85,10 +85,14 @@ export default function ProfileForm({
       // Force session refresh by calling update with trigger refresh
       try {
         await update();
-      } catch (sessionError: any) {
+      } catch (sessionError) {
         console.error("Session refresh error:", sessionError);
+        const errorMessage =
+          sessionError instanceof Error
+            ? sessionError.message
+            : "An unknown error occurred during session refresh.";
         toast.error(
-          "Profile updated, but failed to refresh session. Please log out and log back in."
+          `Profile updated, but failed to refresh session: ${errorMessage}. Please log out and log back in.`
         );
       }
 
