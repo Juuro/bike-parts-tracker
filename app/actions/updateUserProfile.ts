@@ -101,7 +101,7 @@ async function updateUserProfile(formData: FormData): Promise<void> {
 
   // Revalidate the profile page and layout to show updated data
   revalidatePath("/profile");
-  revalidatePath("/", "layout"); // This will revalidate the entire layout including the header
+  revalidatePath("/header"); // Revalidate only the header component to reflect updated user profile data
 }
 
 export default updateUserProfile;
