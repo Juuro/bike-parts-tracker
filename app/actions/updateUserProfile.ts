@@ -38,7 +38,6 @@ async function updateUserProfile(formData: FormData): Promise<void> {
           distance_unit: $distance_unit
           currency_unit: $currency_unit
           strava_user: $strava_user
-          updated_at: "now()"
         }
       ) {
         affected_rows
