@@ -29,7 +29,7 @@ export const validateProfileImage = (url: string): boolean => {
     // Check if URL ends with common image extensions
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
     const hasValidExtension = imageExtensions.some(ext => 
-      url.toLowerCase().includes(ext)
+      url.toLowerCase().endsWith(ext)
     );
     
     // Allow common image hosting domains even without file extensions
