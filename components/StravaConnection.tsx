@@ -35,8 +35,8 @@ export default function StravaConnection({
       const response = await fetch("/api/strava/status");
       if (response.ok) {
         const status = await response.json();
-        console.log('Strava status check:', status);
-        
+        console.log("Strava status check:", status);
+
         // Just update the status without showing a toast
         // The popup callback handles success messages
         setStravaStatus(status);
@@ -47,7 +47,8 @@ export default function StravaConnection({
     } finally {
       setIsLoading(false);
     }
-  };  const connectToStrava = () => {
+  };
+  const connectToStrava = () => {
     setIsConnecting(true);
 
     // Generate random state for security

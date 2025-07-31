@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { User, Camera, Scale, Route, Coins } from "lucide-react";
 import updateUserProfile from "../app/actions/updateUserProfile";
 import StravaConnection from "./StravaConnection";
+import StravaBikesList from "./StravaBikesList";
 import {
   validateProfileImage,
   validateStravaUsername,
@@ -40,6 +41,7 @@ export default function ProfileForm({
 }: ProfileFormProps) {
   const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [stravaConnected, setStravaConnected] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -309,10 +311,12 @@ export default function ProfileForm({
 
             <StravaConnection
               onConnectionChange={(connected) => {
-                // Optionally handle connection status changes
+                setStravaConnected(connected);
                 console.log("Strava connection status:", connected);
               }}
             />
+
+            <StravaBikesList stravaConnected={stravaConnected} />
           </div>
         </div>
       </div>
