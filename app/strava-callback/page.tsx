@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function StravaCallbackPage() {
+function StravaCallbackContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
@@ -164,5 +164,29 @@ export default function StravaCallbackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md w-full">
+        <div className="text-4xl mb-4">🔄</div>
+        <div className="text-lg font-medium text-blue-600 mb-4">
+          Loading authorization...
+        </div>
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function StravaCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <StravaCallbackContent />
+    </Suspense>
   );
 }
