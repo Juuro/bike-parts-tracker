@@ -23,24 +23,34 @@ export const SUPPORTED_DISTANCE_UNITS = [
 
 export const validateProfileImage = (url: string): boolean => {
   if (!url) return true; // Empty URL is valid (will use default)
-  
+
   try {
     new URL(url);
     // Check if URL ends with common image extensions
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const hasValidExtension = imageExtensions.some(ext => 
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+    const hasValidExtension = imageExtensions.some((ext) =>
       url.toLowerCase().endsWith(ext)
     );
-    
+
     // Allow common image hosting domains even without file extensions
-    const imageDomains = ['imgur.com', 'gravatar.com', 'googleusercontent.com', 'githubusercontent.com'];
+    const imageDomains = [
+      "imgur.com",
+      "gravatar.com",
+      "googleusercontent.com",
+      "githubusercontent.com",
+      "cloudinary.com", // Added Cloudinary support
+      "res.cloudinary.com", // Cloudinary CDN
+    ];
     const parsedUrl = new URL(url);
-    const hasValidDomain = imageDomains.some(domain => {
+    const hasValidDomain = imageDomains.some((domain) => {
       const hostname = parsedUrl.hostname.toLowerCase();
       const normalizedDomain = domain.toLowerCase();
-      return hostname === normalizedDomain || hostname.endsWith(`.${normalizedDomain}`);
+      return (
+        hostname === normalizedDomain ||
+        hostname.endsWith(`.${normalizedDomain}`)
+      );
     });
-    
+
     return hasValidExtension || hasValidDomain;
   } catch {
     return false;
@@ -49,28 +59,32 @@ export const validateProfileImage = (url: string): boolean => {
 
 export const validateStravaUsername = (username: string): boolean => {
   if (!username) return true; // Empty username is valid
-  
+
   // Strava usernames should be alphanumeric with underscores and hyphens
   const stravaUsernameRegex = /^[a-zA-Z0-9_-]+$/;
-  return stravaUsernameRegex.test(username) && username.length >= 3 && username.length <= 30;
+  return (
+    stravaUsernameRegex.test(username) &&
+    username.length >= 3 &&
+    username.length <= 30
+  );
 };
 
 export const getCurrencySymbol = (currencyCode: string): string => {
-  const currency = SUPPORTED_CURRENCIES.find(c => c.value === currencyCode);
+  const currency = SUPPORTED_CURRENCIES.find((c) => c.value === currencyCode);
   return currency?.symbol || currencyCode;
 };
 
 export const formatWeight = (weight: number, unit: string): string => {
-  if (unit === 'lbs') {
+  if (unit === "lbs") {
     return `${weight.toFixed(1)} lbs`;
-  } else if (unit === 'g') {
+  } else if (unit === "g") {
     return `${weight} g`;
   }
   return `${weight} kg`;
 };
 
 export const formatDistance = (distance: number, unit: string): string => {
-  if (unit === 'mi') {
+  if (unit === "mi") {
     return `${distance.toFixed(1)} mi`;
   }
   return `${distance.toFixed(1)} km`;

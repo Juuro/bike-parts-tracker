@@ -5,11 +5,22 @@ import { revalidatePath } from "next/cache";
 async function updateUserProfile(formData: FormData): Promise<void> {
   const session: any = await auth();
   if (!session) {
+    console.error("No session found");
     throw new Error("Unauthorized");
   }
 
   const userId = session?.userId;
   const accessToken = session?.accessToken;
+
+  if (!userId) {
+    console.error("No userId in session:", session);
+    throw new Error("User ID not found in session");
+  }
+
+  if (!accessToken) {
+    console.error("No accessToken in session:", session);
+    throw new Error("Access token not found in session");
+  }
 
   const name = formData.get("name")?.toString() || "";
   const image = formData.get("image")?.toString() || null;
@@ -17,6 +28,16 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   const distanceUnit = formData.get("distance_unit")?.toString() || null;
   const currencyUnit = formData.get("currency_unit")?.toString() || null;
   const stravaUser = formData.get("strava_user")?.toString() || null;
+
+  console.log("Updating user profile with:", {
+    userId,
+    name,
+    image,
+    weightUnit,
+    distanceUnit,
+    currencyUnit,
+    stravaUser,
+  });
 
   // Use proper GraphQL variables instead of string interpolation
   const query = `
@@ -79,6 +100,11 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   if (!response.ok) {
     const errorText = await response.text();
     console.error("HTTP Error:", response.status, errorText);
+    console.error("Request headers:", {
+      Authorization: `Bearer ${accessToken?.substring(0, 20)}...`,
+      "Content-Type": "application/json",
+    });
+    console.error("Request variables:", variables);
     throw new Error(`Failed to update user profile: ${response.status}`);
   }
 
@@ -99,9 +125,12 @@ async function updateUserProfile(formData: FormData): Promise<void> {
     throw new Error("No data returned from update mutation");
   }
 
+  console.log("Profile updated successfully:", result.data.update_users);
+
   // Revalidate the profile page and layout to show updated data
   revalidatePath("/profile");
-  revalidatePath("/header"); // Revalidate only the header component to reflect updated user profile data
+  revalidatePath("/"); // Revalidate the home page to refresh header/navigation
+  revalidatePath("/layout"); // Try to refresh any cached layout data
 }
 
 export default updateUserProfile;

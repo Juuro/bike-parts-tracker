@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Button } from "./ui/button";
@@ -8,6 +8,7 @@ import { User, Camera, Scale, Route, Coins } from "lucide-react";
 import updateUserProfile from "../app/actions/updateUserProfile";
 import StravaConnection from "./StravaConnection";
 import StravaBikesList from "./StravaBikesList";
+import ImageUpload from "./ImageUpload";
 import {
   validateProfileImage,
   validateStravaUsername,
@@ -42,9 +43,17 @@ export default function ProfileForm({
   const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(
+    userProfile.image || null
+  );
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+
+  // Update uploadedImage when userProfile.image changes (after successful update)
+  useEffect(() => {
+    setUploadedImage(userProfile.image || null);
+  }, [userProfile.image]);
 
   const validateForm = (formData: FormData): boolean => {
     const errors: Record<string, string> = {};
@@ -76,6 +85,16 @@ export default function ProfileForm({
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true);
     setValidationErrors({});
+
+    // Debug: Log all form data
+    console.log("Form submission - FormData contents:");
+    console.log("name:", formData.get("name"));
+    console.log("image:", formData.get("image"));
+    console.log("weight_unit:", formData.get("weight_unit"));
+    console.log("distance_unit:", formData.get("distance_unit"));
+    console.log("currency_unit:", formData.get("currency_unit"));
+    console.log("strava_user:", formData.get("strava_user"));
+    console.log("uploadedImage state:", uploadedImage);
 
     if (!validateForm(formData)) {
       setIsLoading(false);
@@ -191,31 +210,26 @@ export default function ProfileForm({
             </div>
 
             <div>
-              <label
-                htmlFor="image"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                <Camera size={16} className="inline mr-1" />
-                Profile Image URL
-              </label>
-              <Input
-                id="image"
-                name="image"
-                type="url"
-                defaultValue={userProfile.image || ""}
-                placeholder="https://example.com/profile.jpg"
-                className={`w-full ${
-                  validationErrors.image ? "border-red-500" : ""
-                }`}
+              <ImageUpload
+                currentImage={uploadedImage || userProfile.image}
+                onImageUpload={(imageUrl) => {
+                  console.log(
+                    "ImageUpload callback - setting uploadedImage to:",
+                    imageUrl
+                  );
+                  setUploadedImage(imageUrl);
+                }}
+                onImageRemove={() => {
+                  console.log("ImageUpload callback - removing image");
+                  setUploadedImage("");
+                }}
               />
-              {validationErrors.image && (
-                <p className="text-red-500 text-xs mt-1">
-                  {validationErrors.image}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Enter a URL to your profile image
-              </p>
+              {/* Hidden input to pass the image URL to the form */}
+              <input
+                type="hidden"
+                name="image"
+                value={uploadedImage || userProfile.image || ""}
+              />
             </div>
           </div>
         </div>
