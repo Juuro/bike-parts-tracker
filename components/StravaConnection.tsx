@@ -37,12 +37,8 @@ export default function StravaConnection({
         const status = await response.json();
         console.log('Strava status check:', status);
         
-        // If we just connected and status shows connected, show success
-        // But only if we're not currently connecting (to avoid duplicate toasts)
-        if (status.connected && !stravaStatus.connected && !isConnecting) {
-          toast.success("Successfully connected to Strava!");
-        }
-        
+        // Just update the status without showing a toast
+        // The popup callback handles success messages
         setStravaStatus(status);
         onConnectionChange?.(status.connected);
       }
