@@ -19,6 +19,8 @@ select_permissions:
         - image
         - name
         - strava_user
+        - strava_id
+        - strava_connected_at
         - weight_unit
         - created_at
         - emailVerified
@@ -38,6 +40,11 @@ update_permissions:
         - image
         - name
         - strava_user
+        - strava_id
+        - strava_access_token
+        - strava_refresh_token
+        - strava_expires_at
+        - strava_connected_at
         - weight_unit
         - updated_at
       filter:

@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { User, Camera, Scale, Route, Coins } from "lucide-react";
 import updateUserProfile from "../app/actions/updateUserProfile";
+import StravaConnection from "./StravaConnection";
 import {
   validateProfileImage,
   validateStravaUsername,
@@ -306,39 +307,12 @@ export default function ProfileForm({
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="strava_user"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                <svg
-                  className="inline w-4 h-4 mr-1"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.181" />
-                </svg>
-                Strava Username
-              </label>
-              <Input
-                id="strava_user"
-                name="strava_user"
-                type="text"
-                defaultValue={userProfile.strava_user || ""}
-                placeholder="your-strava-username"
-                className={`w-full ${
-                  validationErrors.strava_user ? "border-red-500" : ""
-                }`}
-              />
-              {validationErrors.strava_user && (
-                <p className="text-red-500 text-xs mt-1">
-                  {validationErrors.strava_user}
-                </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Connect your Strava profile for bike activity integration
-              </p>
-            </div>
+            <StravaConnection
+              onConnectionChange={(connected) => {
+                // Optionally handle connection status changes
+                console.log("Strava connection status:", connected);
+              }}
+            />
           </div>
         </div>
       </div>

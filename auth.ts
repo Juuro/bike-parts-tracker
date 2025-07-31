@@ -1,11 +1,40 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import type { Provider } from "next-auth/providers";
 import { HasuraAdapter } from "@auth/hasura-adapter";
 import { SignJWT } from "jose";
 
+// Custom Strava provider since it's not built-in
+const Strava: Provider = {
+  id: "strava",
+  name: "Strava",
+  type: "oauth",
+  authorization: {
+    url: "https://www.strava.com/oauth/authorize",
+    params: {
+      scope: "read,activity:read_all,profile:read_all",
+      response_type: "code",
+    },
+  },
+  token: "https://www.strava.com/oauth/token",
+  userinfo: "https://www.strava.com/api/v3/athlete",
+  clientId: process.env.STRAVA_CLIENT_ID,
+  clientSecret: process.env.STRAVA_CLIENT_SECRET,
+  profile(profile) {
+    return {
+      id: profile.id.toString(),
+      name: `${profile.firstname} ${profile.lastname}`,
+      email: profile.email || "",
+      image: profile.profile || profile.profile_medium,
+      stravaId: profile.id,
+      stravaUsername: profile.username,
+    };
+  },
+};
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
-  providers: [Google],
+  providers: [Google, Strava],
   adapter: HasuraAdapter({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
     adminSecret: process.env.HASURA_ADMIN_SECRET!,
@@ -16,6 +45,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, account, profile }) {
       token.accessToken = "";
+
+      // Store Strava access token if connecting via Strava
+      if (account?.provider === "strava" && account?.access_token) {
+        token.stravaAccessToken = account.access_token;
+        token.stravaRefreshToken = account.refresh_token;
+        token.stravaExpiresAt = account.expires_at;
+      }
 
       const encodedToken = await new SignJWT(token)
         .setProtectedHeader({ alg: "HS256" })
@@ -40,7 +76,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session: async ({ session, token, user }) => {
       (session as any).accessToken = token.accessToken; // Pass accessToken to the session
       session.userId = token.sub ?? "";
-      
+
       // Fetch the latest user data from the database to ensure session is up-to-date
       if (token.sub) {
         try {
@@ -55,7 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }
             }
           `;
-          
+
           const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
             method: "POST",
             headers: {
@@ -64,14 +100,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
             body: JSON.stringify({
               query,
-              variables: { userId: token.sub }
+              variables: { userId: token.sub },
             }),
           });
-          
+
           if (response.ok) {
             const result = await response.json();
             const dbUser = result.data?.users_by_pk;
-            
+
             if (dbUser) {
               // Update session with latest data from database
               session.user = {
@@ -90,7 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Error is logged, but session object remains unmodified.
         }
       }
-      
+
       return session;
     },
   },
