@@ -35,6 +35,14 @@ export default function StravaConnection({
       const response = await fetch("/api/strava/status");
       if (response.ok) {
         const status = await response.json();
+        console.log('Strava status check:', status);
+        
+        // If we just connected and status shows connected, show success
+        // But only if we're not currently connecting (to avoid duplicate toasts)
+        if (status.connected && !stravaStatus.connected && !isConnecting) {
+          toast.success("Successfully connected to Strava!");
+        }
+        
         setStravaStatus(status);
         onConnectionChange?.(status.connected);
       }
@@ -43,9 +51,7 @@ export default function StravaConnection({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const connectToStrava = () => {
+  };  const connectToStrava = () => {
     setIsConnecting(true);
 
     // Generate random state for security
@@ -86,8 +92,12 @@ export default function StravaConnection({
       if (popup?.closed) {
         clearInterval(checkClosed);
         setIsConnecting(false);
-        // Check status again after popup closes
-        setTimeout(checkStravaStatus, 1000);
+        // Check status again after popup closes with a longer delay
+        // to allow the backend to process the connection
+        setTimeout(() => {
+          console.log("Popup closed, checking connection status...");
+          checkStravaStatus();
+        }, 3000); // Increased delay to 3 seconds
       }
     }, 1000);
 
@@ -106,7 +116,9 @@ export default function StravaConnection({
         clearInterval(checkClosed);
         popup?.close();
         setIsConnecting(false);
-        toast.error("Failed to connect to Strava");
+        // Only show error toast if we get an explicit error message
+        const errorMessage = event.data.error || "Connection failed";
+        toast.error(`Failed to connect to Strava: ${errorMessage}`);
         window.removeEventListener("message", handleMessage);
       }
     };

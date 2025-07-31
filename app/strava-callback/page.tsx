@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function StravaCallbackPage() {
@@ -7,10 +7,26 @@ export default function StravaCallbackPage() {
     "loading"
   );
   const [message, setMessage] = useState("Processing Strava authorization...");
+  const processedRef = useRef(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    
+    // Create unique key for this authorization attempt
+    const authKey = `strava_auth_${code}_${state}`;
+    
+    // Check if we've already processed this exact authorization
+    if (processedRef.current || sessionStorage.getItem(authKey)) {
+      console.log("Already processed this authorization, skipping...");
+      return;
+    }
+    
     const handleCallback = async () => {
+      processedRef.current = true;
+      sessionStorage.setItem(authKey, "processed");
+      console.log("Starting callback processing...");
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       const error = searchParams.get("error");
@@ -20,14 +36,14 @@ export default function StravaCallbackPage() {
       if (error) {
         setStatus("error");
         setMessage(`Authorization failed: ${error}`);
-        setTimeout(() => window.close(), 3000);
+        setTimeout(() => window.close(), 2000);
         return;
       }
 
       if (!code) {
         setStatus("error");
         setMessage("No authorization code received.");
-        setTimeout(() => window.close(), 3000);
+        setTimeout(() => window.close(), 2000);
         return;
       }
 
@@ -36,7 +52,7 @@ export default function StravaCallbackPage() {
       if (state !== storedState) {
         setStatus("error");
         setMessage("Invalid state parameter.");
-        setTimeout(() => window.close(), 3000);
+        setTimeout(() => window.close(), 2000);
         return;
       }
 
@@ -84,7 +100,7 @@ export default function StravaCallbackPage() {
           }
         }
 
-        setTimeout(() => window.close(), 3000);
+        setTimeout(() => window.close(), 1500);
       } catch (err) {
         console.error("Error:", err);
         setStatus("error");
@@ -100,7 +116,7 @@ export default function StravaCallbackPage() {
           );
         }
 
-        setTimeout(() => window.close(), 3000);
+        setTimeout(() => window.close(), 2000);
       }
     };
 
