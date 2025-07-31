@@ -13,16 +13,16 @@ function StravaCallbackContent() {
   useEffect(() => {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
-    
+
     // Create unique key for this authorization attempt
     const authKey = `strava_auth_${code}_${state}`;
-    
+
     // Check if we've already processed this exact authorization
     if (processedRef.current || sessionStorage.getItem(authKey)) {
       console.log("Already processed this authorization, skipping...");
       return;
     }
-    
+
     const handleCallback = async () => {
       processedRef.current = true;
       sessionStorage.setItem(authKey, "processed");
