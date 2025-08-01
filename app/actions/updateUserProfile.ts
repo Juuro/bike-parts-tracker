@@ -30,16 +30,6 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   const currencyUnit = formData.get("currency_unit")?.toString() || null;
   const stravaUser = formData.get("strava_user")?.toString() || null;
 
-  console.log("Updating user profile with:", {
-    userId,
-    name,
-    image: image === null ? "NULL" : image, // Show NULL explicitly for debugging
-    weightUnit,
-    distanceUnit,
-    currencyUnit,
-    stravaUser,
-  });
-
   // Use proper GraphQL variables instead of string interpolation
   const query = `
     mutation UpdateUserProfile(
