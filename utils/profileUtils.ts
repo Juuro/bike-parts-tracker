@@ -8,6 +8,11 @@ export const SUPPORTED_CURRENCIES = [
   { value: "CAD", label: "Canadian Dollar (CAD)", symbol: "C$" },
   { value: "AUD", label: "Australian Dollar (AUD)", symbol: "A$" },
   { value: "JPY", label: "Japanese Yen (JPY)", symbol: "¥" },
+  { value: "NZD", label: "New Zealand Dollar (NZD)", symbol: "NZ$" },
+  { value: "INR", label: "Indian Rupee (INR)", symbol: "₹" },
+  { value: "ZAR", label: "South African Rand (ZAR)", symbol: "R" },
+  { value: "SGD", label: "Singapore Dollar (SGD)", symbol: "S$" },
+  { value: "HKD", label: "Hong Kong Dollar (HKD)", symbol: "HK$" },
 ];
 
 export const getDefaultCurrencyByLocale = (): string => {
