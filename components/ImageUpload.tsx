@@ -3,6 +3,12 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
+// Configuration constants
+const MAX_FILE_SIZE_MB = parseInt(
+  process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || "5"
+);
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 interface ImageUploadProps {
   currentImage?: string;
   onImageUpload: (imageUrl: string) => void;
@@ -38,10 +44,9 @@ export default function ImageUpload({
       return false;
     }
 
-    // Check file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-    if (file.size > maxSize) {
-      toast.error("Image must be smaller than 5MB");
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast.error(`Image must be smaller than ${MAX_FILE_SIZE_MB}MB`);
       return false;
     }
 
@@ -198,7 +203,7 @@ export default function ImageUpload({
                 or drag and drop
               </p>
               <p className="text-xs text-gray-500">
-                PNG, JPG, GIF or WebP (max 5MB)
+                PNG, JPG, GIF or WebP (max {MAX_FILE_SIZE_MB}MB)
               </p>
             </div>
           )}
