@@ -38,7 +38,7 @@ export const validateProfileImage = (url: string): boolean => {
       "gravatar.com",
       "googleusercontent.com",
       "githubusercontent.com",
-      "cloudinary.com", // Added Cloudinary support
+      "cloudinary.com",
       "res.cloudinary.com", // Cloudinary CDN
     ];
     const parsedUrl = new URL(url);
