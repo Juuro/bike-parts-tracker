@@ -9,7 +9,12 @@ INSERT INTO public.currency_unit (unit) VALUES
   ('CHF'),
   ('CAD'),
   ('AUD'),
-  ('JPY')
+  ('JPY'),
+  ('NZD'),
+  ('INR'),
+  ('ZAR'),
+  ('SGD'),
+  ('HKD')
 ON CONFLICT (unit) DO NOTHING;
 
 -- Insert weight units  
