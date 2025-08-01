@@ -91,7 +91,6 @@ export default function StravaConnection({
         // Check status again after popup closes with a longer delay
         // to allow the backend to process the connection
         setTimeout(() => {
-          console.log("Popup closed, checking connection status...");
           checkStravaStatus();
         }, 3000); // Increased delay to 3 seconds
       }
