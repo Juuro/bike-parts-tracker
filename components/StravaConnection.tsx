@@ -57,11 +57,6 @@ export default function StravaConnection({
     const redirectUri = `${window.location.origin}/strava-callback`;
     const scope = "read,activity:read_all,profile:read_all";
 
-    // Avoid logging sensitive OAuth parameters
-    if (process.env.NODE_ENV === "development") {
-      console.log("Initiating Strava OAuth flow.");
-    }
-
     const stravaAuthUrl =
       `https://www.strava.com/oauth/authorize?` +
       `client_id=${clientId}&` +
