@@ -49,19 +49,19 @@ function StravaCallbackContent() {
 
     // Check if we've already processed this exact authorization
     if (processedRef.current || safeSessionStorage.hasKey(authKey)) {
-      console.log("Already processed this authorization, skipping...");
+      // Already processed this authorization, skipping...
       return;
     }
 
     const handleCallback = async () => {
       processedRef.current = true;
       safeSessionStorage.setItem(authKey, "processed");
-      console.log("Starting callback processing...");
+      // Starting callback processing...
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       const error = searchParams.get("error");
 
-      console.log("Callback received:", { code: !!code, state, error });
+      // Callback received: { code: !!code, state, error }
 
       if (error) {
         setStatus("error");
