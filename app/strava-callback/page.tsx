@@ -8,7 +8,37 @@ function StravaCallbackContent() {
   );
   const [message, setMessage] = useState("Processing Strava authorization...");
   const processedRef = useRef(false);
+  const fallbackProcessedRef = useRef(new Set<string>()); // Fallback for when sessionStorage isn't available
   const searchParams = useSearchParams();
+
+  // Helper function to safely use sessionStorage
+  const safeSessionStorage = {
+    getItem: (key: string): string | null => {
+      try {
+        return sessionStorage.getItem(key);
+      } catch (error) {
+        console.warn("SessionStorage not available:", error);
+        return null;
+      }
+    },
+    setItem: (key: string, value: string): void => {
+      try {
+        sessionStorage.setItem(key, value);
+      } catch (error) {
+        console.warn("SessionStorage not available:", error);
+        // Use in-memory fallback
+        fallbackProcessedRef.current.add(key);
+      }
+    },
+    hasKey: (key: string): boolean => {
+      try {
+        return sessionStorage.getItem(key) !== null;
+      } catch (error) {
+        // Fallback to in-memory check
+        return fallbackProcessedRef.current.has(key);
+      }
+    },
+  };
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -18,14 +48,14 @@ function StravaCallbackContent() {
     const authKey = `strava_auth_${code}_${state}`;
 
     // Check if we've already processed this exact authorization
-    if (processedRef.current || sessionStorage.getItem(authKey)) {
+    if (processedRef.current || safeSessionStorage.hasKey(authKey)) {
       console.log("Already processed this authorization, skipping...");
       return;
     }
 
     const handleCallback = async () => {
       processedRef.current = true;
-      sessionStorage.setItem(authKey, "processed");
+      safeSessionStorage.setItem(authKey, "processed");
       console.log("Starting callback processing...");
       const code = searchParams.get("code");
       const state = searchParams.get("state");
@@ -48,7 +78,7 @@ function StravaCallbackContent() {
       }
 
       // Verify state (basic CSRF protection)
-      const storedState = sessionStorage.getItem("strava_oauth_state");
+      const storedState = safeSessionStorage.getItem("strava_oauth_state");
       if (state !== storedState) {
         setStatus("error");
         setMessage("Invalid state parameter.");
