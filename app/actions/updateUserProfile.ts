@@ -23,7 +23,8 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   }
 
   const name = formData.get("name")?.toString() || "";
-  const image = formData.get("image")?.toString() || null;
+  const imageRaw = formData.get("image")?.toString() || "";
+  const image = imageRaw.trim() === "" ? null : imageRaw; // Convert empty string to null
   const weightUnit = formData.get("weight_unit")?.toString() || null;
   const distanceUnit = formData.get("distance_unit")?.toString() || null;
   const currencyUnit = formData.get("currency_unit")?.toString() || null;
@@ -32,7 +33,7 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   console.log("Updating user profile with:", {
     userId,
     name,
-    image,
+    image: image === null ? "NULL" : image, // Show NULL explicitly for debugging
     weightUnit,
     distanceUnit,
     currencyUnit,
@@ -78,7 +79,7 @@ async function updateUserProfile(formData: FormData): Promise<void> {
   const variables = {
     userId,
     name,
-    image: image || null,
+    image: image, // Pass null directly, don't convert to empty string
     weight_unit: weightUnit || null,
     distance_unit: distanceUnit || null,
     currency_unit: currencyUnit || null,

@@ -1,16 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Bike, MapPin, Calendar, Wrench } from "lucide-react";
+import { Bike, MapPin } from "lucide-react";
 
 interface StravaBike {
   id: string;
   name: string;
   nickname: string;
   distance: number;
-  brand_name: string;
-  model_name: string;
-  frame_type: number;
-  description: string;
+  converted_distance: number;
+  primary: boolean;
+  retired: boolean;
+  resource_state: number;
 }
 
 interface StravaBikesResponse {
@@ -58,6 +58,7 @@ export default function StravaBikesList({
         setBikes([]);
       } else {
         setBikes(data.bikes || []);
+        console.log("Fetched Strava bikes:", data.bikes);
       }
     } catch (err) {
       console.error("Error fetching Strava bikes:", err);
@@ -71,16 +72,6 @@ export default function StravaBikesList({
   const formatDistance = (distanceInMeters: number): string => {
     const km = Math.round(distanceInMeters / 1000);
     return `${km.toLocaleString()} km`;
-  };
-
-  const getFrameTypeName = (frameType: number): string => {
-    const frameTypes: { [key: number]: string } = {
-      1: "MTB",
-      2: "Cross",
-      3: "Road",
-      4: "Time Trial",
-    };
-    return frameTypes[frameType] || "Other";
   };
 
   // Don't render anything if Strava is not connected
@@ -140,13 +131,19 @@ export default function StravaBikesList({
                   <h4 className="font-medium text-gray-900">
                     {bike.nickname || bike.name}
                   </h4>
-                  <p className="text-sm text-gray-600">
-                    {bike.brand_name} {bike.model_name}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {bike.primary && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Primary
+                      </span>
+                    )}
+                    {bike.retired && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Retired
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {getFrameTypeName(bike.frame_type)}
-                </span>
               </div>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -154,14 +151,6 @@ export default function StravaBikesList({
                   <MapPin size={14} />
                   <span>{formatDistance(bike.distance)}</span>
                 </div>
-                {bike.description && (
-                  <div className="flex items-center gap-1">
-                    <Wrench size={14} />
-                    <span className="truncate max-w-xs">
-                      {bike.description}
-                    </span>
-                  </div>
-                )}
               </div>
 
               <div className="mt-2 text-xs text-gray-400">

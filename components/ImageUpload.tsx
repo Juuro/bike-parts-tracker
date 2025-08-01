@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -18,6 +18,11 @@ export default function ImageUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync preview with currentImage prop changes
+  useEffect(() => {
+    setPreview(currentImage || null);
+  }, [currentImage]);
 
   const validateFile = (file: File): boolean => {
     // Check file type
@@ -104,7 +109,31 @@ export default function ImageUpload({
     }
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
+    // If there's a current image that looks like a Cloudinary URL, delete it
+    if (currentImage && currentImage.includes("cloudinary.com")) {
+      try {
+        const response = await fetch("/api/upload/profile-image/delete", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageUrl: currentImage }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          console.log("Image deleted from Cloudinary:", result.message);
+        } else {
+          console.error("Failed to delete from Cloudinary:", result.error);
+          // Continue with removal even if Cloudinary deletion fails
+        }
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        // Continue with removal even if deletion API fails
+      }
+    }
+
     setPreview(null);
     onImageRemove();
     if (fileInputRef.current) {

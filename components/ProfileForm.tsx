@@ -221,14 +221,14 @@ export default function ProfileForm({
                 }}
                 onImageRemove={() => {
                   console.log("ImageUpload callback - removing image");
-                  setUploadedImage("");
+                  setUploadedImage(null); // Use null instead of empty string
                 }}
               />
               {/* Hidden input to pass the image URL to the form */}
               <input
                 type="hidden"
                 name="image"
-                value={uploadedImage || userProfile.image || ""}
+                value={uploadedImage ?? userProfile.image ?? ""}
               />
             </div>
           </div>
