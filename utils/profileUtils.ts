@@ -10,6 +10,44 @@ export const SUPPORTED_CURRENCIES = [
   { value: "JPY", label: "Japanese Yen (JPY)", symbol: "¥" },
 ];
 
+export const getDefaultCurrencyByLocale = (): string => {
+  // Try to use the browser's locale to guess a default currency
+  if (typeof window !== "undefined" && window.navigator.language) {
+    const locale = window.navigator.language;
+
+    // Map common locales to currencies
+    const localeToCurrency: { [key: string]: string } = {
+      "en-US": "USD",
+      "en-GB": "GBP",
+      "en-AU": "AUD",
+      "de-DE": "EUR",
+      "de-CH": "CHF",
+      "fr-FR": "EUR",
+      "fr-CH": "CHF",
+      "ja-JP": "JPY",
+      "es-ES": "EUR",
+      "en-CA": "CAD",
+      "fr-CA": "CAD",
+    };
+
+    // Check for exact match first
+    if (localeToCurrency[locale]) {
+      return localeToCurrency[locale];
+    }
+
+    // Check for language prefix matches
+    const language = locale.split("-")[0];
+    if (language === "de") return "EUR";
+    if (language === "fr") return "EUR";
+    if (language === "es") return "EUR";
+    if (language === "ja") return "JPY";
+    if (language === "en") return "USD"; // Default English to USD
+  }
+
+  // Fallback to USD
+  return "USD";
+};
+
 export const SUPPORTED_WEIGHT_UNITS = [
   { value: "kg", label: "Kilograms (kg)" },
   { value: "lbs", label: "Pounds (lbs)" },
