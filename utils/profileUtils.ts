@@ -39,7 +39,7 @@ export const validateProfileImage = (url: string): boolean => {
       "googleusercontent.com",
       "githubusercontent.com",
       "cloudinary.com",
-      "res.cloudinary.com", // Cloudinary CDN
+      "res.cloudinary.com",
     ];
     const parsedUrl = new URL(url);
     const hasValidDomain = imageDomains.some((domain) => {
