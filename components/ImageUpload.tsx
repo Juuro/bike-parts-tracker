@@ -70,7 +70,6 @@ export default function ImageUpload({
 
       setPreview(data.url);
       onImageUpload(data.url);
-      console.log("Image uploaded successfully, URL:", data.url);
       toast.success("Profile image uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
