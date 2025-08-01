@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-// Removed unnecessary import of react-hot-toast
 
 export const dynamic = "force-dynamic";
 
