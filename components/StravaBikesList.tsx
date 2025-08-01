@@ -58,7 +58,6 @@ export default function StravaBikesList({
         setBikes([]);
       } else {
         setBikes(data.bikes || []);
-        console.log("Fetched Strava bikes:", data.bikes);
       }
     } catch (err) {
       console.error("Error fetching Strava bikes:", err);

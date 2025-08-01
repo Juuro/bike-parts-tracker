@@ -79,51 +79,96 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Fetch the latest user data from the database to ensure session is up-to-date
       if (token.sub) {
-        try {
-          const query = `
-            query GetUser($userId: uuid!) {
-              users_by_pk(id: $userId) {
-                id
-                name
-                email
-                image
-                emailVerified
+        let retryCount = 0;
+        const maxRetries = 2;
+
+        while (retryCount <= maxRetries) {
+          try {
+            const query = `
+              query GetUser($userId: uuid!) {
+                users_by_pk(id: $userId) {
+                  id
+                  name
+                  email
+                  image
+                  emailVerified
+                }
               }
+            `;
+
+            const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+              },
+              body: JSON.stringify({
+                query,
+                variables: { userId: token.sub },
+              }),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+
+              if (result.errors) {
+                throw new Error(
+                  `GraphQL errors: ${JSON.stringify(result.errors)}`
+                );
+              }
+
+              const dbUser = result.data?.users_by_pk;
+
+              if (dbUser) {
+                // Update session with latest data from database
+                session.user = {
+                  ...session.user,
+                  id: dbUser.id,
+                  name: dbUser.name,
+                  email: dbUser.email,
+                  image: dbUser.image,
+                  emailVerified: dbUser.emailVerified,
+                };
+                // Mark session as fresh
+                (session as any).dataFresh = true;
+                break; // Success, exit retry loop
+              } else {
+                console.warn(`User ${token.sub} not found in database`);
+                (session as any).dataFresh = false;
+                (session as any).dataError = "User not found in database";
+                break; // No point retrying if user doesn't exist
+              }
+            } else {
+              throw new Error(
+                `HTTP ${response.status}: ${response.statusText}`
+              );
             }
-          `;
+          } catch (error) {
+            retryCount++;
+            const isLastRetry = retryCount > maxRetries;
 
-          const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-            },
-            body: JSON.stringify({
-              query,
-              variables: { userId: token.sub },
-            }),
-          });
+            console.error(
+              `Error fetching user data in session callback (attempt ${retryCount}/${
+                maxRetries + 1
+              }):`,
+              error
+            );
 
-          if (response.ok) {
-            const result = await response.json();
-            const dbUser = result.data?.users_by_pk;
-
-            if (dbUser) {
-              // Update session with latest data from database
-              session.user = {
-                ...session.user,
-                id: dbUser.id,
-                name: dbUser.name,
-                email: dbUser.email,
-                image: dbUser.image,
-                emailVerified: dbUser.emailVerified,
-              };
+            if (isLastRetry) {
+              // Mark session as potentially stale after all retries failed
+              (session as any).dataFresh = false;
+              (session as any).dataError =
+                error instanceof Error ? error.message : "Unknown error";
+              console.error(
+                "All retries failed. Session may contain stale data."
+              );
+            } else {
+              // Wait briefly before retry
+              await new Promise((resolve) =>
+                setTimeout(resolve, 100 * retryCount)
+              );
             }
           }
-        } catch (error) {
-          console.error("Error fetching user data in session callback:", error);
-          // Fall back to existing session data if there's an error
-          // Error is logged, but session object remains unmodified.
         }
       }
 
