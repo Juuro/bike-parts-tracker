@@ -18,7 +18,7 @@ const UserButton = () => {
   return (
     <div className="flex gap-2 items-center">
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex gap-2 items-center hover:bg-gray-100 rounded-md px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="User menu">
+        <DropdownMenuTrigger className="flex gap-2 items-center hover:bg-gray-100 rounded-md px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label={`User account menu for ${session.user.name}`}>
           <div className="flex items-center gap-2">
             {session.user.image ? (
               <img 
