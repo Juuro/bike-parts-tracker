@@ -87,7 +87,14 @@ const fetchUserProfile = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    // Log detailed error information for debugging
+    console.error("Error fetching user profile:", {
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      stack: error instanceof Error ? error.stack : undefined,
+      apiDomain,
+      timestamp: new Date().toISOString(),
+    });
     return null; // Return null to indicate error state
   }
 };
