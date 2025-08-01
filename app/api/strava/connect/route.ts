@@ -88,8 +88,7 @@ export const POST = async (request: NextRequest) => {
           stravaAccessToken: access_token,
           stravaRefreshToken: refresh_token,
           stravaExpiresAt: expires_at,
-          stravaUser:
-            athlete.username || `${athlete.firstname}_${athlete.lastname}`,
+          stravaUser: athlete.username,
         },
       }),
     });
