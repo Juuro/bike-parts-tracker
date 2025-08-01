@@ -41,7 +41,23 @@ export const getDefaultCurrencyByLocale = (): string => {
     if (language === "fr") return "EUR";
     if (language === "es") return "EUR";
     if (language === "ja") return "JPY";
-    if (language === "en") return "USD"; // Default English to USD
+    if (language === "en") {
+      // Try to infer currency from region if possible
+      const region = locale.split("-")[1];
+      switch (region) {
+        case "GB": return "GBP";
+        case "AU": return "AUD";
+        case "NZ": return "NZD";
+        case "IE": return "EUR";
+        case "IN": return "INR";
+        case "CA": return "CAD";
+        case "ZA": return "ZAR";
+        case "SG": return "SGD";
+        case "HK": return "HKD";
+        case "US": return "USD";
+        default: return "USD"; // Fallback for unknown English region
+      }
+    }
   }
 
   // Fallback to USD
