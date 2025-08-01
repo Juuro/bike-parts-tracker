@@ -88,14 +88,6 @@ export default function ProfileForm({
     setValidationErrors({});
 
     // Debug: Log all form data
-    console.log("Form submission - FormData contents:");
-    console.log("name:", formData.get("name"));
-    console.log("image:", formData.get("image"));
-    console.log("weight_unit:", formData.get("weight_unit"));
-    console.log("distance_unit:", formData.get("distance_unit"));
-    console.log("currency_unit:", formData.get("currency_unit"));
-    console.log("strava_user:", formData.get("strava_user"));
-    console.log("uploadedImage state:", uploadedImage);
 
     if (!validateForm(formData)) {
       setIsLoading(false);
