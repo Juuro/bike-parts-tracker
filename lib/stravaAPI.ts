@@ -57,7 +57,8 @@ export class StravaAPI {
         },
       });
       return response.ok;
-    } catch {
+    } catch (error) {
+      console.error("Error validating Strava token:", error);
       return false;
     }
   }
