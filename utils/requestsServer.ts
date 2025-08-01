@@ -88,7 +88,7 @@ const fetchUserProfile = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    return {};
+    return null; // Return null to indicate error state
   }
 };
 
