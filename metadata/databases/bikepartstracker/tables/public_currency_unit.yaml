@@ -6,6 +6,8 @@ select_permissions:
     permission:
       columns:
         - unit
+        - label
+        - symbol
       filter: {}
       allow_aggregations: true
     comment: ""
