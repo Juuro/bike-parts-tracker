@@ -5,6 +5,9 @@ interface CacheEntry<T> {
   ttl: number;
 }
 
+// Configuration constants
+const CLEANUP_PROBABILITY = 0.01; // 1% chance of cleanup per cache access
+
 class SimpleCache {
   private cache = new Map<string, CacheEntry<any>>();
 
@@ -87,8 +90,8 @@ export async function getCachedOrFetch<T>(
   fetchFn: () => Promise<T>,
   ttlMs: number = 60000 // 1 minute default
 ): Promise<T> {
-  // Occasionally clean up expired entries (1% chance per call to avoid performance impact)
-  if (Math.random() < 0.01) {
+  // Occasionally clean up expired entries to prevent memory bloat
+  if (Math.random() < CLEANUP_PROBABILITY) {
     apiCache.cleanup();
   }
 
