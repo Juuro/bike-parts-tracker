@@ -32,7 +32,7 @@ export async function invalidateSessionCache(): Promise<void> {
  * Forces a session refresh by accessing the current session
  * This will trigger the session callback and fetch fresh user data if needed
  */
-export async function refreshSessionData(): Promise<any> {
+export async function refreshSessionData(): Promise<ExtendedSession | null> {
   try {
     // Force session refresh by accessing it
     const session = await auth();
