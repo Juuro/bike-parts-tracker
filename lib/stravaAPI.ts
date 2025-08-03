@@ -64,11 +64,7 @@ export class StravaAPI {
   }
 
   // Refresh access token using refresh token
-  static async refreshToken(refreshToken: string): Promise<{
-    access_token: string;
-    refresh_token: string;
-    expires_at: number;
-  } | null> {
+  static async refreshToken(refreshToken: string): Promise<StravaTokenResponse | null> {
     try {
       const response = await fetch("https://www.strava.com/oauth/token", {
         method: "POST",
