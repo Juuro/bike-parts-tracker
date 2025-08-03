@@ -97,7 +97,7 @@ export async function refreshSessionData(): Promise<ExtendedSession | null> {
 /**
  * Utility to check if session data is fresh
  */
-export function isSessionDataFresh(session: any): boolean {
+export function isSessionDataFresh(session: ExtendedSession): boolean {
   if (!session) return false;
 
   // Check if data is marked as fresh
