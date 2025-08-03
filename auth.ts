@@ -34,7 +34,6 @@ const Strava: Provider = {
 };
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  debug: true,
   providers: [Google, Strava],
   adapter: HasuraAdapter({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
@@ -85,9 +84,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }) => {
-      console.log(
-        "Session callback triggered - evaluating if user data fetch is needed"
-      );
       (session as any).accessToken = token.accessToken; // Pass accessToken to the session
       session.userId = token.sub ?? "";
 
@@ -95,21 +91,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const shouldFetchUserData = () => {
         // Never fetch if we already have user ID - this is the key fix
         if (session.user?.id) {
-          console.log(
-            "Session callback: User data already present, skipping fetch"
-          );
           return false;
         }
 
         // Only fetch on absolute first session creation when no user data exists at all
         if (!session.user || !session.user.name || !session.user.email) {
-          console.log("Session callback: No user data present, need to fetch");
           return true;
         }
 
         // Check if there's a cache invalidation flag in the token
         if (token.invalidateUserCache) {
-          console.log("Session callback: Cache invalidation flag present");
           return true;
         }
 
@@ -119,10 +110,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Only fetch user data when absolutely necessary
       if (token.sub && shouldFetchUserData()) {
-        console.log(
-          "Session callback: Fetching user data from Hasura (rare case)"
-        );
-
         try {
           const result = await makeRateLimitedRequest(async () => {
             const query = `
@@ -183,7 +170,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             (session as any).userDataUpdatedAt = Date.now();
             // Clear any cache invalidation flag
             delete (token as any).invalidateUserCache;
-            console.log("Session callback: User data fetched successfully");
           } else {
             console.warn(`User ${token.sub} not found in database`);
             (session as any).dataFresh = false;
@@ -197,9 +183,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             error instanceof Error ? error.message : "Unknown error";
         }
       } else {
-        console.log(
-          "Session callback: Using existing user data (no fetch needed)"
-        );
         // Preserve existing cache state when not fetching
         (session as any).dataFresh = (session as any).dataFresh ?? true;
         (session as any).userDataUpdatedAt =

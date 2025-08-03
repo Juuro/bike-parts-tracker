@@ -82,12 +82,10 @@ export async function getCachedOrFetch<T>(
   // Try to get from cache first
   const cached = apiCache.get<T>(cacheKey);
   if (cached !== null) {
-    console.log(`Cache hit for ${cacheKey}`);
     return cached;
   }
 
   // Not in cache, fetch and store
-  console.log(`Cache miss for ${cacheKey}, fetching...`);
   const data = await fetchFn();
   apiCache.set(cacheKey, data, ttlMs);
 
