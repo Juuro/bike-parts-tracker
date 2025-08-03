@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import type { Provider } from "next-auth/providers";
 import { HasuraAdapter } from "@auth/hasura-adapter";
 import { SignJWT } from "jose";
@@ -44,8 +45,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, account, profile }) {
-      token.accessToken = "";
-
       // Store Strava access token if connecting via Strava
       if (account?.provider === "strava" && account?.access_token) {
         token.stravaAccessToken = account.access_token;
@@ -53,7 +52,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.stravaExpiresAt = account.expires_at;
       }
 
-      const encodedToken = await new SignJWT(token)
+      // Create JWT payload with only necessary claims (don't include accessToken to avoid circular reference)
+      const jwtPayload = {
+        sub: token.sub,
+        iat: Math.floor(Date.now() / 1000),
+        "https://hasura.io/jwt/claims": {
+          "x-hasura-allowed-roles": ["user"],
+          "x-hasura-default-role": "user",
+          "x-hasura-role": "user",
+          "x-hasura-user-id": token.sub,
+        },
+      };
+
+      const encodedToken = await new SignJWT(jwtPayload)
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .sign(new TextEncoder().encode(process.env.JWT_SECRET));
@@ -74,36 +85,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }) => {
+      console.log(
+        "Session callback triggered - evaluating if user data fetch is needed"
+      );
       (session as any).accessToken = token.accessToken; // Pass accessToken to the session
       session.userId = token.sub ?? "";
 
-      // Check if we need to fetch fresh user data
+      // MUCH MORE AGGRESSIVE CACHING - Only fetch user data in very specific cases
       const shouldFetchUserData = () => {
-        // Always fetch on first session creation (no existing session data)
-        if (!session.user?.id) return true;
+        // Never fetch if we already have user ID - this is the key fix
+        if (session.user?.id) {
+          console.log(
+            "Session callback: User data already present, skipping fetch"
+          );
+          return false;
+        }
+
+        // Only fetch on absolute first session creation when no user data exists at all
+        if (!session.user || !session.user.name || !session.user.email) {
+          console.log("Session callback: No user data present, need to fetch");
+          return true;
+        }
 
         // Check if there's a cache invalidation flag in the token
-        if (token.invalidateUserCache) return true;
+        if (token.invalidateUserCache) {
+          console.log("Session callback: Cache invalidation flag present");
+          return true;
+        }
 
-        // Check if session data is marked as stale
-        if ((session as any).dataFresh === false) return true;
-
-        // Check if user data is older than 1 hour (configurable)
-        const lastUpdated = (session as any).userDataUpdatedAt;
-        if (!lastUpdated) return true;
-
-        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-        const isStale = Date.now() - lastUpdated > oneHour;
-        return isStale;
+        // Don't fetch if marked as stale - let it stay stale rather than hit rate limits
+        return false;
       };
 
-      // Only fetch user data when necessary
+      // Only fetch user data when absolutely necessary
       if (token.sub && shouldFetchUserData()) {
-        let retryCount = 0;
-        const maxRetries = 2;
+        console.log(
+          "Session callback: Fetching user data from Hasura (rare case)"
+        );
 
-        while (retryCount <= maxRetries) {
-          try {
+        try {
+          const result = await makeRateLimitedRequest(async () => {
             const query = `
               query GetUser($userId: uuid!) {
                 users_by_pk(id: $userId) {
@@ -128,72 +149,57 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }),
             });
 
-            if (response.ok) {
-              const result = await response.json();
-
-              if (result.errors) {
-                throw new Error(
-                  `GraphQL errors: ${JSON.stringify(result.errors)}`
-                );
-              }
-
-              const dbUser = result.data?.users_by_pk;
-
-              if (dbUser) {
-                // Update session with latest data from database
-                session.user = {
-                  ...session.user,
-                  id: dbUser.id,
-                  name: dbUser.name,
-                  email: dbUser.email,
-                  image: dbUser.image,
-                  emailVerified: dbUser.emailVerified,
-                };
-                // Mark session as fresh with timestamp
-                (session as any).dataFresh = true;
-                (session as any).userDataUpdatedAt = Date.now();
-                // Clear any cache invalidation flag
-                delete (token as any).invalidateUserCache;
-                break; // Success, exit retry loop
-              } else {
-                console.warn(`User ${token.sub} not found in database`);
-                (session as any).dataFresh = false;
-                (session as any).dataError = "User not found in database";
-                break; // No point retrying if user doesn't exist
-              }
-            } else {
+            if (!response.ok) {
               throw new Error(
                 `HTTP ${response.status}: ${response.statusText}`
               );
             }
-          } catch (error) {
-            retryCount++;
-            const isLastRetry = retryCount > maxRetries;
 
-            console.error(
-              `Error fetching user data in session callback (attempt ${retryCount}/${
-                maxRetries + 1
-              }):`,
-              error
-            );
+            const result = await response.json();
 
-            if (isLastRetry) {
-              // Mark session as potentially stale after all retries failed
-              (session as any).dataFresh = false;
-              (session as any).dataError =
-                error instanceof Error ? error.message : "Unknown error";
-              console.error(
-                "All retries failed. Session may contain stale data."
-              );
-            } else {
-              // Wait briefly before retry
-              await new Promise((resolve) =>
-                setTimeout(resolve, 100 * retryCount)
+            if (result.errors) {
+              throw new Error(
+                `GraphQL errors: ${JSON.stringify(result.errors)}`
               );
             }
+
+            return result;
+          }, 1); // Only 1 retry to avoid amplification
+
+          const dbUser = result.data?.users_by_pk;
+
+          if (dbUser) {
+            // Update session with latest data from database
+            session.user = {
+              ...session.user,
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              image: dbUser.image,
+              emailVerified: dbUser.emailVerified,
+            };
+            // Mark session as fresh with timestamp
+            (session as any).dataFresh = true;
+            (session as any).userDataUpdatedAt = Date.now();
+            // Clear any cache invalidation flag
+            delete (token as any).invalidateUserCache;
+            console.log("Session callback: User data fetched successfully");
+          } else {
+            console.warn(`User ${token.sub} not found in database`);
+            (session as any).dataFresh = false;
+            (session as any).dataError = "User not found in database";
           }
+        } catch (error) {
+          console.error("Error fetching user data in session callback:", error);
+          // Mark session as potentially stale after error but don't fail
+          (session as any).dataFresh = false;
+          (session as any).dataError =
+            error instanceof Error ? error.message : "Unknown error";
         }
       } else {
+        console.log(
+          "Session callback: Using existing user data (no fetch needed)"
+        );
         // Preserve existing cache state when not fetching
         (session as any).dataFresh = (session as any).dataFresh ?? true;
         (session as any).userDataUpdatedAt =
