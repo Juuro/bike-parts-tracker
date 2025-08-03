@@ -119,11 +119,11 @@ const fetchAvailableUnits = async () => {
       }
     `;
 
-    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+    const response = await fetch(HASURA_PROJECT_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Hasura-Admin-Secret": process.env.HASURA_ADMIN_SECRET!,
+        "X-Hasura-Admin-Secret": HASURA_ADMIN_SECRET,
       },
       body: JSON.stringify({ query }),
     });
