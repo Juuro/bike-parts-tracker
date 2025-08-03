@@ -6,7 +6,7 @@ import { useRef } from "react";
 // In-memory fallback storage for when sessionStorage/localStorage isn't available
 
 // Returns a per-window memory storage (client-only), or a no-op storage on the server
-function getMemoryStorage() {
+function getMemoryStorage(): Map<string, string> {
   if (typeof window !== "undefined") {
     // Use a single Map per window (client)
     if (!(window as any).__memoryStorage) {
@@ -14,15 +14,22 @@ function getMemoryStorage() {
     }
     return (window as any).__memoryStorage as Map<string, string>;
   } else {
-    // No-op storage for server (SSR)
-    return {
+    // Server-side no-op storage that implements Map interface
+    const serverMap = {
       get: (_key: string) => undefined,
-      set: (_key: string, _value: string) => undefined,
-      delete: (_key: string) => undefined,
+      set: (key: string, value: string) => serverMap as any,
+      delete: (_key: string) => false,
       has: (_key: string) => false,
-      clear: () => undefined,
-      keys: () => [].values(),
-    } as Map<string, string>;
+      clear: () => {},
+      keys: () => [][Symbol.iterator](),
+      values: () => [][Symbol.iterator](),
+      entries: () => [][Symbol.iterator](),
+      forEach: () => {},
+      size: 0,
+      [Symbol.iterator]: () => [][Symbol.iterator](),
+      [Symbol.toStringTag]: "Map",
+    };
+    return serverMap as unknown as Map<string, string>;
   }
 }
 export interface SafeStorage {
@@ -39,8 +46,11 @@ export const safeSessionStorage: SafeStorage = {
     try {
       return sessionStorage.getItem(key);
     } catch (error) {
-      console.warn("SessionStorage not available, using memory fallback:", error);
-      return memoryStorage.get(key) || null;
+      console.warn(
+        "SessionStorage not available, using memory fallback:",
+        error
+      );
+      return getMemoryStorage().get(key) || null;
     }
   },
 
@@ -48,8 +58,11 @@ export const safeSessionStorage: SafeStorage = {
     try {
       sessionStorage.setItem(key, value);
     } catch (error) {
-      console.warn("SessionStorage not available, using memory fallback:", error);
-      memoryStorage.set(key, value);
+      console.warn(
+        "SessionStorage not available, using memory fallback:",
+        error
+      );
+      getMemoryStorage().set(key, value);
     }
   },
 
@@ -57,8 +70,11 @@ export const safeSessionStorage: SafeStorage = {
     try {
       sessionStorage.removeItem(key);
     } catch (error) {
-      console.warn("SessionStorage not available, using memory fallback:", error);
-      memoryStorage.delete(key);
+      console.warn(
+        "SessionStorage not available, using memory fallback:",
+        error
+      );
+      getMemoryStorage().delete(key);
     }
   },
 
@@ -67,7 +83,7 @@ export const safeSessionStorage: SafeStorage = {
       return sessionStorage.getItem(key) !== null;
     } catch (error) {
       // Fallback to in-memory check
-      return memoryStorage.has(key);
+      return getMemoryStorage().has(key);
     }
   },
 
@@ -75,8 +91,11 @@ export const safeSessionStorage: SafeStorage = {
     try {
       sessionStorage.clear();
     } catch (error) {
-      console.warn("SessionStorage not available, clearing memory fallback:", error);
-      memoryStorage.clear();
+      console.warn(
+        "SessionStorage not available, clearing memory fallback:",
+        error
+      );
+      getMemoryStorage().clear();
     }
   },
 };
@@ -88,7 +107,7 @@ export const safeLocalStorage: SafeStorage = {
       return localStorage.getItem(key);
     } catch (error) {
       console.warn("LocalStorage not available, using memory fallback:", error);
-      return memoryStorage.get(`local_${key}`) || null;
+      return getMemoryStorage().get(`local_${key}`) || null;
     }
   },
 
@@ -97,7 +116,7 @@ export const safeLocalStorage: SafeStorage = {
       localStorage.setItem(key, value);
     } catch (error) {
       console.warn("LocalStorage not available, using memory fallback:", error);
-      memoryStorage.set(`local_${key}`, value);
+      getMemoryStorage().set(`local_${key}`, value);
     }
   },
 
@@ -106,7 +125,7 @@ export const safeLocalStorage: SafeStorage = {
       localStorage.removeItem(key);
     } catch (error) {
       console.warn("LocalStorage not available, using memory fallback:", error);
-      memoryStorage.delete(`local_${key}`);
+      getMemoryStorage().delete(`local_${key}`);
     }
   },
 
@@ -115,7 +134,7 @@ export const safeLocalStorage: SafeStorage = {
       return localStorage.getItem(key) !== null;
     } catch (error) {
       // Fallback to in-memory check
-      return memoryStorage.has(`local_${key}`);
+      return getMemoryStorage().has(`local_${key}`);
     }
   },
 
@@ -123,12 +142,16 @@ export const safeLocalStorage: SafeStorage = {
     try {
       localStorage.clear();
     } catch (error) {
-      console.warn("LocalStorage not available, clearing memory fallback:", error);
+      console.warn(
+        "LocalStorage not available, clearing memory fallback:",
+        error
+      );
       // Clear only localStorage keys from memory fallback
-      const keysToDelete = Array.from(memoryStorage.keys()).filter(key => 
+      const memStorage = getMemoryStorage();
+      const keysToDelete = Array.from(memStorage.keys()).filter((key: string) =>
         key.startsWith("local_")
       );
-      keysToDelete.forEach(key => memoryStorage.delete(key));
+      keysToDelete.forEach((key) => memStorage.delete(key));
     }
   },
 };
@@ -157,11 +180,13 @@ export const useSafeComponentStorage = () => {
 };
 
 // Utility function to check if storage is available
-export const isStorageAvailable = (type: 'localStorage' | 'sessionStorage'): boolean => {
+export const isStorageAvailable = (
+  type: "localStorage" | "sessionStorage"
+): boolean => {
   try {
     const storage = window[type];
-    const testKey = '__storage_test__';
-    storage.setItem(testKey, 'test');
+    const testKey = "__storage_test__";
+    storage.setItem(testKey, "test");
     storage.removeItem(testKey);
     return true;
   } catch (error) {
