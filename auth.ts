@@ -81,17 +81,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const shouldFetchUserData = () => {
         // Always fetch on first session creation (no existing session data)
         if (!session.user?.id) return true;
-        
+
         // Check if there's a cache invalidation flag in the token
         if (token.invalidateUserCache) return true;
-        
+
         // Check if session data is marked as stale
         if ((session as any).dataFresh === false) return true;
-        
+
         // Check if user data is older than 1 hour (configurable)
         const lastUpdated = (session as any).userDataUpdatedAt;
         if (!lastUpdated) return true;
-        
+
         const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
         const isStale = Date.now() - lastUpdated > oneHour;
         return isStale;
@@ -196,7 +196,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       } else {
         // Preserve existing cache state when not fetching
         (session as any).dataFresh = (session as any).dataFresh ?? true;
-        (session as any).userDataUpdatedAt = (session as any).userDataUpdatedAt ?? Date.now();
+        (session as any).userDataUpdatedAt =
+          (session as any).userDataUpdatedAt ?? Date.now();
       }
 
       return session;

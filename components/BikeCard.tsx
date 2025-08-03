@@ -3,6 +3,11 @@ import Card from "./Card";
 import Image from "next/image";
 import Link from "next/link";
 import { Bike } from "lucide-react";
+import {
+  applyPresetToUrl,
+  isCloudinaryUrl,
+  CLOUDINARY_PRESETS,
+} from "@/utils/cloudinaryUtils";
 
 type BikeCardProps = {
   bike: Bike;
@@ -11,21 +16,25 @@ type BikeCardProps = {
 const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
   const images = bike.images?.split(",");
 
+  // Optimize the first image if it's from Cloudinary
+  const optimizedImageUrl =
+    images?.[0] && isCloudinaryUrl(images[0])
+      ? applyPresetToUrl(images[0], CLOUDINARY_PRESETS.BIKE_CARD)
+      : images?.[0];
+
   console.log("images", images);
 
   return (
     <Card>
       <Link href={`/bikes/${bike.id}`}>
         <div className="aspect-[3/2] relative">
-          {images && images[0] ? (
-            images[0] && (
-              <Image
-                className="w-full h-auto object-cover"
-                src={images[0]}
-                alt=""
-                fill={true}
-              />
-            )
+          {optimizedImageUrl ? (
+            <Image
+              className="w-full h-auto object-cover"
+              src={optimizedImageUrl}
+              alt={`${bike.name} bike`}
+              fill={true}
+            />
           ) : (
             <Bike
               strokeWidth={2}

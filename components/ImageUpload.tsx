@@ -2,6 +2,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { isCloudinaryUrl } from "@/utils/cloudinaryUtils";
 
 // Configuration constants
 const MAX_FILE_SIZE_MB = parseInt(
@@ -116,7 +117,7 @@ export default function ImageUpload({
 
   const handleRemoveImage = async () => {
     // If there's a current image that looks like a Cloudinary URL, delete it
-    if (currentImage && currentImage.includes("cloudinary.com")) {
+    if (currentImage && isCloudinaryUrl(currentImage)) {
       try {
         const response = await fetch("/api/upload/profile-image/delete", {
           method: "DELETE",

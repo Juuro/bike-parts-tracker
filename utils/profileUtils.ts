@@ -1,4 +1,5 @@
 // Profile utilities for the bike parts tracker application
+import { isCloudinaryUrl } from "./cloudinaryUtils";
 
 export const SUPPORTED_CURRENCIES = [
   { value: "USD", label: "US Dollar (USD)", symbol: "$" },
@@ -50,17 +51,28 @@ export const getDefaultCurrencyByLocale = (): string => {
       // Try to infer currency from region if possible
       const region = locale.split("-")[1];
       switch (region) {
-        case "GB": return "GBP";
-        case "AU": return "AUD";
-        case "NZ": return "NZD";
-        case "IE": return "EUR";
-        case "IN": return "INR";
-        case "CA": return "CAD";
-        case "ZA": return "ZAR";
-        case "SG": return "SGD";
-        case "HK": return "HKD";
-        case "US": return "USD";
-        default: return "USD"; // Fallback for unknown English region
+        case "GB":
+          return "GBP";
+        case "AU":
+          return "AUD";
+        case "NZ":
+          return "NZD";
+        case "IE":
+          return "EUR";
+        case "IN":
+          return "INR";
+        case "CA":
+          return "CAD";
+        case "ZA":
+          return "ZAR";
+        case "SG":
+          return "SGD";
+        case "HK":
+          return "HKD";
+        case "US":
+          return "USD";
+        default:
+          return "USD"; // Fallback for unknown English region
       }
     }
   }
@@ -85,6 +97,12 @@ export const validateProfileImage = (url: string): boolean => {
 
   try {
     new URL(url);
+
+    // Enhanced validation using Cloudinary utilities
+    if (isCloudinaryUrl(url)) {
+      return true; // Cloudinary URLs are always valid
+    }
+
     // Check if URL ends with common image extensions
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
     const hasValidExtension = imageExtensions.some((ext) =>
@@ -97,8 +115,6 @@ export const validateProfileImage = (url: string): boolean => {
       "gravatar.com",
       "googleusercontent.com",
       "githubusercontent.com",
-      "cloudinary.com",
-      "res.cloudinary.com",
     ];
     const parsedUrl = new URL(url);
     const hasValidDomain = imageDomains.some((domain) => {

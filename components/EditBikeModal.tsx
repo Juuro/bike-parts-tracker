@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 import toast from "react-hot-toast";
+import { isCloudinaryUrl } from "@/utils/cloudinaryUtils";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -82,11 +83,35 @@ const EditBikeModal: React.FC<ModalProps> = ({
     index: number,
     image: string
   ): Promise<void> => {
-    const initialImages = [...images];
     const remainingImages = [...images];
     remainingImages.splice(index, 1);
 
+    // Update the UI immediately
     setImages(remainingImages);
+
+    // If it's a Cloudinary image, attempt to delete it from Cloudinary
+    if (isCloudinaryUrl(image)) {
+      try {
+        const response = await fetch("/api/upload/bike-image/delete", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageUrl: image }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          console.log("Bike image deleted from Cloudinary:", result.message);
+        } else {
+          console.error("Failed to delete from Cloudinary:", result.error);
+          // Continue with removal even if Cloudinary deletion fails
+        }
+      } catch (error) {
+        console.error("Error deleting bike image:", error);
+        // Continue with removal even if Cloudinary deletion fails
+      }
+    }
   };
 
   return (

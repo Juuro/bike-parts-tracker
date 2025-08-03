@@ -1,5 +1,10 @@
 // Image utilities for bike operations
 import cloudinary from "@/config/cloudinary";
+import {
+  extractPublicIdFromCloudinaryUrl,
+  isCloudinaryUrl,
+  CLOUDINARY_PRESETS,
+} from "@/utils/cloudinaryUtils";
 
 export interface ImageProcessingResult {
   imageUrls: string[];
@@ -228,19 +233,22 @@ export async function deleteImages(
           continue;
         }
 
-        const publicId = removedImage?.split("/").pop()?.split(".")[0] ?? "";
+        // Use the Cloudinary utilities for better parsing
+        if (!isCloudinaryUrl(removedImage)) {
+          console.warn(`Skipping non-Cloudinary URL: ${removedImage}`);
+          continue;
+        }
+
+        const publicId = extractPublicIdFromCloudinaryUrl(removedImage);
 
         if (!publicId) {
           console.warn(`Could not extract public ID from URL: ${removedImage}`);
           continue;
         }
 
-        const result = await cloudinary.uploader.destroy(
-          `bike-parts-tracker/${publicId}`,
-          {
-            resource_type: "image",
-          }
-        );
+        const result = await cloudinary.uploader.destroy(publicId, {
+          resource_type: "image",
+        });
 
         if (result.result === "ok") {
           console.log(`Successfully deleted image: ${publicId}`);
