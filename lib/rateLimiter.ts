@@ -64,7 +64,7 @@ export async function makeRateLimitedRequest<T>(
       const waitTime = globalRateLimiter.getTimeUntilReset();
       console.warn(`Rate limit reached. Waiting ${waitTime}ms before retry...`);
 
-      if (attempt === retries) {
+      if (attempt >= retries) {
         throw new Error("Rate limit exceeded after all retries");
       }
 
