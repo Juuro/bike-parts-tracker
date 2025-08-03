@@ -51,7 +51,7 @@ export const GET = async (request: Request) => {
       5 * 60 * 1000 // Cache for 5 minutes
     );
 
-    return NextResponse.json(result.data);
+    return NextResponse.json(result.data.manufacturer);
   } catch (error) {
     console.error("Error in manufacturers API:", error);
     return NextResponse.json(
