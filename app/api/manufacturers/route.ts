@@ -5,7 +5,7 @@ import { getCachedOrFetch } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
-export const GET = async (request: Request) => {
+export const GET = async () => {
   try {
     const session = await auth();
 
