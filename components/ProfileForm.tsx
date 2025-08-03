@@ -331,7 +331,6 @@ export default function ProfileForm({
             <StravaConnection
               onConnectionChange={(connected) => {
                 setStravaConnected(connected);
-                console.log("Strava connection status:", connected);
               }}
             />
 
