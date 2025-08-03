@@ -69,7 +69,7 @@ class SimpleCache {
 
   // Get cache statistics
   getStats() {
-    const entries: any[] = [];
+    const entries: Array<[string, CacheEntry<unknown>]> = [];
     this.cache.forEach((value, key) => {
       entries.push([key, value]);
     });
