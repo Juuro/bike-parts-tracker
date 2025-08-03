@@ -72,13 +72,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       };
     },
-    // Add user ID to the session and fetch latest user data
+    // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }) => {
       (session as any).accessToken = token.accessToken; // Pass accessToken to the session
       session.userId = token.sub ?? "";
 
-      // Fetch the latest user data from the database to ensure session is up-to-date
-      if (token.sub) {
+      // Check if we need to fetch fresh user data
+      const shouldFetchUserData = () => {
+        // Always fetch on first session creation (no existing session data)
+        if (!session.user?.id) return true;
+        
+        // Check if there's a cache invalidation flag in the token
+        if (token.invalidateUserCache) return true;
+        
+        // Check if session data is marked as stale
+        if ((session as any).dataFresh === false) return true;
+        
+        // Check if user data is older than 1 hour (configurable)
+        const lastUpdated = (session as any).userDataUpdatedAt;
+        if (!lastUpdated) return true;
+        
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+        const isStale = Date.now() - lastUpdated > oneHour;
+        return isStale;
+      };
+
+      // Only fetch user data when necessary
+      if (token.sub && shouldFetchUserData()) {
         let retryCount = 0;
         const maxRetries = 2;
 
@@ -129,8 +149,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                   image: dbUser.image,
                   emailVerified: dbUser.emailVerified,
                 };
-                // Mark session as fresh
+                // Mark session as fresh with timestamp
                 (session as any).dataFresh = true;
+                (session as any).userDataUpdatedAt = Date.now();
+                // Clear any cache invalidation flag
+                delete (token as any).invalidateUserCache;
                 break; // Success, exit retry loop
               } else {
                 console.warn(`User ${token.sub} not found in database`);
@@ -170,6 +193,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           }
         }
+      } else {
+        // Preserve existing cache state when not fetching
+        (session as any).dataFresh = (session as any).dataFresh ?? true;
+        (session as any).userDataUpdatedAt = (session as any).userDataUpdatedAt ?? Date.now();
       }
 
       return session;
