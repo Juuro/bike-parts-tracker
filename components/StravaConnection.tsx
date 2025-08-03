@@ -50,8 +50,8 @@ export default function StravaConnection({
   const connectToStrava = () => {
     setIsConnecting(true);
 
-    // Generate random state for security
-    const state = Math.random().toString(36).substring(2, 15);
+    // Generate cryptographically secure random state for security
+    const state = crypto.randomUUID();
 
     const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
     const redirectUri = `${window.location.origin}/strava-callback`;
