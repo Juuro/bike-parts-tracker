@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import cloudinary from "@/config/cloudinary";
+import { extractPublicIdFromCloudinaryUrl, isCloudinaryUrl } from "@/utils/cloudinaryUtils";
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -21,53 +22,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Extract the public_id from the Cloudinary URL using Cloudinary's utilities
-    const extractPublicIdFromCloudinaryUrl = (url: string): string | null => {
-      try {
-        // Check if it's a Cloudinary URL
-        if (!url.includes('cloudinary.com')) {
-          return null;
-        }
-
-        // Use Cloudinary's url method to parse the URL
-        // First, let's try to extract using the URL structure
-        const urlParts = url.split('/');
-        const uploadIndex = urlParts.findIndex(part => part === 'upload');
-        
-        if (uploadIndex === -1) {
-          return null;
-        }
-
-        // Find the public_id part (after upload and optional version)
-        let publicIdIndex = uploadIndex + 1;
-        
-        // Skip version if present (starts with 'v' followed by numbers)
-        if (urlParts[publicIdIndex] && /^v\d+$/.test(urlParts[publicIdIndex])) {
-          publicIdIndex++;
-        }
-
-        // Get everything from publicIdIndex to the end, but remove file extension
-        const publicIdParts = urlParts.slice(publicIdIndex);
-        if (publicIdParts.length === 0) {
-          return null;
-        }
-
-        // Join the parts and remove file extension and query parameters
-        let publicId = publicIdParts.join('/');
-        publicId = publicId.split('?')[0].split('#')[0]; // Remove query params and fragments
-        publicId = publicId.replace(/\.[a-zA-Z0-9]+$/, ''); // Remove file extension
-        
-        return publicId || null;
-        
-      } catch (error) {
-        console.error('Error parsing Cloudinary URL:', error);
-        return null;
-      }
-    };
-
+    // Extract the public_id from the Cloudinary URL
     const publicId = extractPublicIdFromCloudinaryUrl(imageUrl);
     
-    if (!publicId) {
+    if (!publicId || !isCloudinaryUrl(imageUrl)) {
       // If it's not a Cloudinary URL or can't extract public_id, just return success
       return NextResponse.json({
         success: true,
