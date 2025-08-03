@@ -43,6 +43,16 @@ export interface StravaGear {
   description: string;
 }
 
+// Strava OAuth token response interface
+export interface StravaTokenResponse {
+  token_type: string;
+  access_token: string;
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+  athlete: StravaAthlete;
+}
+
 export class StravaAPI {
   private baseUrl = "https://www.strava.com/api/v3";
 
@@ -64,7 +74,9 @@ export class StravaAPI {
   }
 
   // Refresh access token using refresh token
-  static async refreshToken(refreshToken: string): Promise<StravaTokenResponse | null> {
+  static async refreshToken(
+    refreshToken: string
+  ): Promise<StravaTokenResponse | null> {
     try {
       const response = await fetch("https://www.strava.com/oauth/token", {
         method: "POST",
