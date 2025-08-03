@@ -79,15 +79,23 @@ export async function makeRateLimitedRequest<T>(
       globalRateLimiter.addRequest();
       const result = await requestFn();
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if this is a rate limit error from Hasura
-      const isRateLimit =
-        error.message?.includes("limit") ||
-        error.message?.includes("tenant-limit-exceeded") ||
-        (error.errors &&
-          error.errors.some(
-            (e: any) => e.extensions?.code === "tenant-limit-exceeded"
-          ));
+      let isRateLimit = false;
+      if (
+        typeof error === "object" &&
+        error !== null
+      ) {
+        const maybeError = error as { message?: string; errors?: any[] };
+        isRateLimit =
+          (typeof maybeError.message === "string" &&
+            (maybeError.message.includes("limit") ||
+             maybeError.message.includes("tenant-limit-exceeded"))) ||
+          (Array.isArray(maybeError.errors) &&
+            maybeError.errors.some(
+              (e: any) => e && typeof e === "object" && e.extensions?.code === "tenant-limit-exceeded"
+            ));
+      }
 
       if (isRateLimit && attempt < retries) {
         console.warn(
