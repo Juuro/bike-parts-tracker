@@ -4,8 +4,27 @@
 import { useRef } from "react";
 
 // In-memory fallback storage for when sessionStorage/localStorage isn't available
-const memoryStorage = new Map<string, string>();
 
+// Returns a per-window memory storage (client-only), or a no-op storage on the server
+function getMemoryStorage() {
+  if (typeof window !== "undefined") {
+    // Use a single Map per window (client)
+    if (!(window as any).__memoryStorage) {
+      (window as any).__memoryStorage = new Map<string, string>();
+    }
+    return (window as any).__memoryStorage as Map<string, string>;
+  } else {
+    // No-op storage for server (SSR)
+    return {
+      get: (_key: string) => undefined,
+      set: (_key: string, _value: string) => undefined,
+      delete: (_key: string) => undefined,
+      has: (_key: string) => false,
+      clear: () => undefined,
+      keys: () => [].values(),
+    } as Map<string, string>;
+  }
+}
 export interface SafeStorage {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
