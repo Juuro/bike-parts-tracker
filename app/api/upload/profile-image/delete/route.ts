@@ -21,20 +21,59 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Extract the public_id from the Cloudinary URL
-    // Cloudinary URLs have the format: https://res.cloudinary.com/cloud-name/image/upload/v1234567890/folder/public_id.ext
-    const publicIdMatch = imageUrl.match(
-      /\/v\d+\/(.+)\.(jpg|jpeg|png|gif|webp)$/i
-    );
-    if (!publicIdMatch) {
-      // If it's not a Cloudinary URL, just return success (external URLs don't need deletion)
+    // Extract the public_id from the Cloudinary URL using Cloudinary's utilities
+    const extractPublicIdFromCloudinaryUrl = (url: string): string | null => {
+      try {
+        // Check if it's a Cloudinary URL
+        if (!url.includes('cloudinary.com')) {
+          return null;
+        }
+
+        // Use Cloudinary's url method to parse the URL
+        // First, let's try to extract using the URL structure
+        const urlParts = url.split('/');
+        const uploadIndex = urlParts.findIndex(part => part === 'upload');
+        
+        if (uploadIndex === -1) {
+          return null;
+        }
+
+        // Find the public_id part (after upload and optional version)
+        let publicIdIndex = uploadIndex + 1;
+        
+        // Skip version if present (starts with 'v' followed by numbers)
+        if (urlParts[publicIdIndex] && /^v\d+$/.test(urlParts[publicIdIndex])) {
+          publicIdIndex++;
+        }
+
+        // Get everything from publicIdIndex to the end, but remove file extension
+        const publicIdParts = urlParts.slice(publicIdIndex);
+        if (publicIdParts.length === 0) {
+          return null;
+        }
+
+        // Join the parts and remove file extension and query parameters
+        let publicId = publicIdParts.join('/');
+        publicId = publicId.split('?')[0].split('#')[0]; // Remove query params and fragments
+        publicId = publicId.replace(/\.[a-zA-Z0-9]+$/, ''); // Remove file extension
+        
+        return publicId || null;
+        
+      } catch (error) {
+        console.error('Error parsing Cloudinary URL:', error);
+        return null;
+      }
+    };
+
+    const publicId = extractPublicIdFromCloudinaryUrl(imageUrl);
+    
+    if (!publicId) {
+      // If it's not a Cloudinary URL or can't extract public_id, just return success
       return NextResponse.json({
         success: true,
-        message: "External image URL, no deletion needed",
+        message: "External image URL or invalid Cloudinary URL, no deletion needed",
       });
     }
-
-    const publicId = publicIdMatch[1];
     console.log(
       "Attempting to delete Cloudinary image with public_id:",
       publicId

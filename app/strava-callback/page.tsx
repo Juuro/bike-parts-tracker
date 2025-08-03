@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { safeSessionStorage } from "@/utils/safeStorage";
 
 function StravaCallbackContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -8,37 +9,7 @@ function StravaCallbackContent() {
   );
   const [message, setMessage] = useState("Processing Strava authorization...");
   const processedRef = useRef(false);
-  const fallbackProcessedRef = useRef(new Set<string>()); // Fallback for when sessionStorage isn't available
   const searchParams = useSearchParams();
-
-  // Helper function to safely use sessionStorage
-  const safeSessionStorage = {
-    getItem: (key: string): string | null => {
-      try {
-        return sessionStorage.getItem(key);
-      } catch (error) {
-        console.warn("SessionStorage not available:", error);
-        return null;
-      }
-    },
-    setItem: (key: string, value: string): void => {
-      try {
-        sessionStorage.setItem(key, value);
-      } catch (error) {
-        console.warn("SessionStorage not available:", error);
-        // Use in-memory fallback
-        fallbackProcessedRef.current.add(key);
-      }
-    },
-    hasKey: (key: string): boolean => {
-      try {
-        return sessionStorage.getItem(key) !== null;
-      } catch (error) {
-        // Fallback to in-memory check
-        return fallbackProcessedRef.current.has(key);
-      }
-    },
-  };
 
   useEffect(() => {
     const code = searchParams.get("code");

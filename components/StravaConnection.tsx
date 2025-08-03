@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import toast from "react-hot-toast";
 import { ExternalLink, Unlink, Check, AlertCircle } from "lucide-react";
+import { safeSessionStorage } from "@/utils/safeStorage";
 
 interface StravaConnectionProps {
   onConnectionChange?: (connected: boolean) => void;
@@ -67,7 +68,7 @@ export default function StravaConnection({
       `state=${state}`;
 
     // Store state for validation
-    sessionStorage.setItem("strava_oauth_state", state);
+    safeSessionStorage.setItem("strava_oauth_state", state);
 
     // Open Strava authorization in new window
     const popup = window.open(
