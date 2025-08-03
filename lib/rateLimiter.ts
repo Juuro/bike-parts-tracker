@@ -56,7 +56,8 @@ export const globalRateLimiter = new RateLimiter(50, 60000);
 // Helper function to make rate-limited requests to Hasura
 export async function makeRateLimitedRequest<T>(
   requestFn: () => Promise<T>,
-  retries: number = 3
+  retries: number = 3,
+  maxWaitTimeMs: number = 5000 // Maximum time to wait before giving up (prevents indefinite blocking)
 ): Promise<T> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     if (!globalRateLimiter.canMakeRequest()) {
@@ -67,9 +68,10 @@ export async function makeRateLimitedRequest<T>(
         throw new Error("Rate limit exceeded after all retries");
       }
 
+      // Cap the wait time to prevent indefinite blocking in high-traffic scenarios
       await new Promise((resolve) =>
-        setTimeout(resolve, Math.min(waitTime, 5000))
-      ); // Max 5 sec wait
+        setTimeout(resolve, Math.min(waitTime, maxWaitTimeMs))
+      );
       continue;
     }
 
