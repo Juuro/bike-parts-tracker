@@ -36,7 +36,20 @@ export async function refreshSessionData(): Promise<ExtendedSession | null> {
   try {
     // Force session refresh by accessing it
     const session = await auth();
-    return session;
+    if (!session) return null;
+    // Map user fields to ensure no nulls (convert null to undefined)
+    const user = session.user
+      ? {
+          id: session.user.id ?? undefined,
+          name: session.user.name ?? undefined,
+          email: session.user.email ?? undefined,
+          image: session.user.image ?? undefined,
+        }
+      : undefined;
+    return {
+      ...session,
+      user,
+    } as ExtendedSession;
   } catch (error) {
     console.error("Failed to refresh session data:", error);
     return null;
@@ -89,7 +102,6 @@ export interface ExtendedSession {
     name?: string;
     email?: string;
     image?: string;
-    emailVerified?: boolean;
   };
   userId?: string;
   accessToken?: string;
