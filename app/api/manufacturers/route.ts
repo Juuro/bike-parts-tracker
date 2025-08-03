@@ -3,6 +3,9 @@ import { auth } from "@/auth";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import { getCachedOrFetch } from "@/lib/cache";
 
+// Cache configuration
+const MANUFACTURERS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export const dynamic = "force-dynamic";
 
 export const GET = async (request: NextRequest) => {
@@ -48,7 +51,7 @@ export const GET = async (request: NextRequest) => {
           return data;
         });
       },
-      5 * 60 * 1000 // Cache for 5 minutes
+      MANUFACTURERS_CACHE_TTL_MS
     );
 
     return NextResponse.json(result.data.manufacturer);

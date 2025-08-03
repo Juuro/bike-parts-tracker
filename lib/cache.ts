@@ -69,14 +69,24 @@ class SimpleCache {
 
   // Get cache statistics
   getStats() {
-    const entries: Array<[string, CacheEntry<unknown>]> = [];
-    this.cache.forEach((value, key) => {
-      entries.push([key, value]);
+    const now = Date.now();
+    let expiredEntries = 0;
+    let activeEntries = 0;
+
+    this.cache.forEach((entry) => {
+      if (now - entry.timestamp > entry.ttl) {
+        expiredEntries++;
+      } else {
+        activeEntries++;
+      }
     });
-    
+
     return {
       totalEntries: this.cache.size,
-      memoryUsage: JSON.stringify(entries).length,
+      activeEntries,
+      expiredEntries,
+      // Simple metric based on entry count rather than actual memory usage
+      estimatedEntries: this.cache.size,
     };
   }
 }
