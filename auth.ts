@@ -151,7 +151,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
 
             return result;
-          }, 2); // At most 1 retry to avoid amplification
+          }, 2); // 2 total attempts (1 retry) to avoid amplification
 
           const dbUser = result.data?.users_by_pk;
 
