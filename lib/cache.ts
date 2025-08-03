@@ -63,15 +63,23 @@ class SimpleCache {
 
     keysToDelete.forEach((key) => this.cache.delete(key));
   }
+
+  // Get cache statistics
+  getStats() {
+    const entries: any[] = [];
+    this.cache.forEach((value, key) => {
+      entries.push([key, value]);
+    });
+    
+    return {
+      totalEntries: this.cache.size,
+      memoryUsage: JSON.stringify(entries).length,
+    };
+  }
 }
 
 // Global cache instance
 export const apiCache = new SimpleCache();
-
-// Clean up expired entries every 5 minutes
-setInterval(() => {
-  apiCache.cleanup();
-}, 5 * 60 * 1000);
 
 // Helper function to cache API responses
 export async function getCachedOrFetch<T>(
@@ -79,6 +87,11 @@ export async function getCachedOrFetch<T>(
   fetchFn: () => Promise<T>,
   ttlMs: number = 60000 // 1 minute default
 ): Promise<T> {
+  // Occasionally clean up expired entries (1% chance per call to avoid performance impact)
+  if (Math.random() < 0.01) {
+    apiCache.cleanup();
+  }
+
   // Try to get from cache first
   const cached = apiCache.get<T>(cacheKey);
   if (cached !== null) {
