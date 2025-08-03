@@ -47,6 +47,7 @@ export default function ProfileForm({
   const [uploadedImage, setUploadedImage] = useState<string | null>(
     userProfile.image || null
   );
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -95,7 +96,33 @@ export default function ProfileForm({
     }
 
     try {
+      // First, update the user profile
       await updateUserProfile(formData);
+
+      // If there's an image marked for deletion, delete it now after successful profile update
+      if (imageToDelete) {
+        try {
+          const response = await fetch("/api/upload/profile-image/delete", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ imageUrl: imageToDelete }),
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            console.log("Old image deleted from Cloudinary:", result.message);
+            setImageToDelete(null); // Clear the deletion queue
+          } else {
+            console.error("Failed to delete old image:", result.error);
+            // Don't fail the entire operation for this
+          }
+        } catch (deleteError) {
+          console.error("Error deleting old image:", deleteError);
+          // Don't fail the entire operation for this
+        }
+      }
 
       // Force session refresh by calling update with trigger refresh
       try {
@@ -186,7 +213,7 @@ export default function ProfileForm({
 
             <div>
               <ImageUpload
-                currentImage={uploadedImage || userProfile.image}
+                currentImage={uploadedImage || undefined}
                 onImageUpload={(imageUrl) => {
                   console.log(
                     "ImageUpload callback - setting uploadedImage to:",
@@ -195,16 +222,19 @@ export default function ProfileForm({
                   setUploadedImage(imageUrl);
                 }}
                 onImageRemove={() => {
-                  console.log("ImageUpload callback - removing image");
-                  setUploadedImage(null); // Use null instead of empty string
+                  console.log("ImageUpload callback - removing image from UI");
+                  setUploadedImage(null); // Clear the UI immediately
+                }}
+                onImageMarkForDeletion={(imageUrl) => {
+                  console.log(
+                    "ImageUpload callback - marking image for deletion:",
+                    imageUrl
+                  );
+                  setImageToDelete(imageUrl); // Mark for deletion on form submit
                 }}
               />
               {/* Hidden input to pass the image URL to the form */}
-              <input
-                type="hidden"
-                name="image"
-                value={uploadedImage ?? userProfile.image ?? ""}
-              />
+              <input type="hidden" name="image" value={uploadedImage ?? ""} />
             </div>
           </div>
         </div>

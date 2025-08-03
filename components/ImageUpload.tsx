@@ -15,15 +15,20 @@ interface ImageUploadProps {
   currentImage?: string;
   onImageUpload: (imageUrl: string) => void;
   onImageRemove: () => void;
+  onSessionRefresh?: () => Promise<void>; // Optional callback to refresh session
+  onImageMarkForDeletion?: (imageUrl: string) => void; // Mark image for deletion on form submit
 }
 
 export default function ImageUpload({
   currentImage,
   onImageUpload,
   onImageRemove,
+  onSessionRefresh,
+  onImageMarkForDeletion,
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +82,9 @@ export default function ImageUpload({
 
       setPreview(data.url);
       onImageUpload(data.url);
-      toast.success("Profile image uploaded successfully!");
+      toast.success(
+        "Image uploaded successfully. Submit the form to save changes."
+      );
     } catch (error) {
       console.error("Upload error:", error);
       toast.error(
@@ -116,35 +123,28 @@ export default function ImageUpload({
   };
 
   const handleRemoveImage = async () => {
-    // If there's a current image that looks like a Cloudinary URL, delete it
-    if (currentImage && isCloudinaryUrl(currentImage)) {
-      try {
-        const response = await fetch("/api/upload/profile-image/delete", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ imageUrl: currentImage }),
-        });
+    setIsDeleting(true);
 
-        const result = await response.json();
-        if (response.ok) {
-          console.log("Image deleted from Cloudinary:", result.message);
-        } else {
-          console.error("Failed to delete from Cloudinary:", result.error);
-          // Continue with removal even if Cloudinary deletion fails
-        }
-      } catch (error) {
-        console.error("Error deleting image:", error);
-        // Continue with removal even if deletion API fails
-      }
-    }
-
+    // Clear preview immediately to provide instant feedback
     setPreview(null);
     onImageRemove();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+
+    // If there's a current image, mark it for deletion when form is submitted
+    if (currentImage && isCloudinaryUrl(currentImage)) {
+      if (onImageMarkForDeletion) {
+        onImageMarkForDeletion(currentImage);
+        console.log("Image marked for deletion on form submit:", currentImage);
+        toast.success("Image removed. Submit the form to save changes.");
+      }
+    } else {
+      // For non-Cloudinary images or when no deletion callback is provided
+      toast.success("Image removed from preview.");
+    }
+
+    setIsDeleting(false);
   };
 
   const openFileDialog = () => {
@@ -164,15 +164,26 @@ export default function ImageUpload({
           <img
             src={preview}
             alt="Profile preview"
-            className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+            className={`w-24 h-24 rounded-full object-cover border-2 border-gray-200 ${
+              isDeleting ? "opacity-50" : ""
+            }`}
           />
           <button
             type="button"
             onClick={handleRemoveImage}
-            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-            title="Remove image"
+            disabled={isDeleting}
+            className={`absolute -top-2 -right-2 w-6 h-6 text-white rounded-full flex items-center justify-center transition-colors ${
+              isDeleting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600"
+            }`}
+            title={isDeleting ? "Deleting..." : "Remove image"}
           >
-            <X size={12} />
+            {isDeleting ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <X size={12} />
+            )}
           </button>
         </div>
       )}
