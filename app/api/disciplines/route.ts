@@ -34,8 +34,20 @@ export const GET = async () => {
     });
 
     const result = (await response.json()) as {
-      data: { discipline: Discipline[] };
+      data?: { discipline: Discipline[] };
+      errors?: any[];
     };
+
+    if (result.errors) {
+      console.error("GraphQL errors in disciplines:", result.errors);
+      return new Response("GraphQL errors", { status: 500 });
+    }
+
+    if (!result.data || !result.data.discipline) {
+      console.error("No discipline data returned:", result);
+      return new Response("No data returned", { status: 500 });
+    }
+
     const { discipline: disciplineResponse } = result.data;
 
     return new Response(JSON.stringify(disciplineResponse), {
