@@ -1,4 +1,6 @@
 import { fetchBike, fetchBikes } from "@/utils/requestsServer";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 import InstallationsTable from "@/components/InstallationsTable";
 import AddPartModal from "@/components/AddPartModal";
@@ -12,6 +14,13 @@ import {
 } from "@/utils/cloudinaryUtils";
 
 const BikePage = async ({ params }: { params: any }) => {
+  // Check authentication
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
+
   const { id: bikeId } = params;
 
   const bike = await fetchBike(bikeId);
@@ -34,8 +43,8 @@ const BikePage = async ({ params }: { params: any }) => {
       : images?.[0];
 
   return (
-    <section className="bg-slate-50 pt-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="bg-slate-50 flex-1 pt-6 pb-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-start items-center gap-2 mb-6">
           {thumbnailImage ? (
             <Image
