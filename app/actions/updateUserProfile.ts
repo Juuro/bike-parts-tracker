@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { invalidateSessionCache } from "@/utils/sessionCache";
+import { logSessionCacheInvalidationRequest } from "@/utils/sessionCache";
 
 async function updateUserProfile(formData: FormData): Promise<void> {
   const session: any = await auth();
@@ -119,8 +119,8 @@ async function updateUserProfile(formData: FormData): Promise<void> {
 
   console.log("Profile updated successfully:", result.data.update_users);
 
-  // Invalidate session cache to ensure fresh user data on next session access
-  await invalidateSessionCache();
+  // Log session cache invalidation request (note: doesn't actually invalidate)
+  await logSessionCacheInvalidationRequest();
 
   // Revalidate the profile page and layout to show updated data
   revalidatePath("/profile");

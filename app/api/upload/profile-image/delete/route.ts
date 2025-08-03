@@ -5,7 +5,7 @@ import {
   extractPublicIdFromCloudinaryUrl,
   isCloudinaryUrl,
 } from "@/utils/cloudinaryUtils";
-import { invalidateSessionCache } from "@/utils/sessionCache";
+import { logSessionCacheInvalidationRequest } from "@/utils/sessionCache";
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -48,8 +48,8 @@ export async function DELETE(request: NextRequest) {
       console.log("Cloudinary deletion result:", result);
 
       if (result.result === "ok") {
-        // Invalidate session cache since profile image was deleted
-        await invalidateSessionCache();
+        // Log session cache invalidation request (note: doesn't actually invalidate)
+        await logSessionCacheInvalidationRequest();
 
         return NextResponse.json({
           success: true,
@@ -57,8 +57,8 @@ export async function DELETE(request: NextRequest) {
         });
       } else if (result.result === "not found") {
         // Image not found in Cloudinary, but that's okay
-        // Still invalidate session cache in case the user profile had this URL
-        await invalidateSessionCache();
+        // Still log cache invalidation request in case the user profile had this URL
+        await logSessionCacheInvalidationRequest();
 
         return NextResponse.json({
           success: true,
@@ -67,7 +67,7 @@ export async function DELETE(request: NextRequest) {
         });
       } else {
         console.error("Unexpected Cloudinary result:", result);
-        await invalidateSessionCache();
+        await logSessionCacheInvalidationRequest();
 
         return NextResponse.json({
           success: true,

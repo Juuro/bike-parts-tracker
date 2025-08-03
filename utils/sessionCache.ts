@@ -1,31 +1,69 @@
 // Session cache management utilities for NextAuth.js
-// Use these functions to invalidate user session cache when profile data changes
+// Use these functions to check cache state and log invalidation requests when profile data changes
 
 import { auth } from "@/auth";
 
 /**
- * Invalidates the user session cache to force fresh data fetch on next session callback
- * Call this after profile updates to ensure session data stays synchronized
+ * Logs a session cache invalidation request for debugging purposes.
+ *
+ * NOTE: This function does not actually invalidate the session cache.
+ * NextAuth.js doesn't provide a direct way to invalidate JWT token-based sessions
+ * from server actions or API routes. The actual cache invalidation happens
+ * through time-based expiration (1 hour) or when users manually refresh.
+ *
+ * For true cache invalidation, consider:
+ * 1. Using database sessions instead of JWT tokens
+ * 2. Implementing a Redis-based invalidation flag system
+ * 3. Using NextAuth's database session strategy
+ *
+ * @deprecated Use refreshSessionData() after profile updates instead
  */
-export async function invalidateSessionCache(): Promise<void> {
+export async function logSessionCacheInvalidationRequest(): Promise<void> {
   try {
-    // This approach works by setting a flag that the session callback will detect
-    // Note: NextAuth doesn't provide direct cache invalidation, so we use this pattern
-
-    // In a real implementation, you might want to:
-    // 1. Store invalidation flags in a Redis cache
-    // 2. Use database triggers to set invalidation flags
-    // 3. Implement a more sophisticated cache management system
-
     console.log(
       "Session cache invalidation requested - will refresh on next session access"
     );
 
-    // For now, we rely on the time-based cache expiration and manual invalidation
-    // The session callback will check for the invalidateUserCache flag
+    // TODO: Implement actual cache invalidation mechanism
+    // Current limitation: NextAuth JWT tokens cannot be invalidated from server-side
   } catch (error) {
-    console.error("Failed to invalidate session cache:", error);
+    console.error("Failed to log session cache invalidation request:", error);
   }
+}
+
+/**
+ * Placeholder for future cache invalidation implementation.
+ *
+ * This function outlines how proper session cache invalidation could be implemented
+ * when using NextAuth.js with JWT tokens. Current implementation does not work
+ * because JWT tokens cannot be modified from server actions.
+ *
+ * Recommended approaches for real cache invalidation:
+ * 1. Switch to database sessions (session: { strategy: "database" })
+ * 2. Use Redis to store invalidation flags that the session callback checks
+ * 3. Implement a custom session provider with invalidation support
+ *
+ * @param userId - The user ID whose cache should be invalidated
+ * @returns Promise that resolves when invalidation is complete
+ */
+export async function invalidateUserSessionCache(
+  userId: string
+): Promise<boolean> {
+  // TODO: Implement one of the following approaches:
+
+  // Option 1: Redis-based invalidation flags
+  // await redis.set(`session_invalid:${userId}`, '1', 'EX', 300); // 5 min expiry
+
+  // Option 2: Database session invalidation
+  // await db.session.deleteMany({ where: { userId } });
+
+  // Option 3: Custom invalidation service
+  // await sessionInvalidationService.invalidate(userId);
+
+  console.warn(
+    "invalidateUserSessionCache not implemented - using time-based expiration only"
+  );
+  return false;
 }
 
 /**
