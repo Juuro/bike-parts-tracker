@@ -5,6 +5,11 @@ import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
 import DeleteBikeModal from "@/components/DeleteBikeModal";
 import { Bike } from "lucide-react";
+import {
+  applyPresetToUrl,
+  isCloudinaryUrl,
+  CLOUDINARY_PRESETS,
+} from "@/utils/cloudinaryUtils";
 
 const BikePage = async ({ params }: { params: any }) => {
   const { id: bikeId } = params;
@@ -16,20 +21,30 @@ const BikePage = async ({ params }: { params: any }) => {
     ?.split(",")
     .filter((image: string) => image.length > 0);
 
+  // Optimize images for display
+  const optimizedImages = images?.map((image: string) =>
+    isCloudinaryUrl(image)
+      ? applyPresetToUrl(image, CLOUDINARY_PRESETS.BIKE_DETAIL)
+      : image
+  );
+
+  const thumbnailImage =
+    images?.[0] && isCloudinaryUrl(images[0])
+      ? applyPresetToUrl(images[0], CLOUDINARY_PRESETS.BIKE_THUMBNAIL)
+      : images?.[0];
+
   return (
     <section className="bg-slate-50 pt-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-start items-center gap-2 mb-6">
-          {images && images[0] ? (
-            images[0] && (
-              <Image
-                src={images ? images[0] : ""}
-                className="mr-2 rounded-full object-cover h-12 w-12"
-                width={50}
-                height={50}
-                alt={`${bike.name}`}
-              />
-            )
+          {thumbnailImage ? (
+            <Image
+              src={thumbnailImage}
+              className="mr-2 rounded-full object-cover h-12 w-12"
+              width={50}
+              height={50}
+              alt={`${bike.name}`}
+            />
           ) : (
             <Bike
               strokeWidth={2}
@@ -41,7 +56,7 @@ const BikePage = async ({ params }: { params: any }) => {
           <h1 className="text-4xl font-bold">{bike.name}</h1>
         </div>
         <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] rounded-lg mb-6">
-          {images?.map((image: string, index: number) => {
+          {optimizedImages?.map((image: string, index: number) => {
             return (
               <div
                 key={index}

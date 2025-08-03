@@ -31,6 +31,20 @@ declare global {
     userId: string;
   };
 
+  type User = {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+    currency_unit?: string;
+    weight_unit?: string;
+    distance_unit?: string;
+    strava_user?: string;
+    created_at?: string;
+    updated_at?: string;
+    last_seen_at?: string;
+  };
+
   type Manufacturer = {
     id: string;
     name: string;
