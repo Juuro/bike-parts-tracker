@@ -5,7 +5,7 @@ import HomeBikes from "@/components/HomeBikes";
 export default async function BikesPage() {
   // Check authentication
   const session = await auth();
-  
+
   if (!session) {
     redirect("/api/auth/signin");
   }
