@@ -5,14 +5,14 @@ import { fetchBikes } from "@/utils/requestsServer";
 import { redirect } from "next/navigation";
 
 const PartsPage = async () => {
-  const bikes = await fetchBikes();
-
   // Check authentication
   const session = await auth();
 
   if (!session) {
     redirect("/api/auth/signin");
   }
+
+  const bikes = await fetchBikes();
 
   return (
     <section className="bg-slate-50 flex-1 pt-6 pb-6">
