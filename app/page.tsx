@@ -65,7 +65,7 @@ export default async function Index() {
               Get Started - Sign In
             </a>
             <p className="text-sm text-gray-500">
-              Sign in with Google or Strava to start tracking your bike parts
+              Sign in to start tracking your bike parts
             </p>
           </div>
         </div>
