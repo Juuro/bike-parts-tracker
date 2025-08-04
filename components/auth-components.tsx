@@ -1,13 +1,16 @@
+"use client";
+
 import { signIn, signOut } from "next-auth/react";
 import { Button, type ButtonProps } from "./ui/button";
 
 export function SignIn({
   provider,
+  children = "Sign In",
   ...props
-}: { provider?: string } & ButtonProps) {
+}: { provider?: string; children?: React.ReactNode } & ButtonProps) {
   return (
     <Button onClick={() => signIn(provider)} {...props}>
-      Sign In
+      {children}
     </Button>
   );
 }

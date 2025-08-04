@@ -16,7 +16,7 @@ import {
 const BikePage = async ({ params }: { params: any }) => {
   // Check authentication
   const session = await auth();
-  
+
   if (!session) {
     redirect("/api/auth/signin");
   }
