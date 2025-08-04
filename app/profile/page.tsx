@@ -6,10 +6,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function ProfilePage() {
+  // Check authentication
   const session = await auth();
 
-  if (!session?.user) {
-    redirect("/");
+  if (!session) {
+    redirect("/api/auth/signin");
   }
 
   const [userProfile, availableUnits] = await Promise.all([
