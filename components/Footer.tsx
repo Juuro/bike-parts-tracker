@@ -8,7 +8,6 @@ const Footer = () => {
           <a
             href="#"
             className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-          >
             Mastodon
           </a>
         </div>

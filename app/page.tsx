@@ -39,7 +39,6 @@ export default async function Index() {
               upgrades. Never lose track of your gear again.
             </p>
           </div>
-
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="bg-white p-6 rounded-lg shadow-lg">
               <div className="text-3xl mb-4">🚴‍♂️</div>
