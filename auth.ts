@@ -86,6 +86,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
     adminSecret: process.env.HASURA_ADMIN_SECRET!,
   }),
+  pages: {
+    signIn: "/auth/signin",
+  },
   session: {
     strategy: "jwt",
   },
