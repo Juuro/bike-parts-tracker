@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { User, Camera, Scale, Route, Coins } from "lucide-react";
+import { User, Camera, Scale, Route, Coins, FileText } from "lucide-react";
 import updateUserProfile from "../app/actions/updateUserProfile";
 import StravaConnection from "./StravaConnection";
 import StravaBikesList from "./StravaBikesList";
@@ -156,7 +156,7 @@ export default function ProfileForm({
         <div className="space-y-6">
           <div className="border-b pb-4">
             <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900">
-              <User size={20} className="text-blue-600" />
+              <FileText size={20} className="text-blue-600" />
               Basic Information
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -339,7 +339,7 @@ export default function ProfileForm({
         </div>
       </div>
 
-      <div className="flex justify-end pt-6 border-t">
+      <div className="flex justify-end">
         <Button type="submit" disabled={isLoading} className="px-8 py-2">
           {isLoading ? (
             <>

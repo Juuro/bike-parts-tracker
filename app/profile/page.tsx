@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import { fetchUserProfile, fetchAvailableUnits } from "@/utils/requestsServer";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 
 export default async function ProfilePage() {
   // Check authentication
@@ -43,13 +43,16 @@ export default async function ProfilePage() {
             <ArrowLeft size={16} />
             Back to Dashboard
           </Link>
-          <h1 className="text-4xl font-bold mb-2">Profile Settings</h1>
-          <p className="text-gray-600">
-            Manage your account settings and preferences
-          </p>
+
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="bg-blue-100 p-2 rounded-full">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="bg-white rounded-lg shadow-sm border p-8 mb-8">
           <ProfileForm
             userProfile={profileData}
             availableUnits={availableUnits}

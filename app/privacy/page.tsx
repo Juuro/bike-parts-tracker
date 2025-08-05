@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-8 space-y-8">
+        <div className="bg-white border rounded-lg shadow-sm p-8 space-y-8">
           <section>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               1. Information We Collect
@@ -280,7 +280,7 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Footer Navigation */}
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-end">
           <Link href="/terms">
             <Button variant="outline" className="flex items-center space-x-2">
               <FileText className="w-4 h-4" />
