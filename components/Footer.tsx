@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
           <div className="order-2 sm:order-1">
             <p className="text-xs text-slate-400">
-              © 2025 Bike Parts Tracker. All rights reserved.
+              © {new Date().getFullYear()} Bike Parts Tracker. All rights reserved.
             </p>
           </div>
           <div className="order-1 sm:order-2 flex items-center space-x-4">
