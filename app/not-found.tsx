@@ -70,7 +70,7 @@ export default function NotFound() {
           <p>
             If you believe this is an error, please{" "}
             <a
-              href={`mailto:${SUPPORT_EMAIL}`}
+              href={`mailto:${process.env.SUPPORT_EMAIL}`}
               className="text-blue-600 hover:text-blue-500"
             >
               contact support
