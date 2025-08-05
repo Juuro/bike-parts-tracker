@@ -12,9 +12,15 @@ import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 
 type ModalProps = {
   showCloseButton?: boolean;
+  buttonText?: string;
+  buttonClassName?: string;
 };
 
-const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
+const AddBikeModal: React.FC<ModalProps> = ({ 
+  showCloseButton = true, 
+  buttonText = "Add bike",
+  buttonClassName 
+}) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,14 +67,26 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
 
   return (
     <>
-      <Link
-        href=""
-        onClick={() => setIsModalOpen(true)}
-        className="flex flex-col items-center justify-center h-full"
-      >
-        <span>Add bike</span>
-        <Plus size={120} />
-      </Link>
+      {buttonClassName ? (
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className={buttonClassName}
+        >
+          <div className="bg-blue-600 p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200">
+            <Plus className="w-8 h-8 text-white" />
+          </div>
+          <span>{buttonText}</span>
+        </button>
+      ) : (
+        <Link
+          href=""
+          onClick={() => setIsModalOpen(true)}
+          className="flex flex-col items-center justify-center h-full"
+        >
+          <span>{buttonText}</span>
+          <Plus size={120} />
+        </Link>
+      )}
       {isModalOpen && (
         <div
           className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
@@ -106,7 +124,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-1">
                       <label
                         htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Bike name
                       </label>
@@ -123,7 +141,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-1">
                       <label
                         htmlFor="strava_bike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Strava Bike ID
                       </label>
@@ -140,7 +158,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-1">
                       <label
                         htmlFor="discipline"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Discipline
                       </label>
@@ -178,7 +196,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-1">
                       <label
                         htmlFor="category"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Category
                       </label>
@@ -213,7 +231,7 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-2">
                       <label
                         htmlFor="images"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Images (Select up to 4 images)
                       </label>
@@ -230,19 +248,20 @@ const AddBikeModal: React.FC<ModalProps> = ({ showCloseButton = true }) => {
                     <div className="col-span-1">
                       <label
                         htmlFor="ebike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
                       >
                         Is this an eBike?
                       </label>
-                      <input
-                        tabIndex={0}
-                        type="checkbox"
-                        name="ebike"
-                        id="ebike"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        value="true"
-                      />
+                      <div className="flex justify-start">
+                        <input
+                          tabIndex={0}
+                          type="checkbox"
+                          name="ebike"
+                          id="ebike"
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          value="true"
+                        />
+                      </div>
                     </div>
                   </div>
                   <SubmitButton text="Add new bike" />

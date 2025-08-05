@@ -11,12 +11,9 @@
     "build": "next build",
     "start": "next start"
   },
-  "author": "Iain Collins <me@iaincollins.com>",
+  "author": "Sebastian Engel <sebastianengel@posteo.de>",
   "contributors": [
-    "Balázs Orbán <info@balazsorban.com>",
-    "Nico Domino <yo@ndo.dev>",
-    "Lluis Agusti <hi@llu.lu>",
-    "Thang Huu Vu <hi@thvu.dev>"
+    "Sebastian Engel <sebastianengel@posteo.de>"
   ],
   "dependencies": {
     "@auth/core": "^0.34.2",
