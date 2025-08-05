@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Bike, Home, Search, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
-  const router = useRouter();
+  const SUPPORT_EMAIL = "support@bikepartstracker.com";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
@@ -70,7 +69,7 @@ export default function NotFound() {
           <p>
             If you believe this is an error, please{" "}
             <a
-              href={`mailto:${process.env.SUPPORT_EMAIL}`}
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="text-blue-600 hover:text-blue-500"
             >
               contact support
