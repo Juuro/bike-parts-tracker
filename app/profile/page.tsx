@@ -48,7 +48,9 @@ export default async function ProfilePage() {
             <div className="bg-blue-100 p-2 rounded-full">
               <User className="w-6 h-6 text-blue-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Profile Settings
+            </h1>
           </div>
         </div>
 
