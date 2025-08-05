@@ -1,11 +1,13 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import type { Provider } from "next-auth/providers";
 import { HasuraAdapter } from "@auth/hasura-adapter";
 import { SignJWT } from "jose";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
+import bcrypt from "bcryptjs";
 
 // Extended interfaces for better type safety
 interface ExtendedToken extends JWT {
@@ -39,7 +41,7 @@ interface DatabaseUser {
   emailVerified: Date | null;
 }
 
-// GraphQL query for fetching user data
+// GraphQL queries
 const GET_USER_QUERY = `
   query GetUser($userId: uuid!) {
     users_by_pk(id: $userId) {
@@ -52,8 +54,146 @@ const GET_USER_QUERY = `
   }
 `;
 
+const GET_USER_BY_EMAIL_QUERY = `
+  query GetUserByEmail($email: String!) {
+    users(where: {email: {_eq: $email}}) {
+      id
+      name
+      email
+      password
+      image
+      emailVerified
+    }
+  }
+`;
+
+const CREATE_USER_MUTATION = `
+  mutation CreateUser($email: String!, $name: String!, $password: String!) {
+    insert_users_one(object: {email: $email, name: $name, password: $password}) {
+      id
+      name
+      email
+      image
+      emailVerified
+    }
+  }
+`;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [Google], // Focus on working Google auth for now
+  providers: [
+    Google,
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+        name: { label: "Name", type: "text" }, // For registration
+        mode: { label: "Mode", type: "hidden" }, // signin or signup
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
+
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+        const name = credentials.name as string;
+        const mode = credentials.mode as string;
+
+        try {
+          if (mode === "signup") {
+            // Registration flow
+            if (!name) {
+              throw new Error("Name is required for registration");
+            }
+
+            // Check if user already exists
+            const existingUserResponse = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+              },
+              body: JSON.stringify({
+                query: GET_USER_BY_EMAIL_QUERY,
+                variables: { email },
+              }),
+            });
+
+            const existingUserResult = await existingUserResponse.json();
+            if (existingUserResult.data?.users?.length > 0) {
+              throw new Error("User already exists with this email");
+            }
+
+            // Hash password
+            const hashedPassword = await bcrypt.hash(password, 12);
+
+            // Create new user
+            const createUserResponse = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+              },
+              body: JSON.stringify({
+                query: CREATE_USER_MUTATION,
+                variables: { email, name, password: hashedPassword },
+              }),
+            });
+
+            const createUserResult = await createUserResponse.json();
+            if (createUserResult.errors) {
+              throw new Error("Failed to create user");
+            }
+
+            const newUser = createUserResult.data?.insert_users_one;
+            return {
+              id: newUser.id,
+              email: newUser.email,
+              name: newUser.name,
+              image: newUser.image,
+            };
+          } else {
+            // Login flow
+            const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+              },
+              body: JSON.stringify({
+                query: GET_USER_BY_EMAIL_QUERY,
+                variables: { email },
+              }),
+            });
+
+            const result = await response.json();
+            const user = result.data?.users?.[0];
+
+            if (!user) {
+              throw new Error("No user found with this email");
+            }
+
+            // Verify password
+            const isValidPassword = await bcrypt.compare(password, user.password);
+            if (!isValidPassword) {
+              throw new Error("Invalid password");
+            }
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            };
+          }
+        } catch (error) {
+          console.error("Auth error:", error);
+          throw error;
+        }
+      },
+    }),
+  ],
   adapter: HasuraAdapter({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
     adminSecret: process.env.HASURA_ADMIN_SECRET!,
