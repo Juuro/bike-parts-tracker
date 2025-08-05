@@ -8,11 +8,12 @@ export default function PrivacyPolicy() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/">
-            <Button variant="outline" className="mb-4 flex items-center space-x-2">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
-            </Button>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Dashboard
           </Link>
           
           <div className="flex items-center space-x-3 mb-4">
