@@ -55,19 +55,14 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
             {bike.name}
           </Link>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600 text-sm font-medium">
-            <Link 
-              href={`https://www.strava.com/bikes/${bike.strava_bike}`}
-              className="hover:text-blue-600 transition-colors duration-200"
-            >
-              {bike.discipline.abbr}
-            </Link>
-          </p>
-          <div className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
-            {bike.category?.name || 'Bike'}
-          </div>
-        </div>
+        <p className="text-gray-600 text-sm font-medium">
+          <Link 
+            href={`https://www.strava.com/bikes/${bike.strava_bike}`}
+            className="hover:text-blue-600 transition-colors duration-200"
+          >
+            {bike.discipline.abbr}
+          </Link>
+        </p>
       </div>
     </div>
   );
