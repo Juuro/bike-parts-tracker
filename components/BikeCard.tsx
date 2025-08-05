@@ -48,7 +48,7 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         </div>
       </Link>
-      
+
       <div className="p-4">
         <div className="font-bold text-lg mb-1 text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
           <Link href={`/bikes/${bike.id}`} className="line-clamp-1">
@@ -56,7 +56,7 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
           </Link>
         </div>
         <p className="text-gray-600 text-sm font-medium">
-          <Link 
+          <Link
             href={`https://www.strava.com/bikes/${bike.strava_bike}`}
             className="hover:text-blue-600 transition-colors duration-200"
           >

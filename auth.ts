@@ -108,17 +108,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
 
             // Check if user already exists
-            const existingUserResponse = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-              },
-              body: JSON.stringify({
-                query: GET_USER_BY_EMAIL_QUERY,
-                variables: { email },
-              }),
-            });
+            const existingUserResponse = await fetch(
+              process.env.HASURA_PROJECT_ENDPOINT!,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+                },
+                body: JSON.stringify({
+                  query: GET_USER_BY_EMAIL_QUERY,
+                  variables: { email },
+                }),
+              }
+            );
 
             const existingUserResult = await existingUserResponse.json();
             if (existingUserResult.data?.users?.length > 0) {
@@ -129,17 +132,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const hashedPassword = await bcrypt.hash(password, 12);
 
             // Create new user
-            const createUserResponse = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-              },
-              body: JSON.stringify({
-                query: CREATE_USER_MUTATION,
-                variables: { email, name, password: hashedPassword },
-              }),
-            });
+            const createUserResponse = await fetch(
+              process.env.HASURA_PROJECT_ENDPOINT!,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+                },
+                body: JSON.stringify({
+                  query: CREATE_USER_MUTATION,
+                  variables: { email, name, password: hashedPassword },
+                }),
+              }
+            );
 
             const createUserResult = await createUserResponse.json();
             if (createUserResult.errors) {
@@ -175,7 +181,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
 
             // Verify password
-            const isValidPassword = await bcrypt.compare(password, user.password);
+            const isValidPassword = await bcrypt.compare(
+              password,
+              user.password
+            );
             if (!isValidPassword) {
               throw new Error("Invalid password");
             }

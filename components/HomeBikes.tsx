@@ -24,18 +24,18 @@ const HomeBikes = async () => {
             <div className="bg-blue-600 p-4 rounded-full w-20 h-20 mx-auto mb-6 shadow-lg">
               <Bike className="w-12 h-12 text-white" />
             </div>
-            
+
             {/* Heading */}
             <h3 className="text-2xl font-bold text-gray-900 mb-3">
               Start Your Bike Journey
             </h3>
-            
+
             {/* Description */}
             <p className="text-gray-600 mb-6 leading-relaxed">
-              Add your first bike to begin tracking components, maintenance schedules, 
-              and keep your cycling gear organized like never before.
+              Add your first bike to begin tracking components, maintenance
+              schedules, and keep your cycling gear organized like never before.
             </p>
-            
+
             {/* Benefits */}
             <div className="grid grid-cols-1 gap-3 mb-8 text-sm">
               <div className="flex items-center justify-center text-gray-700">
@@ -57,10 +57,10 @@ const HomeBikes = async () => {
                 Monitor performance and history
               </div>
             </div>
-            
+
             {/* CTA Button */}
             <div className="space-y-3">
-              <AddBikeModal 
+              <AddBikeModal
                 showCloseButton={true}
                 buttonText="Add Your First Bike"
                 buttonClassName="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2 w-full"
@@ -85,12 +85,12 @@ const HomeBikes = async () => {
               <BikeCard bike={bike} />
             </div>
           ))}
-          
+
           {/* Enhanced Add Bike Card */}
           <div className="group cursor-pointer">
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-400 transition-all duration-200 hover:shadow-md group-hover:scale-105 transform">
               <div className="aspect-[3/2] relative flex flex-col items-center justify-center p-6">
-                <AddBikeModal 
+                <AddBikeModal
                   showCloseButton={true}
                   buttonText="Add Another Bike"
                   buttonClassName="flex flex-col items-center justify-center space-y-3 text-blue-700 font-semibold hover:text-blue-800 transition-colors duration-200 w-full h-full"
@@ -99,11 +99,12 @@ const HomeBikes = async () => {
             </div>
           </div>
         </div>
-        
+
         {/* Collection Stats */}
         <div className="mt-6 pt-4 border-t border-blue-100">
           <p className="text-sm text-gray-600 text-center">
-            <span className="font-semibold text-blue-700">{bikes.length}</span> bike{bikes.length !== 1 ? 's' : ''} in your collection
+            <span className="font-semibold text-blue-700">{bikes.length}</span>{" "}
+            bike{bikes.length !== 1 ? "s" : ""} in your collection
           </p>
         </div>
       </div>

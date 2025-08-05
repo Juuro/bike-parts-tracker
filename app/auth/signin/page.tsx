@@ -1,10 +1,18 @@
 "use client";
 
 import { signIn, getProviders } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Bike, User, Activity, Wrench, Calendar, Eye, EyeOff } from "lucide-react";
+import {
+  Bike,
+  User,
+  Activity,
+  Wrench,
+  Calendar,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 interface Provider {
   id: string;
@@ -12,10 +20,16 @@ interface Provider {
   type: string;
 }
 
-export default function SignIn() {
-  const [providers, setProviders] = useState<Record<string, Provider> | null>(null);
+function SignInForm() {
+  const [providers, setProviders] = useState<Record<string, Provider> | null>(
+    null
+  );
   const [isSignUp, setIsSignUp] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "", name: "" });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -93,7 +107,9 @@ export default function SignIn() {
     }
   };
 
-  const oauthProviders = providers ? Object.values(providers).filter(p => p.id !== "credentials") : [];
+  const oauthProviders = providers
+    ? Object.values(providers).filter((p) => p.id !== "credentials")
+    : [];
   const hasOAuthProviders = oauthProviders.length > 0;
 
   return (
@@ -110,7 +126,8 @@ export default function SignIn() {
             Welcome to Bike Parts Tracker
           </h2>
           <p className="text-sm sm:text-base text-gray-600 px-2">
-            {isSignUp ? "Create an account" : "Sign in"} to start tracking your bike components
+            {isSignUp ? "Create an account" : "Sign in"} to start tracking your
+            bike components
           </p>
         </div>
 
@@ -124,7 +141,10 @@ export default function SignIn() {
 
             {isSignUp && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Full Name
                 </label>
                 <input
@@ -135,13 +155,18 @@ export default function SignIn() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your full name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email Address
               </label>
               <input
@@ -153,12 +178,17 @@ export default function SignIn() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
@@ -169,9 +199,13 @@ export default function SignIn() {
                   autoComplete={isSignUp ? "new-password" : "current-password"}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10"
-                  placeholder={isSignUp ? "Create a password" : "Enter your password"}
+                  placeholder={
+                    isSignUp ? "Create a password" : "Enter your password"
+                  }
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                 />
                 <button
                   type="button"
@@ -203,7 +237,11 @@ export default function SignIn() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+              {loading
+                ? "Processing..."
+                : isSignUp
+                ? "Create Account"
+                : "Sign In"}
             </Button>
 
             <div className="text-center">
@@ -216,7 +254,9 @@ export default function SignIn() {
                 }}
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
-                {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+                {isSignUp
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Sign up"}
               </button>
             </div>
           </form>
@@ -229,7 +269,9 @@ export default function SignIn() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
@@ -315,5 +357,33 @@ export default function SignIn() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignIn() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full space-y-6 sm:space-y-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-4 sm:mb-6">
+                <div className="bg-blue-600 p-3 rounded-full shadow-lg">
+                  <Bike className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                </div>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                Welcome to Bike Parts Tracker
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 px-2">
+                Loading sign-in options...
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   );
 }

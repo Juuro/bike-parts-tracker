@@ -16,10 +16,10 @@ type ModalProps = {
   buttonClassName?: string;
 };
 
-const AddBikeModal: React.FC<ModalProps> = ({ 
-  showCloseButton = true, 
+const AddBikeModal: React.FC<ModalProps> = ({
+  showCloseButton = true,
   buttonText = "Add bike",
-  buttonClassName 
+  buttonClassName,
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
