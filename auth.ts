@@ -52,47 +52,25 @@ const GET_USER_QUERY = `
   }
 `;
 
-// Custom Strava provider since it's not built-in
-const Strava: Provider = {
-  id: "strava",
-  name: "Strava",
-  type: "oauth",
-  authorization: {
-    url: "https://www.strava.com/oauth/authorize",
-    params: {
-      scope: "read,activity:read_all,profile:read_all",
-      response_type: "code",
-    },
-  },
-  token: "https://www.strava.com/oauth/token",
-  userinfo: "https://www.strava.com/api/v3/athlete",
-  clientId: process.env.STRAVA_CLIENT_ID,
-  clientSecret: process.env.STRAVA_CLIENT_SECRET,
-  profile(profile) {
-    return {
-      id: profile.id.toString(),
-      name: `${profile.firstname} ${profile.lastname}`,
-      email: profile.email || "",
-      image: profile.profile || profile.profile_medium,
-      stravaId: profile.id,
-      stravaUsername: profile.username,
-    };
-  },
-};
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [Google, Strava],
+  providers: [Google], // Focus on working Google auth for now
   adapter: HasuraAdapter({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
     adminSecret: process.env.HASURA_ADMIN_SECRET!,
   }),
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/error", // Re-enable custom error page
   },
   session: {
     strategy: "jwt",
   },
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      // Allow sign in for all verified accounts
+      return true;
+    },
     async jwt({ token, account, profile }): Promise<ExtendedToken> {
       const extendedToken = token as ExtendedToken;
 

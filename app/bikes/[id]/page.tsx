@@ -6,12 +6,13 @@ import InstallationsTable from "@/components/InstallationsTable";
 import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
 import DeleteBikeModal from "@/components/DeleteBikeModal";
-import { Bike } from "lucide-react";
+import { ArrowLeft, Bike } from "lucide-react";
 import {
   applyPresetToUrl,
   isCloudinaryUrl,
   CLOUDINARY_PRESETS,
 } from "@/utils/cloudinaryUtils";
+import Link from "next/link";
 
 const BikePage = async ({ params }: { params: any }) => {
   // Check authentication
@@ -45,25 +46,37 @@ const BikePage = async ({ params }: { params: any }) => {
   return (
     <section className="bg-slate-50 flex-1 pt-6 pb-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
-        <div className="flex justify-start items-center gap-2 mb-6">
-          {thumbnailImage ? (
-            <Image
-              src={thumbnailImage}
-              className="mr-2 rounded-full object-cover h-12 w-12"
-              width={50}
-              height={50}
-              alt={`${bike.name}`}
-            />
-          ) : (
-            <Bike
-              strokeWidth={2}
-              size={5}
-              className="mr-2 rounded-full object-cover h-12 w-12 bg-gray-200"
-            />
-          )}
+        <div className="mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Dashboard
+          </Link>
 
-          <h1 className="text-4xl font-bold">{bike.name}</h1>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="">
+              {thumbnailImage ? (
+                <Image
+                  src={thumbnailImage}
+                  className="mr-2 rounded-full object-cover h-12 w-12"
+                  width={50}
+                  height={50}
+                  alt={`${bike.name}`}
+                />
+              ) : (
+                <Bike
+                  strokeWidth={2}
+                  size={5}
+                  className="mr-2 rounded-full object-cover h-12 w-12 bg-gray-200"
+                />
+              )}
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">{bike.name}</h1>
+          </div>
         </div>
+
         <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] rounded-lg mb-6">
           {optimizedImages?.map((image: string, index: number) => {
             return (

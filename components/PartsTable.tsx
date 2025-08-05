@@ -116,7 +116,7 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                   Purchase Price
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  On Sale
+                  Status
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
