@@ -186,14 +186,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const name = credentials.name as string;
         const mode = credentials.mode as string;
 
-        // Get client IP for rate limiting (in NextAuth, request structure is different)
-        const clientIP =
-          request?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-          request?.headers?.get("x-real-ip") ||
-          request?.headers?.get("x-client-ip") ||
-          request?.headers?.get("cf-connecting-ip") ||
-          request?.headers?.get("x-vercel-forwarded-for") ||
-          "unknown";
+        // Get client IP for rate limiting
+        const clientIP = getClientIP(request) || "unknown";
 
         // Check rate limiting
         const rateLimitCheck = authRateLimiter.canAttemptAuth(
