@@ -54,31 +54,6 @@ function SignInForm() {
     }
 
     try {
-      // Check rate limiting before attempting authentication
-      const rateLimitResponse = await fetch("/api/auth/rate-limit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          type: isSignUp ? "registration" : "login",
-        }),
-      });
-
-      if (rateLimitResponse.status === 429) {
-        const rateLimitData = await rateLimitResponse.json();
-        setError(
-          `${
-            rateLimitData.reason || "Too many attempts"
-          }. Please try again in ${
-            rateLimitData.retryAfter || "a few"
-          } seconds.`
-        );
-        setLoading(false);
-        return;
-      }
-
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,

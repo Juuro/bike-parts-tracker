@@ -72,23 +72,7 @@ The authentication system includes built-in rate limiting to prevent:
 
 ## API Endpoints
 
-### Rate Limit Check
-
-```
-POST /api/auth/rate-limit
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "type": "login|registration|email_check"
-}
-```
-
-**Responses:**
-
-- `200 OK`: Rate limit check passed
-- `429 Too Many Requests`: Rate limit exceeded
-- `400 Bad Request`: Invalid request parameters
+All rate limiting is handled internally within the authentication system. No external API endpoints are required for rate limiting functionality.
 
 ## Monitoring
 
