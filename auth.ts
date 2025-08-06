@@ -201,7 +201,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             };
           }
         } catch (error) {
-          console.error("Auth error:", error);
+          if (process.env.NODE_ENV === "development") {
+            console.error("Auth error:", error);
+          } else {
+            // Log only the error message or type in production
+            console.error("Auth error:", error instanceof Error ? error.message : String(error));
+          }
           throw error;
         }
       },
