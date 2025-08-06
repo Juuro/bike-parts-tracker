@@ -173,8 +173,9 @@ class AuthRateLimiter {
       return 0;
     }
 
-    const allAttempts = [...ipAttempts, ...emailAttempts];
-    const oldestAttempt = Math.min(...allAttempts.map((a) => a.timestamp));
+    const ipMin = ipAttempts.length > 0 ? Math.min(...ipAttempts.map(a => a.timestamp)) : Infinity;
+    const emailMin = emailAttempts.length > 0 ? Math.min(...emailAttempts.map(a => a.timestamp)) : Infinity;
+    const oldestAttempt = Math.min(ipMin, emailMin);
     return Math.max(0, this.windowMs - (Date.now() - oldestAttempt));
   }
 
