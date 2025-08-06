@@ -7,7 +7,7 @@
   },
   "homepage": "https://next-auth-example.vercel.app",
   "scripts": {
-    "dev": "next",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start"
   },
@@ -26,7 +26,6 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@simplewebauthn/server": "^9.0.3",
     "@tailwindcss/forms": "^0.5.8",
-    "@types/bcryptjs": "^3.0.0",
     "@vercel/kv": "^1.0.1",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
@@ -36,8 +35,8 @@
     "graphql-request": "^7.1.0",
     "jose": "^5.8.0",
     "lucide-react": "^0.445.0",
-    "next": "latest",
-    "next-auth": "beta",
+    "next": "^15.4.5",
+    "next-auth": "^5.0.0-beta.29",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
