@@ -129,7 +129,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
 
             // Hash password
-            const hashedPassword = await bcrypt.hash(password, 12);
+            const saltRounds = parseInt(
+              process.env.BCRYPT_SALT_ROUNDS || "12",
+              10
+            );
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
 
             // Create new user
             const createUserResponse = await fetch(
