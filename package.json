@@ -11,12 +11,9 @@
     "build": "next build",
     "start": "next start"
   },
-  "author": "Iain Collins <me@iaincollins.com>",
+  "author": "Sebastian Engel <sebastianengel@posteo.de>",
   "contributors": [
-    "Balázs Orbán <info@balazsorban.com>",
-    "Nico Domino <yo@ndo.dev>",
-    "Lluis Agusti <hi@llu.lu>",
-    "Thang Huu Vu <hi@thvu.dev>"
+    "Sebastian Engel <sebastianengel@posteo.de>"
   ],
   "dependencies": {
     "@auth/core": "^0.34.2",
@@ -29,7 +26,9 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@simplewebauthn/server": "^9.0.3",
     "@tailwindcss/forms": "^0.5.8",
+    "@types/bcryptjs": "^3.0.0",
     "@vercel/kv": "^1.0.1",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.5.1",
     "clsx": "^2.0.0",

@@ -3,19 +3,25 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { auth } from "@/auth";
 import { SignIn } from "@/components/auth-components";
+import { fetchParts } from "@/utils/requestsServer";
 
 export default async function Index() {
   const session = await auth();
 
   if (session) {
+    const parts = await fetchParts();
+    const hasParts = parts && parts.length > 0;
+
     return (
       <section className="bg-slate-50 flex-1 pt-6 pb-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full">
           <h1 className="text-4xl font-bold mb-6">Dashboard</h1>
           <HomeBikes />
-          <Link href={`/parts`} className="block my-2">
-            All your parts <ArrowRight size={16} className="inline" />
-          </Link>
+          {hasParts && (
+            <Link href={`/parts`} className="block my-2">
+              All your parts <ArrowRight size={16} className="inline" />
+            </Link>
+          )}
         </div>
       </section>
     );

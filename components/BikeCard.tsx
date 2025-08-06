@@ -25,37 +25,46 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
   console.log("images", images);
 
   return (
-    <Card>
+    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-100 hover:border-blue-200 group cursor-pointer transform hover:scale-105">
       <Link href={`/bikes/${bike.id}`}>
-        <div className="aspect-[3/2] relative">
+        <div className="aspect-[3/2] relative overflow-hidden">
           {optimizedImageUrl ? (
             <Image
-              className="w-full h-auto object-cover"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               src={optimizedImageUrl}
               alt={`${bike.name} bike`}
               fill={true}
             />
           ) : (
-            <Bike
-              strokeWidth={2}
-              size={110}
-              className="w-full h-full bg-gray-200"
-              width={790}
-            />
+            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <Bike
+                strokeWidth={1.5}
+                size={48}
+                className="text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
+              />
+            </div>
           )}
+          {/* Overlay gradient for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         </div>
       </Link>
-      <div className="px-6 py-4">
-        <div className="font-bold text-xl mb-2">
-          <Link href={`/bikes/${bike.id}`}>{bike.name}</Link>
+
+      <div className="p-4">
+        <div className="font-bold text-lg mb-1 text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+          <Link href={`/bikes/${bike.id}`} className="line-clamp-1">
+            {bike.name}
+          </Link>
         </div>
-        <p className="text-gray-700 text-base">
-          <Link href={`https://www.strava.com/bikes/${bike.strava_bike}`}>
+        <p className="text-gray-600 text-sm font-medium">
+          <Link
+            href={`https://www.strava.com/bikes/${bike.strava_bike}`}
+            className="hover:text-blue-600 transition-colors duration-200"
+          >
             {bike.discipline.abbr}
           </Link>
         </p>
       </div>
-    </Card>
+    </div>
   );
 };
 

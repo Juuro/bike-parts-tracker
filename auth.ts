@@ -1,11 +1,14 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
+import { authRateLimiter, getClientIP } from "@/lib/authRateLimiter";
 import type { Provider } from "next-auth/providers";
 import { HasuraAdapter } from "@auth/hasura-adapter";
 import { SignJWT } from "jose";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
+import bcrypt from "bcryptjs";
 
 // Extended interfaces for better type safety
 interface ExtendedToken extends JWT {
@@ -39,7 +42,7 @@ interface DatabaseUser {
   emailVerified: Date | null;
 }
 
-// GraphQL query for fetching user data
+// GraphQL queries
 const GET_USER_QUERY = `
   query GetUser($userId: uuid!) {
     users_by_pk(id: $userId) {
@@ -52,8 +55,296 @@ const GET_USER_QUERY = `
   }
 `;
 
+const GET_USER_BY_EMAIL_QUERY = `
+  query GetUserByEmail($email: String!) {
+    users(where: {email: {_eq: $email}}) {
+      id
+      name
+      email
+      password
+      image
+      emailVerified
+    }
+  }
+`;
+
+const CREATE_USER_MUTATION = `
+  mutation CreateUser($email: String!, $name: String!, $password: String!) {
+    insert_users_one(object: {email: $email, name: $name, password: $password}) {
+      id
+      name
+      email
+      image
+      emailVerified
+    }
+  }
+`;
+
+// Helper function to perform secure database queries with consistent timing
+async function secureDbQuery(query: string, variables: any) {
+  const startTime = Date.now();
+
+  try {
+    const response = await makeRateLimitedRequest(async () => {
+      return fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+        },
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+      });
+    }, 2);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    // Add consistent timing delay to prevent timing attacks (minimum 100ms)
+    const elapsed = Date.now() - startTime;
+    const minDelay = 100;
+    if (elapsed < minDelay) {
+      await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+    }
+
+    return result;
+  } catch (error) {
+    // Ensure consistent timing even on errors
+    const elapsed = Date.now() - startTime;
+    const minDelay = 100;
+    if (elapsed < minDelay) {
+      await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+    }
+    throw error;
+  }
+}
+
+// Helper function to safely check if user exists (prevents enumeration)
+async function checkUserExists(
+  email: string,
+  clientIP: string
+): Promise<{ exists: boolean; rateLimited: boolean; error?: string }> {
+  // Check rate limiting first
+  const rateLimitCheck = authRateLimiter.canCheckEmail(clientIP, email);
+  if (!rateLimitCheck.allowed) {
+    return {
+      exists: false,
+      rateLimited: true,
+      error: `${rateLimitCheck.reason}. Try again in ${rateLimitCheck.retryAfter} seconds.`,
+    };
+  }
+
+  try {
+    const result = await secureDbQuery(GET_USER_BY_EMAIL_QUERY, { email });
+    const userExists = result.data?.users?.length > 0;
+
+    // Record the check attempt
+    authRateLimiter.recordAttempt(clientIP, email, "email_check", true);
+
+    return { exists: userExists, rateLimited: false };
+  } catch (error) {
+    // Record failed attempt
+    authRateLimiter.recordAttempt(clientIP, email, "email_check", false);
+
+    // Don't expose internal errors to prevent information leakage
+    console.error("Error checking user existence:", error);
+    return {
+      exists: false,
+      rateLimited: false,
+      error: "Unable to verify email. Please try again later.",
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [Google], // Focus on working Google auth for now
+  providers: [
+    Google,
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+        name: { label: "Name", type: "text" }, // For registration
+        mode: { label: "Mode", type: "hidden" }, // signin or signup
+      },
+      async authorize(credentials, request) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
+
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+        const name = credentials.name as string;
+        const mode = credentials.mode as string;
+
+        // Get client IP for rate limiting
+        const clientIP = getClientIP(request) || "unknown";
+
+        // Check rate limiting
+        const rateLimitCheck = authRateLimiter.canAttemptAuth(
+          clientIP,
+          email,
+          mode === "signup" ? "registration" : "login"
+        );
+
+        if (!rateLimitCheck.allowed) {
+          throw new Error(
+            `${rateLimitCheck.reason}. Try again in ${rateLimitCheck.retryAfter} seconds.`
+          );
+        }
+
+        try {
+          if (mode === "signup") {
+            // Registration flow with enhanced security
+            if (!name) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+              throw new Error("Name is required for registration");
+            }
+
+            // Check if user already exists (with rate limiting)
+            const userCheck = await checkUserExists(email, clientIP);
+            if (userCheck.rateLimited) {
+              throw new Error(userCheck.error || "Rate limit exceeded");
+            }
+
+            if (userCheck.exists) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+              // Don't reveal that user exists - use generic message
+              throw new Error(
+                "Registration failed. Please try again or sign in if you already have an account."
+              );
+            }
+
+            // Hash password with secure salt rounds
+            const saltRounds = parseInt(
+              process.env.BCRYPT_SALT_ROUNDS || "12",
+              10
+            );
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+            // Create new user
+            const createUserResult = await secureDbQuery(CREATE_USER_MUTATION, {
+              email,
+              name,
+              password: hashedPassword,
+            });
+
+            if (createUserResult.errors) {
+              // Log the specific GraphQL errors for debugging
+              console.error(
+                "GraphQL user creation errors:",
+                createUserResult.errors
+              );
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+
+              // Provide a generic error message to prevent information leakage
+              throw new Error("Registration failed. Please try again later.");
+            }
+
+            const newUser = createUserResult.data?.insert_users_one;
+            if (!newUser) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+              throw new Error("Registration failed. Please try again later.");
+            }
+
+            // Record successful registration
+            authRateLimiter.recordAttempt(
+              clientIP,
+              email,
+              "registration",
+              true
+            );
+
+            return {
+              id: newUser.id,
+              email: newUser.email,
+              name: newUser.name,
+              image: newUser.image,
+            };
+          } else {
+            // Login flow with enhanced security
+            const result = await secureDbQuery(GET_USER_BY_EMAIL_QUERY, {
+              email,
+            });
+            const user = result.data?.users?.[0];
+
+            if (!user) {
+              authRateLimiter.recordAttempt(clientIP, email, "login", false);
+              // Generic error message to prevent user enumeration
+              throw new Error("Invalid email or password");
+            }
+
+            // Verify password - this also adds consistent timing
+            const isValidPassword = await bcrypt.compare(
+              password,
+              user.password
+            );
+
+            if (!isValidPassword) {
+              authRateLimiter.recordAttempt(clientIP, email, "login", false);
+              // Generic error message to prevent user enumeration
+              throw new Error("Invalid email or password");
+            }
+
+            // Record successful login
+            authRateLimiter.recordAttempt(clientIP, email, "login", true);
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            };
+          }
+        } catch (error) {
+          // Enhanced error logging with security considerations
+          if (process.env.NODE_ENV === "development") {
+            console.error("Auth error details:", error);
+          } else {
+            // In production, log only non-sensitive information
+            console.error(
+              "Auth error:",
+              error instanceof Error
+                ? error.message
+                : "Unknown authentication error"
+            );
+          }
+
+          // Always throw the error to be handled by NextAuth
+          throw error;
+        }
+      },
+    }),
+  ],
   adapter: HasuraAdapter({
     endpoint: process.env.HASURA_PROJECT_ENDPOINT!,
     adminSecret: process.env.HASURA_ADMIN_SECRET!,
