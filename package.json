@@ -16,7 +16,7 @@
     "Sebastian Engel <sebastianengel@posteo.de>"
   ],
   "dependencies": {
-    "@auth/core": "^0.34.2",
+    "@auth/core": "^0.40.0",
     "@auth/hasura-adapter": "^1.4.2",
     "@auth/unstorage-adapter": "^2.0.0",
     "@radix-ui/react-avatar": "^1.0.3",
