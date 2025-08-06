@@ -35,7 +35,7 @@ The authentication system includes built-in rate limiting to prevent:
 1. **IP-based limiting**: Prevents attacks from single sources
 2. **Email-based limiting**: Prevents targeted attacks on specific accounts
 3. **Type-specific limits**: Different limits for login, registration, and email checks
-4. **Automatic cleanup**: Old attempts are automatically cleaned up
+4. **Serverless-friendly cleanup**: On-demand cleanup instead of setInterval to prevent memory leaks
 5. **Consistent timing**: Database queries have consistent timing to prevent timing attacks
 
 ## Security Measures Implemented

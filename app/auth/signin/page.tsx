@@ -34,7 +34,8 @@ function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  // Always redirect to home page after login
+  const callbackUrl = "/";
 
   useEffect(() => {
     getProviders().then(setProviders);

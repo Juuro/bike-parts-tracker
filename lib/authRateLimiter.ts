@@ -199,13 +199,56 @@ class AuthRateLimiter {
   }
 }
 
-// Global auth rate limiter instance
-export const authRateLimiter = new AuthRateLimiter();
+// Global auth rate limiter instance with serverless-friendly cleanup
+class ServerlessAuthRateLimiter extends AuthRateLimiter {
+  private lastCleanup = Date.now();
+  private readonly cleanupInterval = 5 * 60 * 1000; // 5 minutes
 
-// Clean up old entries every 5 minutes
-setInterval(() => {
-  authRateLimiter.cleanup();
-}, 5 * 60 * 1000);
+  // Override methods to include automatic cleanup
+  canAttemptAuth(
+    ip: string,
+    email: string,
+    type: "login" | "registration"
+  ): { allowed: boolean; reason?: string; retryAfter?: number } {
+    this.cleanupIfNeeded();
+    return super.canAttemptAuth(ip, email, type);
+  }
+
+  canCheckEmail(
+    ip: string,
+    email: string
+  ): { allowed: boolean; reason?: string; retryAfter?: number } {
+    this.cleanupIfNeeded();
+    return super.canCheckEmail(ip, email);
+  }
+
+  recordAttempt(
+    ip: string,
+    email: string,
+    type: "login" | "registration" | "email_check",
+    success: boolean
+  ) {
+    this.cleanupIfNeeded();
+    super.recordAttempt(ip, email, type, success);
+  }
+
+  // Cleanup on demand when needed, instead of using setInterval
+  private cleanupIfNeeded() {
+    const now = Date.now();
+    if (now - this.lastCleanup > this.cleanupInterval) {
+      this.cleanup();
+      this.lastCleanup = now;
+    }
+  }
+
+  // Force cleanup (useful for testing or manual cleanup)
+  forceCleanup() {
+    this.cleanup();
+    this.lastCleanup = Date.now();
+  }
+}
+
+export const authRateLimiter = new ServerlessAuthRateLimiter();
 
 // Helper function to get client IP (with fallbacks for various deployment scenarios)
 export function getClientIP(request?: Request): string {
