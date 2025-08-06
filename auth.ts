@@ -153,7 +153,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             const createUserResult = await createUserResponse.json();
             if (createUserResult.errors) {
-              throw new Error("Failed to create user");
+              // Log the specific GraphQL errors for debugging
+              console.error("GraphQL user creation errors:", createUserResult.errors);
+              // Provide a more meaningful error message
+              const errorMessages = createUserResult.errors
+                .map((err: any) => err.message)
+                .join("; ");
+              throw new Error(`Failed to create user: ${errorMessages}`);
             }
 
             const newUser = createUserResult.data?.insert_users_one;
