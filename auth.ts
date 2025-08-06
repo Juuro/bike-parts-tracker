@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
+import { authRateLimiter, getClientIP } from "@/lib/authRateLimiter";
 import type { Provider } from "next-auth/providers";
 import { HasuraAdapter } from "@auth/hasura-adapter";
 import { SignJWT } from "jose";
@@ -79,6 +80,91 @@ const CREATE_USER_MUTATION = `
   }
 `;
 
+// Helper function to perform secure database queries with consistent timing
+async function secureDbQuery(query: string, variables: any) {
+  const startTime = Date.now();
+
+  try {
+    const response = await makeRateLimitedRequest(async () => {
+      return fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+        },
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+      });
+    }, 2);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    // Add consistent timing delay to prevent timing attacks (minimum 100ms)
+    const elapsed = Date.now() - startTime;
+    const minDelay = 100;
+    if (elapsed < minDelay) {
+      await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+    }
+
+    return result;
+  } catch (error) {
+    // Ensure consistent timing even on errors
+    const elapsed = Date.now() - startTime;
+    const minDelay = 100;
+    if (elapsed < minDelay) {
+      await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+    }
+    throw error;
+  }
+}
+
+// Helper function to safely check if user exists (prevents enumeration)
+async function checkUserExists(
+  email: string,
+  clientIP: string
+): Promise<{ exists: boolean; rateLimited: boolean; error?: string }> {
+  // Check rate limiting first
+  const rateLimitCheck = authRateLimiter.canCheckEmail(clientIP, email);
+  if (!rateLimitCheck.allowed) {
+    return {
+      exists: false,
+      rateLimited: true,
+      error: `${rateLimitCheck.reason}. Try again in ${rateLimitCheck.retryAfter} seconds.`,
+    };
+  }
+
+  try {
+    const result = await secureDbQuery(GET_USER_BY_EMAIL_QUERY, { email });
+    const userExists = result.data?.users?.length > 0;
+
+    // Record the check attempt
+    authRateLimiter.recordAttempt(clientIP, email, "email_check", true);
+
+    return { exists: userExists, rateLimited: false };
+  } catch (error) {
+    // Record failed attempt
+    authRateLimiter.recordAttempt(clientIP, email, "email_check", false);
+
+    // Don't expose internal errors to prevent information leakage
+    console.error("Error checking user existence:", error);
+    return {
+      exists: false,
+      rateLimited: false,
+      error: "Unable to verify email. Please try again later.",
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google,
@@ -90,7 +176,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         name: { label: "Name", type: "text" }, // For registration
         mode: { label: "Mode", type: "hidden" }, // signin or signup
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password are required");
         }
@@ -100,35 +186,61 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const name = credentials.name as string;
         const mode = credentials.mode as string;
 
+        // Get client IP for rate limiting (in NextAuth, request structure is different)
+        const clientIP =
+          request?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+          request?.headers?.get("x-real-ip") ||
+          request?.headers?.get("x-client-ip") ||
+          request?.headers?.get("cf-connecting-ip") ||
+          request?.headers?.get("x-vercel-forwarded-for") ||
+          "unknown";
+
+        // Check rate limiting
+        const rateLimitCheck = authRateLimiter.canAttemptAuth(
+          clientIP,
+          email,
+          mode === "signup" ? "registration" : "login"
+        );
+
+        if (!rateLimitCheck.allowed) {
+          throw new Error(
+            `${rateLimitCheck.reason}. Try again in ${rateLimitCheck.retryAfter} seconds.`
+          );
+        }
+
         try {
           if (mode === "signup") {
-            // Registration flow
+            // Registration flow with enhanced security
             if (!name) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
               throw new Error("Name is required for registration");
             }
 
-            // Check if user already exists
-            const existingUserResponse = await fetch(
-              process.env.HASURA_PROJECT_ENDPOINT!,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-                },
-                body: JSON.stringify({
-                  query: GET_USER_BY_EMAIL_QUERY,
-                  variables: { email },
-                }),
-              }
-            );
-
-            const existingUserResult = await existingUserResponse.json();
-            if (existingUserResult.data?.users?.length > 0) {
-              throw new Error("User already exists with this email");
+            // Check if user already exists (with rate limiting)
+            const userCheck = await checkUserExists(email, clientIP);
+            if (userCheck.rateLimited) {
+              throw new Error(userCheck.error || "Rate limit exceeded");
             }
 
-            // Hash password
+            if (userCheck.exists) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+              // Don't reveal that user exists - use generic message
+              throw new Error(
+                "Registration failed. Please try again or sign in if you already have an account."
+              );
+            }
+
+            // Hash password with secure salt rounds
             const saltRounds = parseInt(
               process.env.BCRYPT_SALT_ROUNDS || "12",
               10
@@ -136,33 +248,48 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const hashedPassword = await bcrypt.hash(password, saltRounds);
 
             // Create new user
-            const createUserResponse = await fetch(
-              process.env.HASURA_PROJECT_ENDPOINT!,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-                },
-                body: JSON.stringify({
-                  query: CREATE_USER_MUTATION,
-                  variables: { email, name, password: hashedPassword },
-                }),
-              }
-            );
+            const createUserResult = await secureDbQuery(CREATE_USER_MUTATION, {
+              email,
+              name,
+              password: hashedPassword,
+            });
 
-            const createUserResult = await createUserResponse.json();
             if (createUserResult.errors) {
               // Log the specific GraphQL errors for debugging
-              console.error("GraphQL user creation errors:", createUserResult.errors);
-              // Provide a more meaningful error message
-              const errorMessages = createUserResult.errors
-                .map((err: any) => err.message)
-                .join("; ");
-              throw new Error(`Failed to create user: ${errorMessages}`);
+              console.error(
+                "GraphQL user creation errors:",
+                createUserResult.errors
+              );
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+
+              // Provide a generic error message to prevent information leakage
+              throw new Error("Registration failed. Please try again later.");
             }
 
             const newUser = createUserResult.data?.insert_users_one;
+            if (!newUser) {
+              authRateLimiter.recordAttempt(
+                clientIP,
+                email,
+                "registration",
+                false
+              );
+              throw new Error("Registration failed. Please try again later.");
+            }
+
+            // Record successful registration
+            authRateLimiter.recordAttempt(
+              clientIP,
+              email,
+              "registration",
+              true
+            );
+
             return {
               id: newUser.id,
               email: newUser.email,
@@ -170,34 +297,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               image: newUser.image,
             };
           } else {
-            // Login flow
-            const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-              },
-              body: JSON.stringify({
-                query: GET_USER_BY_EMAIL_QUERY,
-                variables: { email },
-              }),
+            // Login flow with enhanced security
+            const result = await secureDbQuery(GET_USER_BY_EMAIL_QUERY, {
+              email,
             });
-
-            const result = await response.json();
             const user = result.data?.users?.[0];
 
             if (!user) {
-              throw new Error("No user found with this email");
+              authRateLimiter.recordAttempt(clientIP, email, "login", false);
+              // Generic error message to prevent user enumeration
+              throw new Error("Invalid email or password");
             }
 
-            // Verify password
+            // Verify password - this also adds consistent timing
             const isValidPassword = await bcrypt.compare(
               password,
               user.password
             );
+
             if (!isValidPassword) {
-              throw new Error("Invalid password");
+              authRateLimiter.recordAttempt(clientIP, email, "login", false);
+              // Generic error message to prevent user enumeration
+              throw new Error("Invalid email or password");
             }
+
+            // Record successful login
+            authRateLimiter.recordAttempt(clientIP, email, "login", true);
 
             return {
               id: user.id,
@@ -207,12 +332,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             };
           }
         } catch (error) {
+          // Enhanced error logging with security considerations
           if (process.env.NODE_ENV === "development") {
-            console.error("Auth error:", error);
+            console.error("Auth error details:", error);
           } else {
-            // Log only the error message or type in production
-            console.error("Auth error:", error instanceof Error ? error.message : String(error));
+            // In production, log only non-sensitive information
+            console.error(
+              "Auth error:",
+              error instanceof Error
+                ? error.message
+                : "Unknown authentication error"
+            );
           }
+
+          // Always throw the error to be handled by NextAuth
           throw error;
         }
       },

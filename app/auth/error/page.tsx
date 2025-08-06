@@ -117,7 +117,9 @@ export default function AuthError() {
             </div>
             <div className="space-y-4">
               <h1 className="text-2xl font-bold text-gray-900">Loading...</h1>
-              <p className="text-gray-600">Processing authentication error...</p>
+              <p className="text-gray-600">
+                Processing authentication error...
+              </p>
             </div>
           </div>
         </div>

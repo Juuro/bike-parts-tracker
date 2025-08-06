@@ -46,24 +46,38 @@ function SignInForm() {
     setLoading(true);
 
     // Client-side validation
-    if (
-      isSignUp &&
-      (
-        formData.password.length < 8 ||
-        !/[A-Z]/.test(formData.password) ||
-        !/[a-z]/.test(formData.password) ||
-        !/[0-9]/.test(formData.password) ||
-        !/[!@#$%^&*(),.?":{}|<>_\-\\[\];'/`~+=]/.test(formData.password)
-      )
-    ) {
-      setError(
-        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
-      );
+    if (isSignUp && formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
       setLoading(false);
       return;
     }
 
     try {
+      // Check rate limiting before attempting authentication
+      const rateLimitResponse = await fetch("/api/auth/rate-limit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          type: isSignUp ? "registration" : "login",
+        }),
+      });
+
+      if (rateLimitResponse.status === 429) {
+        const rateLimitData = await rateLimitResponse.json();
+        setError(
+          `${
+            rateLimitData.reason || "Too many attempts"
+          }. Please try again in ${
+            rateLimitData.retryAfter || "a few"
+          } seconds.`
+        );
+        setLoading(false);
+        return;
+      }
+
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
