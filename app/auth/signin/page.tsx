@@ -46,8 +46,19 @@ function SignInForm() {
     setLoading(true);
 
     // Client-side validation
-    if (isSignUp && formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
+    if (
+      isSignUp &&
+      (
+        formData.password.length < 8 ||
+        !/[A-Z]/.test(formData.password) ||
+        !/[a-z]/.test(formData.password) ||
+        !/[0-9]/.test(formData.password) ||
+        !/[!@#$%^&*(),.?":{}|<>_\-\\[\];'/`~+=]/.test(formData.password)
+      )
+    ) {
+      setError(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+      );
       setLoading(false);
       return;
     }
