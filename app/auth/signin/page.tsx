@@ -45,6 +45,13 @@ function SignInForm() {
     setError("");
     setLoading(true);
 
+    // Client-side validation
+    if (isSignUp && formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await signIn("credentials", {
         email: formData.email,
@@ -198,7 +205,13 @@ function SignInForm() {
                   type={showPassword ? "text" : "password"}
                   autoComplete={isSignUp ? "new-password" : "current-password"}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10"
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10 ${
+                    isSignUp && formData.password.length > 0
+                      ? formData.password.length >= 8
+                        ? "border-green-300 focus:border-green-500 focus:ring-green-500"
+                        : "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : "border-gray-300"
+                  }`}
                   placeholder={
                     isSignUp ? "Create a password" : "Enter your password"
                   }
@@ -220,9 +233,27 @@ function SignInForm() {
                 </button>
               </div>
               {isSignUp && (
-                <p className="mt-1 text-xs text-gray-500">
-                  Password should be at least 8 characters long
-                </p>
+                <div className="mt-1">
+                  {formData.password.length === 0 ? (
+                    <p className="text-xs text-gray-500">
+                      Password should be at least 8 characters long
+                    </p>
+                  ) : formData.password.length >= 8 ? (
+                    <p className="text-xs text-green-600 flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Password meets requirements
+                    </p>
+                  ) : (
+                    <p className="text-xs text-red-600 flex items-center">
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      Password must be at least 8 characters ({formData.password.length}/8)
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
