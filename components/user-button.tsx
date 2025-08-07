@@ -37,7 +37,7 @@ const UserButton = () => {
             <ChevronDown size={14} className="text-gray-500" />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg">
           <div className="px-2 py-1.5 text-sm text-gray-600">
             <div className="font-medium">{session.user.name}</div>
             <div className="text-xs text-gray-500">{session.user.email}</div>
