@@ -10,7 +10,7 @@ export const GET = async (req: Request, { params }: { params: any }) => {
     }
 
     const accessToken = session?.accessToken;
-    const bikeId = params.id;
+    const { id: bikeId } = await params;
 
     const query = `
       query GetInstallation {

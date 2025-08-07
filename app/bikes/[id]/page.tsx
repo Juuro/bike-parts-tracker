@@ -22,7 +22,7 @@ const BikePage = async ({ params }: { params: any }) => {
     redirect("/api/auth/signin");
   }
 
-  const { id: bikeId } = params;
+  const { id: bikeId } = await params;
 
   const bike = await fetchBike(bikeId);
   const bikes = await fetchBikes();
