@@ -13,12 +13,22 @@ import Link from "next/link";
 type PartsTableProps = {
   bikeName?: string;
   bikeId?: string;
+  manufacturers?: Manufacturer[];
+  partsType?: PartsType[];
+  partStatus?: PartStatus[];
 };
 
-const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
+const PartsTable: React.FC<PartsTableProps> = async ({
+  bikeName,
+  bikeId,
+  manufacturers = [],
+  partsType = [],
+  partStatus: partStatusProp = [],
+}) => {
   const bikeParts = await fetchParts();
   const bikes = await fetchBikes();
-  const partStatus = await fetchPartStatus();
+  const partStatus =
+    partStatusProp.length > 0 ? partStatusProp : await fetchPartStatus();
 
   const hasInstallationWhereUninstalledAtIsNull = (
     installations: Installation[]
@@ -184,7 +194,13 @@ const PartsTable: React.FC<PartsTableProps> = async ({ bikeName, bikeId }) => {
                             />
                           )
                         )}
-                        <EditPartModal showCloseButton={true} part={part} />
+                        <EditPartModal
+                          showCloseButton={true}
+                          part={part}
+                          manufacturers={manufacturers}
+                          partsType={partsType}
+                          partStatus={partStatus}
+                        />
                         <DeletePartButton
                           partStatus={partStatus}
                           installationId={installationIdOfCurrentInstallation(

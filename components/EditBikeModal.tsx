@@ -15,16 +15,20 @@ import { isCloudinaryUrl } from "@/utils/cloudinaryUtils";
 type ModalProps = {
   showCloseButton?: boolean;
   bike?: Bike;
+  disciplines?: Discipline[];
+  categories?: Category[];
 };
 
 const EditBikeModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   bike = null,
+  disciplines: disciplinesProp = [],
+  categories: categoriesProp = [],
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
+  const [categories, setCategories] = useState<Category[]>(categoriesProp);
+  const [disciplines, setDisciplines] = useState<Discipline[]>(disciplinesProp);
   const { data: session, status } = useSession();
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
@@ -41,18 +45,23 @@ const EditBikeModal: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        const discipline = await fetchDisciplines();
-        setDisciplines(discipline);
+        // Only fetch data if not provided as props
+        if (disciplinesProp.length === 0) {
+          const fetchedDiscipline = await fetchDisciplines();
+          setDisciplines(fetchedDiscipline);
+        }
 
-        const category = await fetchCategories();
-        setCategories(category);
+        if (categoriesProp.length === 0) {
+          const fetchedCategory = await fetchCategories();
+          setCategories(fetchedCategory);
+        }
       }
     };
 
     fetchData().catch((error) => {
       console.error("Error fetching disciplines: ", error);
     });
-  }, [status, isModalOpen]);
+  }, [status, isModalOpen, disciplinesProp.length, categoriesProp.length]);
 
   // Handle ESC key press to close modal and prevent body scrolling
   useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));

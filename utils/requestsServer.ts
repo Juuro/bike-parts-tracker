@@ -163,12 +163,80 @@ const fetchAvailableUnits = async () => {
   }
 };
 
+const fetchManufacturers = async () => {
+  try {
+    const headersList = await headers();
+    const response = await fetch(`${apiDomain}/manufacturers`, {
+      method: "GET",
+      headers: new Headers(headersList),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching manufacturers:", error);
+    return [];
+  }
+};
+
+const fetchPartsType = async () => {
+  try {
+    const headersList = await headers();
+    const response = await fetch(`${apiDomain}/parts_type`, {
+      method: "GET",
+      headers: new Headers(headersList),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching parts type:", error);
+    return [];
+  }
+};
+
+const fetchDisciplines = async () => {
+  try {
+    const headersList = await headers();
+    const response = await fetch(`${apiDomain}/disciplines`, {
+      method: "GET",
+      headers: new Headers(headersList),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching disciplines:", error);
+    return [];
+  }
+};
+
+const fetchCategories = async () => {
+  try {
+    const headersList = await headers();
+    const response = await fetch(`${apiDomain}/categories`, {
+      method: "GET",
+      headers: new Headers(headersList),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+};
+
 export {
   fetchBikes,
   fetchBike,
   fetchBikeParts,
   fetchParts,
   fetchPartStatus,
+  fetchManufacturers,
+  fetchPartsType,
+  fetchDisciplines,
+  fetchCategories,
   fetchUserProfile,
   fetchAvailableUnits,
 };

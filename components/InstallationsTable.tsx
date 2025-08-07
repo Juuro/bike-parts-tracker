@@ -9,13 +9,20 @@ import Link from "next/link";
 
 type InstallationsTableProps = {
   bikeId?: string;
+  manufacturers?: Manufacturer[];
+  partsType?: PartsType[];
+  partStatus?: PartStatus[];
 };
 
 const InstallationsTable: React.FC<InstallationsTableProps> = async ({
   bikeId,
+  manufacturers = [],
+  partsType = [],
+  partStatus: partStatusProp = [],
 }) => {
   const bikeParts = await fetchBikeParts(bikeId);
-  const partStatus = await fetchPartStatus();
+  const partStatus =
+    partStatusProp.length > 0 ? partStatusProp : await fetchPartStatus();
 
   const uninstalledBikeParts = bikeParts.filter(
     (installation: Installation) => installation.uninstalled_at
@@ -184,7 +191,13 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                           installationId={installation.id}
                           bikeName={installation.bike.name}
                         />
-                        <EditPartModal showCloseButton={true} part={part} />
+                        <EditPartModal
+                          showCloseButton={true}
+                          part={part}
+                          manufacturers={manufacturers}
+                          partsType={partsType}
+                          partStatus={partStatus}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -329,7 +342,13 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                               </button>
                             </form>
                           )}
-                        <EditPartModal showCloseButton={true} part={part} />
+                        <EditPartModal
+                          showCloseButton={true}
+                          part={part}
+                          manufacturers={manufacturers}
+                          partsType={partsType}
+                          partStatus={partStatus}
+                        />
                         <DeletePartButton
                           partStatus={partStatus}
                           installationId={installation.id}
