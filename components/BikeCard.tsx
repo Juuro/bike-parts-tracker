@@ -22,8 +22,6 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
       ? applyPresetToUrl(images[0], CLOUDINARY_PRESETS.BIKE_CARD)
       : images?.[0];
 
-  console.log("images", images);
-
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-100 hover:border-blue-200 group cursor-pointer transform hover:scale-105">
       <Link href={`/bikes/${bike.id}`}>
@@ -34,6 +32,7 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
               src={optimizedImageUrl}
               alt={`${bike.name} bike`}
               fill={true}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
