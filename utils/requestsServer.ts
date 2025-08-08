@@ -29,7 +29,7 @@ const fetchParts = async () => {
 
 const fetchBike = async (bikeId: string) => {
   const data = await makeApiRequest(`/bikes/${bikeId}`, "bike");
-  return data[0] || {};
+  return data.length > 0 ? data[0] : {};
 };
 
 const fetchBikeParts = async (bikeId?: string) => {
@@ -38,12 +38,7 @@ const fetchBikeParts = async (bikeId?: string) => {
 };
 
 const fetchPartStatus = async () => {
-  try {
-    return await makeApiRequest("/part_status", "part status");
-  } catch (error) {
-    // This function originally returned undefined on error, maintaining that behavior
-    return undefined;
-  }
+  return await makeApiRequest("/part_status", "part status");
 };
 
 const fetchUserProfile = async () => {
