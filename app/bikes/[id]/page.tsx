@@ -1,4 +1,12 @@
-import { fetchBike, fetchBikes } from "@/utils/requestsServer";
+import {
+  fetchBike,
+  fetchBikes,
+  fetchManufacturers,
+  fetchPartsType,
+  fetchPartStatus,
+  fetchDisciplines,
+  fetchCategories,
+} from "@/utils/requestsServer";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
@@ -24,8 +32,24 @@ const BikePage = async ({ params }: { params: any }) => {
 
   const { id: bikeId } = await params;
 
-  const bike = await fetchBike(bikeId);
-  const bikes = await fetchBikes();
+  // Fetch all data in parallel for better performance
+  const [
+    bike,
+    bikes,
+    manufacturers,
+    partsType,
+    partStatus,
+    disciplines,
+    categories,
+  ] = await Promise.all([
+    fetchBike(bikeId),
+    fetchBikes(),
+    fetchManufacturers(),
+    fetchPartsType(),
+    fetchPartStatus(),
+    fetchDisciplines(),
+    fetchCategories(),
+  ]);
 
   const images = bike.images
     ?.split(",")
@@ -98,10 +122,27 @@ const BikePage = async ({ params }: { params: any }) => {
 
         <div className="flex justify-end gap-2">
           <DeleteBikeModal showCloseButton={true} bike={bike} />
-          <EditBikeModal showCloseButton={true} bike={bike} />
-          <AddPartModal showCloseButton={true} bike={bike} bikes={bikes} />
+          <EditBikeModal
+            showCloseButton={true}
+            bike={bike}
+            disciplines={disciplines}
+            categories={categories}
+          />
+          <AddPartModal
+            showCloseButton={true}
+            bike={bike}
+            bikes={bikes}
+            manufacturers={manufacturers}
+            partsType={partsType}
+            partStatus={partStatus}
+          />
         </div>
-        <InstallationsTable bikeId={bikeId} />
+        <InstallationsTable
+          bikeId={bikeId}
+          manufacturers={manufacturers}
+          partsType={partsType}
+          partStatus={partStatus}
+        />
       </div>
     </section>
   );

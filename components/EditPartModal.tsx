@@ -18,15 +18,22 @@ import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 type ModalProps = {
   showCloseButton?: boolean;
   part: Part;
+  manufacturers?: Manufacturer[];
+  partsType?: PartsType[];
+  partStatus?: PartStatus[];
 };
 
 const EditPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   part,
+  manufacturers: manufacturersProp = [],
+  partsType: partsTypeProp = [],
+  partStatus: partStatusProp = [],
 }) => {
-  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [partStatus, setPartStatus] = useState<PartStatus[]>([]);
-  const [partsType, setPartsType] = useState<PartsType[]>([]);
+  const [manufacturers, setManufacturers] =
+    useState<Manufacturer[]>(manufacturersProp);
+  const [partStatus, setPartStatus] = useState<PartStatus[]>(partStatusProp);
+  const [partsType, setPartsType] = useState<PartsType[]>(partsTypeProp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const { data: session, status } = useSession();
@@ -35,21 +42,33 @@ const EditPartModal: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        const manufacturers = await fetchManufacturers();
-        setManufacturers(manufacturers);
+        // Only fetch data if not provided as props
+        if (manufacturersProp.length === 0) {
+          const fetchedManufacturers = await fetchManufacturers();
+          setManufacturers(fetchedManufacturers);
+        }
 
-        const partStatus = await fetchPartStatus();
-        setPartStatus(partStatus);
+        if (partStatusProp.length === 0) {
+          const fetchedPartStatus = await fetchPartStatus();
+          setPartStatus(fetchedPartStatus);
+        }
 
-        const partsType = await fetchPartsType();
-        setPartsType(partsType);
+        if (partsTypeProp.length === 0) {
+          const fetchedPartsType = await fetchPartsType();
+          setPartsType(fetchedPartsType);
+        }
       }
     };
 
     fetchData().catch((error) => {
       console.error("Error fetching data: ", error);
     });
-  }, [status]);
+  }, [
+    status,
+    manufacturersProp.length,
+    partStatusProp.length,
+    partsTypeProp.length,
+  ]);
 
   // Handle ESC key press to close modal and prevent body scrolling
   useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));

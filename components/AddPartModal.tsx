@@ -19,17 +19,24 @@ type ModalProps = {
   showCloseButton?: boolean;
   bike?: Bike;
   bikes?: Bike[];
+  manufacturers?: Manufacturer[];
+  partsType?: PartsType[];
+  partStatus?: PartStatus[];
 };
 
 const AddPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   bike = null,
   bikes = [],
+  manufacturers: manufacturersProp = [],
+  partsType: partsTypeProp = [],
+  partStatus: partStatusProp = [],
 }) => {
   const [selectedDate, setSelectedDate] = useState("");
-  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
-  const [PartStatus, setPartStatus] = useState<PartStatus[]>([]);
-  const [partsType, setPartsType] = useState<PartsType[]>([]);
+  const [manufacturers, setManufacturers] =
+    useState<Manufacturer[]>(manufacturersProp);
+  const [PartStatus, setPartStatus] = useState<PartStatus[]>(partStatusProp);
+  const [partsType, setPartsType] = useState<PartsType[]>(partsTypeProp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBikeId, setSelectedBikeId] = useState("");
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
@@ -49,21 +56,34 @@ const AddPartModal: React.FC<ModalProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated") {
-        const manufacturers = await fetchManufacturers();
-        setManufacturers(manufacturers);
+        // Only fetch data if not provided as props
+        if (manufacturersProp.length === 0) {
+          const fetchedManufacturers = await fetchManufacturers();
+          setManufacturers(fetchedManufacturers);
+        }
 
-        const partStatus = await fetchPartStatus();
-        setPartStatus(partStatus);
+        if (partStatusProp.length === 0) {
+          const fetchedPartStatus = await fetchPartStatus();
+          setPartStatus(fetchedPartStatus);
+        }
 
-        const partsType = await fetchPartsType();
-        setPartsType(partsType);
+        if (partsTypeProp.length === 0) {
+          const fetchedPartsType = await fetchPartsType();
+          setPartsType(fetchedPartsType);
+        }
       }
     };
 
     fetchData().catch((error) => {
       console.error("Error fetching bikes: ", error);
     });
-  }, [status, isModalOpen]);
+  }, [
+    status,
+    isModalOpen,
+    manufacturersProp.length,
+    partStatusProp.length,
+    partsTypeProp.length,
+  ]);
 
   const handleSubmit = async (formData: FormData) => {
     try {

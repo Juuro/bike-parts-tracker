@@ -2,84 +2,43 @@ import { headers } from "next/headers";
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
 
-const fetchBikes = async () => {
+// Helper function to make API requests with consistent error handling
+const makeApiRequest = async (endpoint: string, errorContext: string) => {
   try {
     const headersList = await headers();
-    const response = await fetch(`${apiDomain}/bikes`, {
+    const response = await fetch(`${apiDomain}${endpoint}`, {
       method: "GET",
       headers: new Headers(headersList),
     });
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data: Bike[] = await response.json();
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching bikes:", error);
+    console.error(`Error fetching ${errorContext}:`, error);
     return [];
   }
+};
+
+const fetchBikes = async () => {
+  return await makeApiRequest("/bikes", "bikes");
 };
 
 const fetchParts = async () => {
-  try {
-    const headersList = await headers();
-    const response = await fetch(`${apiDomain}/parts`, {
-      method: "GET",
-      headers: new Headers(headersList),
-    });
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching parts:", error);
-    return [];
-  }
+  return await makeApiRequest("/parts", "parts");
 };
 
 const fetchBike = async (bikeId: string) => {
-  try {
-    const headersList = await headers();
-    const response = await fetch(`${apiDomain}/bikes/${bikeId}`, {
-      method: "GET",
-      headers: new Headers(headersList),
-    });
-    if (!response.ok) throw new Error("Failed to fetch");
-    const data = await response.json();
-    return data[0];
-  } catch (error) {
-    console.error("Error fetching bike:", error);
-    return {};
-  }
+  const data = await makeApiRequest(`/bikes/${bikeId}`, "bike");
+  return data.length > 0 ? data[0] : {};
 };
 
 const fetchBikeParts = async (bikeId?: string) => {
   if (!bikeId) return [];
-  try {
-    const headersList = await headers();
-    const response = await fetch(`${apiDomain}/bikes/${bikeId}/installation`, {
-      method: "GET",
-      headers: new Headers(headersList),
-    });
-    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching bike parts:", error);
-    return [];
-  }
+  return await makeApiRequest(`/bikes/${bikeId}/installation`, "bike parts");
 };
 
 const fetchPartStatus = async () => {
-  try {
-    const headersList = await headers();
-    const response = await fetch(`${apiDomain}/part_status`, {
-      method: "GET",
-      headers: new Headers(headersList),
-    });
-    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching part status:", error);
-  }
+  return await makeApiRequest("/part_status", "part status");
 };
 
 const fetchUserProfile = async () => {
@@ -163,12 +122,32 @@ const fetchAvailableUnits = async () => {
   }
 };
 
+const fetchManufacturers = async () => {
+  return await makeApiRequest("/manufacturers", "manufacturers");
+};
+
+const fetchPartsType = async () => {
+  return await makeApiRequest("/parts_type", "parts type");
+};
+
+const fetchDisciplines = async () => {
+  return await makeApiRequest("/disciplines", "disciplines");
+};
+
+const fetchCategories = async () => {
+  return await makeApiRequest("/categories", "categories");
+};
+
 export {
   fetchBikes,
   fetchBike,
   fetchBikeParts,
   fetchParts,
   fetchPartStatus,
+  fetchManufacturers,
+  fetchPartsType,
+  fetchDisciplines,
+  fetchCategories,
   fetchUserProfile,
   fetchAvailableUnits,
 };
