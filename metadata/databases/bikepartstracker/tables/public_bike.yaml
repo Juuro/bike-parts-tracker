@@ -10,28 +10,30 @@ insert_permissions:
     permission:
       check: {}
       columns:
+        - category_id
+        - created_at
+        - discipline_id
         - ebike
+        - id
+        - images
         - name
         - strava_bike
-        - created_at
         - updated_at
-        - category_id
-        - discipline_id
-        - id
         - user_id
     comment: ""
 select_permissions:
   - role: user
     permission:
       columns:
+        - category_id
+        - created_at
+        - discipline_id
         - ebike
+        - id
+        - images
         - name
         - strava_bike
-        - created_at
         - updated_at
-        - category_id
-        - discipline_id
-        - id
         - user_id
       filter: {}
       allow_aggregations: true
@@ -41,6 +43,7 @@ update_permissions:
     permission:
       columns:
         - ebike
+        - images
         - name
         - strava_bike
         - created_at

@@ -17,7 +17,7 @@ export default function PolicyPage() {
         <h2 className="text-xl font-bold">Privacy Policy</h2>
         <p>
           This site uses JSON Web Tokens and a Key-Value database for sessions
-          and WebAuthn authenticators which resets every 2 hours.
+          which resets every 2 hours.
         </p>
         <p>
           Data provided to this site is exclusively used to support signing in
@@ -28,5 +28,5 @@ export default function PolicyPage() {
         </p>
       </section>
     </div>
-  )
+  );
 }

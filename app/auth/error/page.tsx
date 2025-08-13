@@ -11,12 +11,6 @@ function AuthErrorContent() {
   const router = useRouter();
   const error = searchParams.get("error");
 
-  console.log("[auth][debug] Error page:", {
-    error,
-    allParams: Object.fromEntries(searchParams.entries()),
-    currentUrl: window.location.href,
-  });
-
   useEffect(() => {
     // If it's specifically a state/CSRF error and we're coming from Strava
     // and sessions are being created (indicating auth actually worked)
@@ -25,7 +19,6 @@ function AuthErrorContent() {
       error?.includes("state") ||
       error?.includes("CSRF")
     ) {
-      console.log("[auth][debug] Redirecting due to state/verification error");
       const callbackUrl = searchParams.get("callbackUrl") || "/";
       // Small delay to let any session creation complete
       setTimeout(() => {
@@ -56,6 +49,44 @@ function AuthErrorContent() {
             <Link href="/">
               <Button className="w-full bg-blue-600 hover:bg-blue-700">
                 Continue to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle WebAuthn configuration/authenticator-not-found gracefully
+  if (error === "Configuration") {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="bg-yellow-100 p-3 rounded-full">
+              <AlertCircle className="w-8 h-8 text-yellow-600" />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Authentication error
+            </h1>
+            <p className="text-gray-600">
+              There was an issue with authentication. Please try signing in
+              again or use a different authentication method.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Link href="/auth/signin">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                Use another method
+              </Button>
+            </Link>
+            <Link href="/security">
+              <Button variant="outline" className="w-full">
+                Go to Security Settings
               </Button>
             </Link>
           </div>

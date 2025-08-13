@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import { fetchUserProfile, fetchAvailableUnits } from "@/utils/requestsServer";
 import Link from "next/link";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, Shield } from "lucide-react";
 
 export default async function ProfilePage() {
   // Check authentication
@@ -59,6 +59,31 @@ export default async function ProfilePage() {
             userProfile={profileData}
             availableUnits={availableUnits}
           />
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-100 p-2 rounded-full">
+                <Shield className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Security Settings
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Manage your account security and enable MFA
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/security"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Shield size={16} />
+              Security Settings
+            </Link>
+          </div>
         </div>
       </div>
     </section>

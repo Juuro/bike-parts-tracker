@@ -1,0 +1,48 @@
+table:
+  name: user_backup_codes
+  schema: public
+object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - user_id
+        - code_hash
+        - used_at
+        - created_at
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    comment: ""
+insert_permissions:
+  - role: user
+    permission:
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+      columns:
+        - user_id
+        - code_hash
+        - created_at
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - used_at
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      check: null
+    comment: ""
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    comment: ""

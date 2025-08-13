@@ -1,6 +1,7 @@
 "use client";
 
-import { signIn, getProviders } from "next-auth/react";
+import { signIn as signInReact, getProviders } from "next-auth/react";
+
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,10 +30,14 @@ function SignInForm() {
     email: "",
     password: "",
     name: "",
+    mfaCode: "",
+    backupCode: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [showBackupCode, setShowBackupCode] = useState(false);
   const searchParams = useSearchParams();
   // Always redirect to home page after login
   const callbackUrl = "/";
@@ -54,16 +59,41 @@ function SignInForm() {
     }
 
     try {
-      const result = await signIn("credentials", {
+      const signInData: any = {
         email: formData.email,
         password: formData.password,
         name: formData.name,
         mode: isSignUp ? "signup" : "signin",
         redirect: false,
-      });
+      };
+
+      // Add MFA data if provided
+      if (formData.mfaCode) {
+        signInData.mfaCode = formData.mfaCode;
+      }
+      if (formData.backupCode) {
+        signInData.backupCode = formData.backupCode;
+      }
+
+      const result = (await signInReact("credentials", signInData)) as any;
 
       if (result?.error) {
-        setError(result.error);
+        if (
+          result.error === "MFA_REQUIRED" ||
+          result.error.includes("MFA_REQUIRED")
+        ) {
+          setMfaRequired(true);
+          setError("Please enter your MFA code to continue");
+        } else if (
+          result.error === "Configuration" ||
+          result.error.includes("CallbackRouteError")
+        ) {
+          // NextAuth.js wraps MFA_REQUIRED in CallbackRouteError
+          setMfaRequired(true);
+          setError("Please enter your MFA code to continue");
+        } else {
+          setError(result.error);
+        }
       } else {
         window.location.href = callbackUrl;
       }
@@ -275,6 +305,88 @@ function SignInForm() {
               )}
             </div>
 
+            {/* MFA Section - Only show when MFA is required */}
+            {mfaRequired && !isSignUp && (
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 text-blue-800 px-3 py-2 rounded-md text-sm">
+                  Multi-factor authentication is enabled on this account. Please
+                  enter your authenticator code or use a backup code.
+                </div>
+
+                {!showBackupCode ? (
+                  <div>
+                    <label
+                      htmlFor="mfaCode"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Authenticator Code
+                    </label>
+                    <input
+                      id="mfaCode"
+                      name="mfaCode"
+                      type="text"
+                      maxLength={6}
+                      autoComplete="one-time-code"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center text-lg tracking-widest"
+                      placeholder="000000"
+                      value={formData.mfaCode}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          mfaCode: e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 6),
+                          backupCode: "", // Clear backup code when entering MFA code
+                        })
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-500"
+                      onClick={() => setShowBackupCode(true)}
+                    >
+                      Use backup code instead
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <label
+                      htmlFor="backupCode"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Backup Code
+                    </label>
+                    <input
+                      id="backupCode"
+                      name="backupCode"
+                      type="text"
+                      autoComplete="one-time-code"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center text-lg tracking-widest"
+                      placeholder="AB12CD34"
+                      value={formData.backupCode}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          backupCode: e.target.value
+                            .toUpperCase()
+                            .replace(/[^A-F0-9]/g, "")
+                            .slice(0, 8),
+                          mfaCode: "", // Clear MFA code when entering backup code
+                        })
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-500"
+                      onClick={() => setShowBackupCode(false)}
+                    >
+                      Use authenticator code instead
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md text-sm">
                 {error}
@@ -299,7 +411,15 @@ function SignInForm() {
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError("");
-                  setFormData({ email: "", password: "", name: "" });
+                  setMfaRequired(false);
+                  setShowBackupCode(false);
+                  setFormData({
+                    email: "",
+                    password: "",
+                    name: "",
+                    mfaCode: "",
+                    backupCode: "",
+                  });
                 }}
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
@@ -328,7 +448,7 @@ function SignInForm() {
                 {oauthProviders.map((provider) => (
                   <Button
                     key={provider.id}
-                    onClick={() => signIn(provider.id, { callbackUrl })}
+                    onClick={() => signInReact(provider.id, { callbackUrl })}
                     className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-3 ${getProviderColor(
                       provider.id
                     )}`}

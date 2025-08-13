@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import { authRateLimiter, getClientIP } from "@/lib/authRateLimiter";
 import type { Provider } from "next-auth/providers";
@@ -9,6 +10,7 @@ import { SignJWT } from "jose";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
 import bcrypt from "bcryptjs";
+import { authenticator } from "@otplib/preset-default";
 
 // Extended interfaces for better type safety
 interface ExtendedToken extends JWT {
@@ -17,6 +19,8 @@ interface ExtendedToken extends JWT {
   stravaExpiresAt?: number;
   accessToken?: string;
   invalidateUserCache?: boolean;
+  mfaRequired?: boolean;
+  mfaVerified?: boolean;
   "https://hasura.io/jwt/claims"?: {
     "x-hasura-allowed-roles": string[];
     "x-hasura-default-role": string;
@@ -64,6 +68,8 @@ const GET_USER_BY_EMAIL_QUERY = `
       password
       image
       emailVerified
+      mfa_enabled
+
     }
   }
 `;
@@ -156,7 +162,9 @@ async function checkUserExists(
     authRateLimiter.recordAttempt(clientIP, email, "email_check", false);
 
     // Don't expose internal errors to prevent information leakage
-    console.error("Error checking user existence:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error checking user existence:", error);
+    }
     return {
       exists: false,
       rateLimited: false,
@@ -175,6 +183,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
         name: { label: "Name", type: "text" }, // For registration
         mode: { label: "Mode", type: "hidden" }, // signin or signup
+        mfaCode: { label: "MFA Code", type: "text" }, // For MFA verification
+        backupCode: { label: "Backup Code", type: "text" }, // For backup code recovery
       },
       async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
@@ -185,6 +195,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials.password as string;
         const name = credentials.name as string;
         const mode = credentials.mode as string;
+        const mfaCode = credentials.mfaCode as string;
+        const backupCode = credentials.backupCode as string;
 
         // Get client IP for rate limiting
         const clientIP = getClientIP(request) || "unknown";
@@ -249,11 +261,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             });
 
             if (createUserResult.errors) {
-              // Log the specific GraphQL errors for debugging
-              console.error(
-                "GraphQL user creation errors:",
-                createUserResult.errors
-              );
+              // Log the specific GraphQL errors for debugging (development only)
+              if (process.env.NODE_ENV === "development") {
+                console.error(
+                  "GraphQL user creation errors:",
+                  createUserResult.errors
+                );
+              }
               authRateLimiter.recordAttempt(
                 clientIP,
                 email,
@@ -315,6 +329,135 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               throw new Error("Invalid email or password");
             }
 
+            // Handle MFA verification if enabled
+            if (user.mfa_enabled) {
+              // If MFA is required but no MFA code provided, request it
+              if (!mfaCode && !backupCode) {
+                authRateLimiter.recordAttempt(clientIP, email, "login", false);
+                throw new Error("MFA_REQUIRED");
+              }
+
+              // Verify MFA code if provided
+              if (mfaCode) {
+                if (!user.mfa_secret) {
+                  authRateLimiter.recordAttempt(clientIP, email, "mfa", false);
+                  throw new Error(
+                    "MFA setup incomplete. Please contact support."
+                  );
+                }
+
+                const isValidMFA = authenticator.check(
+                  mfaCode,
+                  user.mfa_secret
+                );
+                if (!isValidMFA) {
+                  authRateLimiter.recordAttempt(clientIP, email, "mfa", false);
+                  throw new Error("Invalid MFA code");
+                }
+                authRateLimiter.recordAttempt(clientIP, email, "mfa", true);
+              }
+
+              // Verify backup code if provided
+              if (backupCode) {
+                // Query backup codes for this user
+                const backupCodeQuery = `
+                  query GetBackupCodes($userId: uuid!) {
+                    user_backup_codes(where: {
+                      user_id: {_eq: $userId}, 
+                      used_at: {_is_null: true}
+                    }) {
+                      id
+                      code_hash
+                    }
+                  }
+                `;
+
+                const backupResult = await secureDbQuery(backupCodeQuery, {
+                  userId: user.id,
+                });
+
+                const backupCodes = backupResult.data?.user_backup_codes || [];
+                let validBackupCode = null;
+
+                // Check the provided backup code against all stored hashes
+                // Support both old format (XXXX-XXXX) and new format (XXXXXXXX)
+                const cleanedBackupCode = backupCode
+                  .replace(/[\s-]/g, "")
+                  .toUpperCase();
+                const formattedBackupCode = `${cleanedBackupCode.slice(
+                  0,
+                  4
+                )}-${cleanedBackupCode.slice(4, 8)}`;
+
+                for (const storedCode of backupCodes) {
+                  let isValidBackupCode = false;
+
+                  // Try original input first
+                  isValidBackupCode = await bcrypt.compare(
+                    backupCode,
+                    storedCode.code_hash
+                  );
+
+                  // If that fails, try cleaned format (new format: XXXXXXXX)
+                  if (!isValidBackupCode && cleanedBackupCode.length === 8) {
+                    isValidBackupCode = await bcrypt.compare(
+                      cleanedBackupCode,
+                      storedCode.code_hash
+                    );
+                  }
+
+                  // If that fails and input was cleaned, try formatted version (old format: XXXX-XXXX)
+                  if (
+                    !isValidBackupCode &&
+                    cleanedBackupCode.length === 8 &&
+                    !backupCode.includes("-")
+                  ) {
+                    isValidBackupCode = await bcrypt.compare(
+                      formattedBackupCode,
+                      storedCode.code_hash
+                    );
+                  }
+
+                  if (isValidBackupCode) {
+                    validBackupCode = storedCode;
+                    break;
+                  }
+                }
+
+                if (!validBackupCode) {
+                  authRateLimiter.recordAttempt(
+                    clientIP,
+                    email,
+                    "backup_code",
+                    false
+                  );
+                  throw new Error("Invalid backup code");
+                }
+
+                // Mark backup code as used
+                const markUsedMutation = `
+                  mutation MarkBackupCodeUsed($id: uuid!) {
+                    update_user_backup_codes_by_pk(
+                      pk_columns: {id: $id}, 
+                      _set: {used_at: "now()"}
+                    ) {
+                      id
+                    }
+                  }
+                `;
+
+                await secureDbQuery(markUsedMutation, {
+                  id: validBackupCode.id,
+                });
+                authRateLimiter.recordAttempt(
+                  clientIP,
+                  email,
+                  "backup_code",
+                  true
+                );
+              }
+            }
+
             // Record successful login
             authRateLimiter.recordAttempt(clientIP, email, "login", true);
 
@@ -359,7 +502,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      // Allow sign in for all verified accounts
       return true;
     },
     async jwt({ token, account, profile }): Promise<ExtendedToken> {
@@ -403,8 +545,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       };
     },
-    // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }): Promise<ExtendedSession> => {
+      // For database sessions, user object is provided directly
+      if (user) {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: user.id,
+          },
+          userId: user.id,
+          accessToken: "",
+          dataFresh: true,
+          userDataUpdatedAt: Date.now(),
+        } as ExtendedSession;
+      }
+
       const extendedSession = session as ExtendedSession;
       const extendedToken = token as ExtendedToken;
 
@@ -486,12 +642,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Clear any cache invalidation flag
             delete extendedToken.invalidateUserCache;
           } else {
-            console.warn(`User ${extendedToken.sub} not found in database`);
+            if (process.env.NODE_ENV === "development") {
+              console.warn(`User ${extendedToken.sub} not found in database`);
+            }
             extendedSession.dataFresh = false;
             extendedSession.dataError = "User not found in database";
           }
         } catch (error) {
-          console.error("Error fetching user data in session callback:", error);
+          if (process.env.NODE_ENV === "development") {
+            console.error(
+              "Error fetching user data in session callback:",
+              error
+            );
+          } else {
+            console.error(
+              "Error fetching user data in session callback:",
+              error instanceof Error ? error.message : "Unknown error"
+            );
+          }
           // Mark session as potentially stale after error but don't fail
           extendedSession.dataFresh = false;
           extendedSession.dataError =

@@ -1,7 +1,7 @@
 "use client";
 import { SignIn, SignOut } from "./auth-components";
 import { useSession } from "next-auth/react";
-import { User, ChevronDown } from "lucide-react";
+import { User, ChevronDown, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +56,15 @@ const UserButton = () => {
             >
               <User size={14} />
               Profile Settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/security"
+              className="w-full cursor-pointer flex items-center gap-2"
+            >
+              <Shield size={14} />
+              Security
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
