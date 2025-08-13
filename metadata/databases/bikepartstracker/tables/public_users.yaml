@@ -23,7 +23,7 @@ select_permissions:
   - role: user
     permission:
       columns:
-        - backup_codes_generated_at
+mfa        - backup_codes_generated_at
         - created_at
         - currency_unit
         - distance_unit

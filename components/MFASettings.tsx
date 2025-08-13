@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import QRCode from "qrcode";
 
 interface MFAStatus {
   mfaEnabled: boolean;
@@ -34,6 +35,7 @@ export function MFASettings() {
   const [loading, setLoading] = useState(true);
   const [setupStep, setSetupStep] = useState<"none" | "qr" | "verify">("none");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [copiedCodes, setCopiedCodes] = useState(false);
@@ -41,6 +43,22 @@ export function MFASettings() {
   useEffect(() => {
     fetchMFAStatus();
   }, []);
+
+  const generateQRCode = async (totpUrl: string) => {
+    try {
+      const dataUrl = await QRCode.toDataURL(totpUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+      });
+      setQrCodeDataUrl(dataUrl);
+    } catch (error) {
+      toast.error("Failed to generate QR code");
+    }
+  };
 
   const fetchMFAStatus = async () => {
     try {
@@ -69,6 +87,7 @@ export function MFASettings() {
       if (response.ok) {
         const data = await response.json();
         setQrCodeUrl(data.qrCodeUrl);
+        await generateQRCode(data.qrCodeUrl);
         setSetupStep("qr");
         toast.success("Scan the QR code with your authenticator app");
       } else {
@@ -151,6 +170,7 @@ export function MFASettings() {
   const finishSetup = () => {
     setSetupStep("none");
     setQrCodeUrl("");
+    setQrCodeDataUrl("");
     setVerificationCode("");
     setBackupCodes([]);
     // Now fetch the updated status to show MFA is enabled
@@ -233,13 +253,19 @@ export function MFASettings() {
                   </Alert>
 
                   <div className="flex justify-center p-4 bg-white rounded-lg border">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                        qrCodeUrl
-                      )}`}
-                      alt="MFA QR Code"
-                      className="w-48 h-48"
-                    />
+                    {qrCodeDataUrl ? (
+                      <img
+                        src={qrCodeDataUrl}
+                        alt="MFA QR Code"
+                        className="w-48 h-48"
+                      />
+                    ) : (
+                      <div className="w-48 h-48 flex items-center justify-center bg-gray-100 rounded">
+                        <span className="text-gray-500">
+                          Generating QR code...
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
