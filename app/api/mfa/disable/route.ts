@@ -118,15 +118,7 @@ export const POST = async (request: Request) => {
       }
     }
 
-    console.log("[MFA Disable] Verification result:", {
-      isValidVerification,
-      hasVerificationCode: !!verificationCode,
-      hasBackupCode: !!backupCode,
-      userHasMfaSecret: !!user.mfa_secret,
-    });
-
     if (!isValidVerification) {
-      console.error("[MFA Disable] Verification failed - code invalid");
       return new Response("Invalid verification code", { status: 400 });
     }
 
@@ -160,24 +152,14 @@ export const POST = async (request: Request) => {
       }
 
       const result = await response.json();
-      console.log(
-        "[MFA Disable] Backup codes disable result:",
-        JSON.stringify(result, null, 2)
-      );
 
       // Check for GraphQL errors
       if (result.errors && result.errors.length > 0) {
-        console.error("[MFA Disable] GraphQL errors:", result.errors);
         throw new Error(`GraphQL Error: ${result.errors[0].message}`);
       }
 
       return result;
     }, 2);
-
-    console.log(
-      "[MFA Disable] Disabled backup codes:",
-      disableResult.data?.update_user_backup_codes?.affected_rows || 0
-    );
 
     // Step 2: Disable MFA in users table
     const disableMFAMutation = `
@@ -214,21 +196,14 @@ export const POST = async (request: Request) => {
       }
 
       const result = await response.json();
-      console.log(
-        "[MFA Disable] Users table update result:",
-        JSON.stringify(result, null, 2)
-      );
 
       // Check for GraphQL errors
       if (result.errors && result.errors.length > 0) {
-        console.error("[MFA Disable] GraphQL errors:", result.errors);
         throw new Error(`GraphQL Error: ${result.errors[0].message}`);
       }
 
       return result;
     }, 2);
-
-    console.log("[MFA Disable] MFA disabled successfully for user:", userId);
 
     return new Response(
       JSON.stringify({

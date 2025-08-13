@@ -466,16 +466,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      console.log("[auth] 🔍 signIn CALLBACK TRIGGERED:");
-      console.log("[auth] USER:", JSON.stringify(user, null, 2));
-      console.log("[auth] ACCOUNT:", JSON.stringify(account, null, 2));
-      console.log("[auth] PROFILE:", JSON.stringify(profile, null, 2));
-      console.log("[auth] EMAIL:", JSON.stringify(email, null, 2));
-      console.log("[auth] CREDENTIALS:", JSON.stringify(credentials, null, 2));
-      console.log("[auth] ====================================");
-
-      // Allow sign in for all verified accounts
-      console.log("[auth] ✅ Allowing general sign in");
       return true;
     },
     async jwt({ token, account, profile }): Promise<ExtendedToken> {
@@ -519,17 +509,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       };
     },
-    // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }): Promise<ExtendedSession> => {
-      console.log("[auth] 🔍 SESSION CALLBACK TRIGGERED:");
-      console.log("[auth] SESSION:", JSON.stringify(session, null, 2));
-      console.log("[auth] TOKEN:", JSON.stringify(token, null, 2));
-      console.log("[auth] USER:", JSON.stringify(user, null, 2));
-      console.log("[auth] ====================================");
-
       // For database sessions, user object is provided directly
       if (user) {
-        console.log("[auth] 🔗 Using database session with user object");
         return {
           ...session,
           user: {

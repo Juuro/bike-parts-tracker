@@ -11,13 +11,6 @@ function AuthErrorContent() {
   const router = useRouter();
   const error = searchParams.get("error");
 
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  console.log("[auth][debug] Error page:", {
-    error,
-    allParams: Object.fromEntries(searchParams.entries()),
-    currentUrl,
-  });
-
   useEffect(() => {
     // If it's specifically a state/CSRF error and we're coming from Strava
     // and sessions are being created (indicating auth actually worked)
@@ -26,7 +19,6 @@ function AuthErrorContent() {
       error?.includes("state") ||
       error?.includes("CSRF")
     ) {
-      console.log("[auth][debug] Redirecting due to state/verification error");
       const callbackUrl = searchParams.get("callbackUrl") || "/";
       // Small delay to let any session creation complete
       setTimeout(() => {
