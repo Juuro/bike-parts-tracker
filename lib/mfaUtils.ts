@@ -43,15 +43,14 @@ export async function generateBackupCodes(
   const codes: BackupCode[] = [];
 
   for (let i = 0; i < count; i++) {
-    // Generate a readable backup code (format: XXXX-XXXX)
+    // Generate a 8-character hex backup code (32 bits of entropy)
     const code = crypto.randomBytes(4).toString("hex").toUpperCase();
-    const formattedCode = `${code.slice(0, 4)}-${code.slice(4, 8)}`;
 
     // Hash the code for storage
-    const hash = await bcrypt.hash(formattedCode, 12);
+    const hash = await bcrypt.hash(code, 12);
 
     codes.push({
-      code: formattedCode,
+      code,
       hash,
     });
   }
@@ -61,12 +60,34 @@ export async function generateBackupCodes(
 
 /**
  * Verify a backup code against a hash
+ * Supports both old format (XXXX-XXXX) and new format (XXXXXXXX)
  */
 export async function verifyBackupCode(
   code: string,
   hash: string
 ): Promise<boolean> {
-  return bcrypt.compare(code, hash);
+  // Try original input first
+  let isValid = await bcrypt.compare(code, hash);
+  if (isValid) return true;
+
+  // Try cleaned format (new format: XXXXXXXX)
+  const cleanedCode = code.replace(/[\s-]/g, "").toUpperCase();
+  if (cleanedCode.length === 8 && cleanedCode !== code) {
+    isValid = await bcrypt.compare(cleanedCode, hash);
+    if (isValid) return true;
+  }
+
+  // Try formatted version (old format: XXXX-XXXX)
+  if (cleanedCode.length === 8 && !code.includes("-")) {
+    const formattedCode = `${cleanedCode.slice(0, 4)}-${cleanedCode.slice(
+      4,
+      8
+    )}`;
+    isValid = await bcrypt.compare(formattedCode, hash);
+    if (isValid) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -84,15 +105,15 @@ export function isValidMFACodeFormat(code: string): boolean {
 }
 
 /**
- * Validate backup code format (XXXX-XXXX)
+ * Validate backup code format (8 hex characters)
  */
 export function isValidBackupCodeFormat(code: string): boolean {
-  return /^[A-F0-9]{4}-[A-F0-9]{4}$/.test(code.toUpperCase());
+  return /^[A-F0-9]{8}$/.test(code.toUpperCase());
 }
 
 /**
  * Clean and format a backup code for verification
  */
 export function formatBackupCode(code: string): string {
-  return code.replace(/\s/g, "").toUpperCase();
+  return code.replace(/[\s-]/g, "").toUpperCase();
 }

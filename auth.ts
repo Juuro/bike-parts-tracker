@@ -377,11 +377,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 let validBackupCode = null;
 
                 // Check the provided backup code against all stored hashes
+                // Support both old format (XXXX-XXXX) and new format (XXXXXXXX)
+                const cleanedBackupCode = backupCode.replace(/[\s-]/g, "").toUpperCase();
+                const formattedBackupCode = `${cleanedBackupCode.slice(0, 4)}-${cleanedBackupCode.slice(4, 8)}`;
+                
                 for (const storedCode of backupCodes) {
-                  const isValidBackupCode = await bcrypt.compare(
-                    backupCode,
-                    storedCode.code_hash
-                  );
+                  let isValidBackupCode = false;
+                  
+                  // Try original input first
+                  isValidBackupCode = await bcrypt.compare(backupCode, storedCode.code_hash);
+                  
+                  // If that fails, try cleaned format (new format: XXXXXXXX)
+                  if (!isValidBackupCode && cleanedBackupCode.length === 8) {
+                    isValidBackupCode = await bcrypt.compare(cleanedBackupCode, storedCode.code_hash);
+                  }
+                  
+                  // If that fails and input was cleaned, try formatted version (old format: XXXX-XXXX)
+                  if (!isValidBackupCode && cleanedBackupCode.length === 8 && !backupCode.includes("-")) {
+                    isValidBackupCode = await bcrypt.compare(formattedBackupCode, storedCode.code_hash);
+                  }
+                  
                   if (isValidBackupCode) {
                     validBackupCode = storedCode;
                     break;

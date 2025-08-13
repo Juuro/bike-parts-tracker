@@ -135,8 +135,11 @@ export function MFASettings() {
     if (!code) return;
 
     try {
-      const body = code.includes("-")
-        ? { backupCode: code }
+      // Clean the code and determine if it's a backup code or verification code
+      const cleanedCode = code.replace(/[\s-]/g, "").toUpperCase();
+      const isBackupCode = /^[A-F0-9]{8}$/i.test(cleanedCode);
+      const body = isBackupCode
+        ? { backupCode: cleanedCode }
         : { verificationCode: code };
 
       const response = await fetch("/api/mfa/disable", {

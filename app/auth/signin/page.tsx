@@ -363,14 +363,15 @@ function SignInForm() {
                       type="text"
                       autoComplete="one-time-code"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-center text-lg tracking-widest"
-                      placeholder="XXXX-XXXX"
+                      placeholder="AB12CD34"
                       value={formData.backupCode}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
                           backupCode: e.target.value
                             .toUpperCase()
-                            .replace(/[^A-F0-9-]/g, ""),
+                            .replace(/[^A-F0-9]/g, "")
+                            .slice(0, 8),
                           mfaCode: "", // Clear MFA code when entering backup code
                         })
                       }
