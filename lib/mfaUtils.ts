@@ -43,7 +43,7 @@ export async function generateBackupCodes(
   const codes: BackupCode[] = [];
 
   for (let i = 0; i < count; i++) {
-    // Generate a 8-character hex backup code (32 bits of entropy)
+    // Generate an 8-character hex backup code (32 bits of entropy)
     const code = crypto.randomBytes(4).toString("hex").toUpperCase();
 
     // Hash the code for storage
