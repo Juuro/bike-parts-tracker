@@ -143,7 +143,14 @@ export const POST = async (request: Request) => {
       }
     );
   } catch (error) {
-    console.error("Error enabling MFA:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error enabling MFA:", error);
+    } else {
+      console.error(
+        "Error enabling MFA:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    }
     return new Response("Internal server error", { status: 500 });
   }
 };

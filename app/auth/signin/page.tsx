@@ -78,7 +78,6 @@ function SignInForm() {
       const result = (await signInReact("credentials", signInData)) as any;
 
       if (result?.error) {
-        console.log("Sign-in error:", result.error);
         if (
           result.error === "MFA_REQUIRED" ||
           result.error.includes("MFA_REQUIRED")

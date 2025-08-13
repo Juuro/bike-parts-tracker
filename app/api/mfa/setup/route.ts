@@ -106,7 +106,14 @@ export const POST = async () => {
       }
     );
   } catch (error) {
-    console.error("Error setting up MFA:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error setting up MFA:", error);
+    } else {
+      console.error(
+        "Error setting up MFA:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    }
     return new Response("Internal server error", { status: 500 });
   }
 };

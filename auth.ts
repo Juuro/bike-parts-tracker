@@ -163,7 +163,9 @@ async function checkUserExists(
     authRateLimiter.recordAttempt(clientIP, email, "email_check", false);
 
     // Don't expose internal errors to prevent information leakage
-    console.error("Error checking user existence:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error checking user existence:", error);
+    }
     return {
       exists: false,
       rateLimited: false,
@@ -260,11 +262,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             });
 
             if (createUserResult.errors) {
-              // Log the specific GraphQL errors for debugging
-              console.error(
-                "GraphQL user creation errors:",
-                createUserResult.errors
-              );
+              // Log the specific GraphQL errors for debugging (development only)
+              if (process.env.NODE_ENV === "development") {
+                console.error(
+                  "GraphQL user creation errors:",
+                  createUserResult.errors
+                );
+              }
               authRateLimiter.recordAttempt(
                 clientIP,
                 email,
@@ -378,25 +382,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                 // Check the provided backup code against all stored hashes
                 // Support both old format (XXXX-XXXX) and new format (XXXXXXXX)
-                const cleanedBackupCode = backupCode.replace(/[\s-]/g, "").toUpperCase();
-                const formattedBackupCode = `${cleanedBackupCode.slice(0, 4)}-${cleanedBackupCode.slice(4, 8)}`;
-                
+                const cleanedBackupCode = backupCode
+                  .replace(/[\s-]/g, "")
+                  .toUpperCase();
+                const formattedBackupCode = `${cleanedBackupCode.slice(
+                  0,
+                  4
+                )}-${cleanedBackupCode.slice(4, 8)}`;
+
                 for (const storedCode of backupCodes) {
                   let isValidBackupCode = false;
-                  
+
                   // Try original input first
-                  isValidBackupCode = await bcrypt.compare(backupCode, storedCode.code_hash);
-                  
+                  isValidBackupCode = await bcrypt.compare(
+                    backupCode,
+                    storedCode.code_hash
+                  );
+
                   // If that fails, try cleaned format (new format: XXXXXXXX)
                   if (!isValidBackupCode && cleanedBackupCode.length === 8) {
-                    isValidBackupCode = await bcrypt.compare(cleanedBackupCode, storedCode.code_hash);
+                    isValidBackupCode = await bcrypt.compare(
+                      cleanedBackupCode,
+                      storedCode.code_hash
+                    );
                   }
-                  
+
                   // If that fails and input was cleaned, try formatted version (old format: XXXX-XXXX)
-                  if (!isValidBackupCode && cleanedBackupCode.length === 8 && !backupCode.includes("-")) {
-                    isValidBackupCode = await bcrypt.compare(formattedBackupCode, storedCode.code_hash);
+                  if (
+                    !isValidBackupCode &&
+                    cleanedBackupCode.length === 8 &&
+                    !backupCode.includes("-")
+                  ) {
+                    isValidBackupCode = await bcrypt.compare(
+                      formattedBackupCode,
+                      storedCode.code_hash
+                    );
                   }
-                  
+
                   if (isValidBackupCode) {
                     validBackupCode = storedCode;
                     break;
@@ -621,12 +643,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Clear any cache invalidation flag
             delete extendedToken.invalidateUserCache;
           } else {
-            console.warn(`User ${extendedToken.sub} not found in database`);
+            if (process.env.NODE_ENV === "development") {
+              console.warn(`User ${extendedToken.sub} not found in database`);
+            }
             extendedSession.dataFresh = false;
             extendedSession.dataError = "User not found in database";
           }
         } catch (error) {
-          console.error("Error fetching user data in session callback:", error);
+          if (process.env.NODE_ENV === "development") {
+            console.error(
+              "Error fetching user data in session callback:",
+              error
+            );
+          } else {
+            console.error(
+              "Error fetching user data in session callback:",
+              error instanceof Error ? error.message : "Unknown error"
+            );
+          }
           // Mark session as potentially stale after error but don't fail
           extendedSession.dataFresh = false;
           extendedSession.dataError =
