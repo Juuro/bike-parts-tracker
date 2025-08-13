@@ -71,6 +71,8 @@ update_permissions:
         - strava_user
         - updated_at
         - weight_unit
-      filter: {}
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
       check: null
     comment: ""
