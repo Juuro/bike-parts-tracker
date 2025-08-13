@@ -69,7 +69,6 @@ const GET_USER_BY_EMAIL_QUERY = `
       image
       emailVerified
       mfa_enabled
-      mfa_secret
 
     }
   }
