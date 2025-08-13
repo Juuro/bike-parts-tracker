@@ -1,4 +1,5 @@
 - "!include public_accounts.yaml"
+- "!include public_authenticators.yaml"
 - "!include public_bike.yaml"
 - "!include public_category.yaml"
 - "!include public_currency_unit.yaml"
@@ -11,6 +12,7 @@
 - "!include public_parts_type.yaml"
 - "!include public_provider_type.yaml"
 - "!include public_sessions.yaml"
+- "!include public_user_backup_codes.yaml"
 - "!include public_users.yaml"
 - "!include public_verification_tokens.yaml"
 - "!include public_weight_unit.yaml"

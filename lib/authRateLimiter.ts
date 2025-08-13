@@ -2,7 +2,7 @@
 interface AuthAttempt {
   timestamp: number;
   success: boolean;
-  type: "login" | "registration" | "email_check";
+  type: "login" | "registration" | "email_check" | "mfa" | "backup_code";
 }
 
 class AuthRateLimiter {
@@ -41,7 +41,7 @@ class AuthRateLimiter {
 
   private getAttempts(
     key: string,
-    type?: "login" | "registration" | "email_check"
+    type?: "login" | "registration" | "email_check" | "mfa" | "backup_code"
   ): AuthAttempt[] {
     this.cleanOldAttempts(key);
     const attempts = this.attempts.get(key) || [];
@@ -56,7 +56,7 @@ class AuthRateLimiter {
   canAttemptAuth(
     ip: string,
     email: string,
-    type: "login" | "registration"
+    type: "login" | "registration" | "mfa" | "backup_code"
   ): { allowed: boolean; reason?: string; retryAfter?: number } {
     const ipKey = this.getKey(ip, "ip");
     const emailKey = this.getKey(email, "email");
@@ -139,7 +139,7 @@ class AuthRateLimiter {
   recordAttempt(
     ip: string,
     email: string,
-    type: "login" | "registration" | "email_check",
+    type: "login" | "registration" | "email_check" | "mfa" | "backup_code",
     success: boolean
   ) {
     const ipKey = this.getKey(ip, "ip");
@@ -173,8 +173,14 @@ class AuthRateLimiter {
       return 0;
     }
 
-    const ipMin = ipAttempts.length > 0 ? Math.min(...ipAttempts.map(a => a.timestamp)) : Infinity;
-    const emailMin = emailAttempts.length > 0 ? Math.min(...emailAttempts.map(a => a.timestamp)) : Infinity;
+    const ipMin =
+      ipAttempts.length > 0
+        ? Math.min(...ipAttempts.map((a) => a.timestamp))
+        : Infinity;
+    const emailMin =
+      emailAttempts.length > 0
+        ? Math.min(...emailAttempts.map((a) => a.timestamp))
+        : Infinity;
     const oldestAttempt = Math.min(ipMin, emailMin);
     return Math.max(0, this.windowMs - (Date.now() - oldestAttempt));
   }
@@ -209,7 +215,7 @@ class ServerlessAuthRateLimiter extends AuthRateLimiter {
   canAttemptAuth(
     ip: string,
     email: string,
-    type: "login" | "registration"
+    type: "login" | "registration" | "mfa" | "backup_code"
   ): { allowed: boolean; reason?: string; retryAfter?: number } {
     this.cleanupIfNeeded();
     return super.canAttemptAuth(ip, email, type);
@@ -226,7 +232,7 @@ class ServerlessAuthRateLimiter extends AuthRateLimiter {
   recordAttempt(
     ip: string,
     email: string,
-    type: "login" | "registration" | "email_check",
+    type: "login" | "registration" | "email_check" | "mfa" | "backup_code",
     success: boolean
   ) {
     this.cleanupIfNeeded();

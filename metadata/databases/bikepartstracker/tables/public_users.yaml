@@ -1,6 +1,16 @@
 table:
   name: users
   schema: public
+object_relationships:
+  - name: currency_unit_unit
+    using:
+      foreign_key_constraint_on: currency_unit
+  - name: distance_unit_unit
+    using:
+      foreign_key_constraint_on: distance_unit
+  - name: weight_unit_unit
+    using:
+      foreign_key_constraint_on: weight_unit
 array_relationships:
   - name: accounts
     using:
@@ -13,20 +23,26 @@ select_permissions:
   - role: user
     permission:
       columns:
+        - backup_codes_generated_at
+        - created_at
         - currency_unit
         - distance_unit
         - email
-        - image
-        - name
-        - strava_user
-        - strava_id
-        - strava_connected_at
-        - weight_unit
-        - created_at
         - emailVerified
-        - last_seen_at
-        - updated_at
         - id
+        - image
+        - last_seen_at
+        - mfa_enabled
+        - mfa_secret
+        - name
+        - strava_access_token
+        - strava_connected_at
+        - strava_expires_at
+        - strava_id
+        - strava_refresh_token
+        - strava_user
+        - updated_at
+        - weight_unit
       filter:
         id:
           _eq: X-Hasura-User-Id
@@ -35,22 +51,26 @@ update_permissions:
   - role: user
     permission:
       columns:
+        - backup_codes_generated_at
+        - created_at
         - currency_unit
         - distance_unit
+        - email
+        - emailVerified
+        - id
         - image
+        - last_seen_at
+        - mfa_enabled
+        - mfa_secret
         - name
-        - strava_user
-        - strava_id
         - strava_access_token
-        - strava_refresh_token
-        - strava_expires_at
         - strava_connected_at
-        - weight_unit
+        - strava_expires_at
+        - strava_id
+        - strava_refresh_token
+        - strava_user
         - updated_at
-      filter:
-        id:
-          _eq: X-Hasura-User-Id
-      check:
-        id:
-          _eq: X-Hasura-User-Id
+        - weight_unit
+      filter: {}
+      check: null
     comment: ""

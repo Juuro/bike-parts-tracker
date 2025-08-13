@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import { authRateLimiter, getClientIP } from "@/lib/authRateLimiter";
 import type { Provider } from "next-auth/providers";
@@ -9,6 +10,7 @@ import { SignJWT } from "jose";
 import type { JWT } from "next-auth/jwt";
 import type { Session } from "next-auth";
 import bcrypt from "bcryptjs";
+import { authenticator } from "@otplib/preset-default";
 
 // Extended interfaces for better type safety
 interface ExtendedToken extends JWT {
@@ -17,6 +19,8 @@ interface ExtendedToken extends JWT {
   stravaExpiresAt?: number;
   accessToken?: string;
   invalidateUserCache?: boolean;
+  mfaRequired?: boolean;
+  mfaVerified?: boolean;
   "https://hasura.io/jwt/claims"?: {
     "x-hasura-allowed-roles": string[];
     "x-hasura-default-role": string;
@@ -64,6 +68,9 @@ const GET_USER_BY_EMAIL_QUERY = `
       password
       image
       emailVerified
+      mfa_enabled
+      mfa_secret
+
     }
   }
 `;
@@ -175,6 +182,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
         name: { label: "Name", type: "text" }, // For registration
         mode: { label: "Mode", type: "hidden" }, // signin or signup
+        mfaCode: { label: "MFA Code", type: "text" }, // For MFA verification
+        backupCode: { label: "Backup Code", type: "text" }, // For backup code recovery
       },
       async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) {
@@ -185,6 +194,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials.password as string;
         const name = credentials.name as string;
         const mode = credentials.mode as string;
+        const mfaCode = credentials.mfaCode as string;
+        const backupCode = credentials.backupCode as string;
 
         // Get client IP for rate limiting
         const clientIP = getClientIP(request) || "unknown";
@@ -315,6 +326,102 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               throw new Error("Invalid email or password");
             }
 
+            // Handle MFA verification if enabled
+            if (user.mfa_enabled) {
+              // If MFA is required but no MFA code provided, request it
+              if (!mfaCode && !backupCode) {
+                authRateLimiter.recordAttempt(clientIP, email, "login", false);
+                throw new Error("MFA_REQUIRED");
+              }
+
+              // Verify MFA code if provided
+              if (mfaCode) {
+                if (!user.mfa_secret) {
+                  authRateLimiter.recordAttempt(clientIP, email, "mfa", false);
+                  throw new Error(
+                    "MFA setup incomplete. Please contact support."
+                  );
+                }
+
+                const isValidMFA = authenticator.check(
+                  mfaCode,
+                  user.mfa_secret
+                );
+                if (!isValidMFA) {
+                  authRateLimiter.recordAttempt(clientIP, email, "mfa", false);
+                  throw new Error("Invalid MFA code");
+                }
+                authRateLimiter.recordAttempt(clientIP, email, "mfa", true);
+              }
+
+              // Verify backup code if provided
+              if (backupCode) {
+                // Query backup codes for this user
+                const backupCodeQuery = `
+                  query GetBackupCodes($userId: uuid!) {
+                    user_backup_codes(where: {
+                      user_id: {_eq: $userId}, 
+                      used_at: {_is_null: true}
+                    }) {
+                      id
+                      code_hash
+                    }
+                  }
+                `;
+
+                const backupResult = await secureDbQuery(backupCodeQuery, {
+                  userId: user.id,
+                });
+
+                const backupCodes = backupResult.data?.user_backup_codes || [];
+                let validBackupCode = null;
+
+                // Check the provided backup code against all stored hashes
+                for (const storedCode of backupCodes) {
+                  const isValidBackupCode = await bcrypt.compare(
+                    backupCode,
+                    storedCode.code_hash
+                  );
+                  if (isValidBackupCode) {
+                    validBackupCode = storedCode;
+                    break;
+                  }
+                }
+
+                if (!validBackupCode) {
+                  authRateLimiter.recordAttempt(
+                    clientIP,
+                    email,
+                    "backup_code",
+                    false
+                  );
+                  throw new Error("Invalid backup code");
+                }
+
+                // Mark backup code as used
+                const markUsedMutation = `
+                  mutation MarkBackupCodeUsed($id: uuid!) {
+                    update_user_backup_codes_by_pk(
+                      pk_columns: {id: $id}, 
+                      _set: {used_at: "now()"}
+                    ) {
+                      id
+                    }
+                  }
+                `;
+
+                await secureDbQuery(markUsedMutation, {
+                  id: validBackupCode.id,
+                });
+                authRateLimiter.recordAttempt(
+                  clientIP,
+                  email,
+                  "backup_code",
+                  true
+                );
+              }
+            }
+
             // Record successful login
             authRateLimiter.recordAttempt(clientIP, email, "login", true);
 
@@ -359,7 +466,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
+      console.log("[auth] 🔍 signIn CALLBACK TRIGGERED:");
+      console.log("[auth] USER:", JSON.stringify(user, null, 2));
+      console.log("[auth] ACCOUNT:", JSON.stringify(account, null, 2));
+      console.log("[auth] PROFILE:", JSON.stringify(profile, null, 2));
+      console.log("[auth] EMAIL:", JSON.stringify(email, null, 2));
+      console.log("[auth] CREDENTIALS:", JSON.stringify(credentials, null, 2));
+      console.log("[auth] ====================================");
+
       // Allow sign in for all verified accounts
+      console.log("[auth] ✅ Allowing general sign in");
       return true;
     },
     async jwt({ token, account, profile }): Promise<ExtendedToken> {
@@ -405,6 +521,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     // Add user ID to the session and fetch latest user data only when needed
     session: async ({ session, token, user }): Promise<ExtendedSession> => {
+      console.log("[auth] 🔍 SESSION CALLBACK TRIGGERED:");
+      console.log("[auth] SESSION:", JSON.stringify(session, null, 2));
+      console.log("[auth] TOKEN:", JSON.stringify(token, null, 2));
+      console.log("[auth] USER:", JSON.stringify(user, null, 2));
+      console.log("[auth] ====================================");
+
+      // For database sessions, user object is provided directly
+      if (user) {
+        console.log("[auth] 🔗 Using database session with user object");
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: user.id,
+          },
+          userId: user.id,
+          accessToken: "",
+          dataFresh: true,
+          userDataUpdatedAt: Date.now(),
+        } as ExtendedSession;
+      }
+
       const extendedSession = session as ExtendedSession;
       const extendedToken = token as ExtendedToken;
 
