@@ -81,7 +81,7 @@ const BikeImageGallery: React.FC<BikeImageGalleryProps> = ({
   if (!images || images.length === 0) {
     return (
       <div
-        className="bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center"
+        className="flex items-center justify-center"
         style={{ height: "320px" }}
       >
         <div className="text-center text-gray-500">
@@ -97,12 +97,9 @@ const BikeImageGallery: React.FC<BikeImageGalleryProps> = ({
   return (
     <>
       {/* Masonry Gallery */}
-      <div
-        className="bg-white rounded-lg shadow-sm border border-gray-200"
-        style={{ height: "320px" }}
-      >
+      <div style={{ height: "320px" }}>
         <div
-          className="p-4 h-full"
+          className="h-full"
           style={{
             display: "grid",
             gridTemplateColumns: (() => {
