@@ -225,9 +225,10 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
         </div>
       </div>
       <div className="inline-block min-w-full align-middle">
-        <h2 className="mt-10 text-2xl font-bold">
+        <h2 className="mt-10 text-2xl font-bold">Parts history</h2>
+        <p className="mt-1 text-sm text-gray-600">
           Parts that were installed on this bike before
-        </h2>
+        </p>
         <div className="rounded-lg bg-gray-50 md:pt-0">
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">

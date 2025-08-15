@@ -119,7 +119,7 @@ const BikePage = async ({ params }: { params: any }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 mb-6">
           <DeleteBikeModal showCloseButton={true} bike={bike} />
           <EditBikeModal
             showCloseButton={true}
@@ -136,6 +136,14 @@ const BikePage = async ({ params }: { params: any }) => {
             partStatus={partStatus}
           />
         </div>
+
+        {/* Installed Parts Section */}
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Installed Parts
+          </h2>
+        </div>
+
         <InstallationsTable
           bikeId={bikeId}
           manufacturers={manufacturers}
