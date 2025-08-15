@@ -14,6 +14,8 @@ import InstallationsTable from "@/components/InstallationsTable";
 import AddPartModal from "@/components/AddPartModal";
 import EditBikeModal from "@/components/EditBikeModal";
 import DeleteBikeModal from "@/components/DeleteBikeModal";
+import BikeInfo from "@/components/BikeInfo";
+import BikeImageGallery from "@/components/BikeImageGallery";
 import { ArrowLeft, Bike } from "lucide-react";
 import {
   applyPresetToUrl,
@@ -101,26 +103,23 @@ const BikePage = async ({ params }: { params: any }) => {
           </div>
         </div>
 
-        <div className="gap-2 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] rounded-lg mb-6">
-          {optimizedImages?.map((image: string, index: number) => {
-            return (
-              <div
-                key={index}
-                className="h-48 w-full overflow-hidden rounded-lg"
-              >
-                <Image
-                  src={image}
-                  width={300}
-                  height={200}
-                  alt={`Bike image ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            );
-          })}
+        {/* Main content grid: Images on left, Bike info on right */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Image gallery - takes up 2 columns on large screens */}
+          <div className="lg:col-span-2">
+            <BikeImageGallery
+              images={optimizedImages || []}
+              bikeName={bike.name}
+            />
+          </div>
+
+          {/* Bike info - takes up 1 column on large screens */}
+          <div className="lg:col-span-1">
+            <BikeInfo bike={bike} bikeId={bikeId} categories={categories} />
+          </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 mb-6">
           <DeleteBikeModal showCloseButton={true} bike={bike} />
           <EditBikeModal
             showCloseButton={true}
@@ -137,6 +136,14 @@ const BikePage = async ({ params }: { params: any }) => {
             partStatus={partStatus}
           />
         </div>
+
+        {/* Installed Parts Section */}
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Installed Parts
+          </h2>
+        </div>
+
         <InstallationsTable
           bikeId={bikeId}
           manufacturers={manufacturers}
