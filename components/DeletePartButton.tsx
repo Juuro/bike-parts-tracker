@@ -5,7 +5,6 @@ import { Trash2 } from "lucide-react";
 import deletePart from "@/app/actions/deletePart";
 import uninstallInstallation from "@/app/actions/uninstallInstallation";
 import Popover from "./Popover";
-import { Button } from "./ui/button";
 
 type DeletePartButtonProps = {
   partStatus?: PartStatus[];
@@ -57,9 +56,13 @@ const DeletePartButton: React.FC<DeletePartButtonProps> = ({
         </div>
       }
     >
-      <Button variant="icon" size="icon" type="button" title="Delete this part">
-        <Trash2 color="#ff0000" />
-      </Button>
+      <button
+        className="py-2 px-3 text-red-600 bg-transparent hover:bg-red-100 hover:text-red-800 rounded-lg text-sm inline-flex justify-center items-center transition-colors"
+        type="button"
+        title="Delete this part"
+      >
+        <Trash2 size={18} />
+      </button>
     </Popover>
   );
 };

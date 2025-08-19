@@ -137,13 +137,6 @@ const BikePage = async ({ params }: { params: any }) => {
           />
         </div>
 
-        {/* Installed Parts Section */}
-        <div className="mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Installed Parts
-          </h2>
-        </div>
-
         <InstallationsTable
           bikeId={bikeId}
           manufacturers={manufacturers}

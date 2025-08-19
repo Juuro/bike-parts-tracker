@@ -14,6 +14,10 @@ import addPart from "@/app/actions/addPart";
 import ManufacturerForm from "./ManufacturerForm";
 import { Button } from "./ui/button";
 import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
+import CustomSelect from "./ui/CustomSelect";
+import StyledCheckbox from "./ui/StyledCheckbox";
+import { getCurrencySymbol } from "@/utils/profileUtils";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -40,6 +44,15 @@ const AddPartModal: React.FC<ModalProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBikeId, setSelectedBikeId] = useState("");
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [bikeDropdownOpen, setBikeDropdownOpen] = useState(false);
+  const [manufacturerDropdownOpen, setManufacturerDropdownOpen] =
+    useState(false);
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [isSecondhand, setIsSecondhand] = useState<boolean>(false);
+  const { userProfile } = useUserProfile();
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -48,7 +61,8 @@ const AddPartModal: React.FC<ModalProps> = ({
     const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     setSelectedDate(formattedDate);
 
-    if (bike) {
+    // Set initial bike if provided
+    if (bike?.id) {
       setSelectedBikeId(bike.id);
     }
   }, []);
@@ -108,12 +122,68 @@ const AddPartModal: React.FC<ModalProps> = ({
     }
   };
 
-  const handleBikeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBikeId(event.target.value);
+  const handleBikeChange = (bikeId: string) => {
+    setSelectedBikeId(bikeId);
   };
 
   const replaceManufacturerDropdownWithInputField = (): void => {
     setShowManufacturerInput(!showManufacturerInput);
+  };
+
+  const getCurrencyLabel = () => {
+    if (!userProfile?.currency_unit) {
+      // Fallback to USD symbol while loading or if not set
+      return "($)";
+    }
+    const symbol = getCurrencySymbol(userProfile.currency_unit);
+    return `(${symbol})`;
+  };
+
+  const getWeightUnitLabel = () => {
+    if (!userProfile?.weight_unit) return "(g)";
+    const unit = userProfile.weight_unit;
+    return `(${unit})`;
+  };
+
+  const getStatusColor = (statusName: string) => {
+    switch (statusName.toLowerCase()) {
+      case "installed":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "available":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "broken":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "sold":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const StatusTag = ({
+    status,
+    isSelected,
+    onClick,
+  }: {
+    status: PartStatus;
+    isSelected: boolean;
+    onClick: () => void;
+  }) => {
+    const baseClasses =
+      "inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border cursor-pointer transition-all duration-200 hover:scale-105";
+    const selectedClasses = isSelected
+      ? "bg-blue-600 text-white border-blue-600 shadow-lg font-semibold"
+      : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100";
+
+    return (
+      <button
+        type="button"
+        className={`${baseClasses} ${selectedClasses}`}
+        onClick={onClick}
+      >
+        {status.name}
+      </button>
+    );
   };
 
   // Handle ESC key press to close modal and prevent body scrolling
@@ -167,7 +237,7 @@ const AddPartModal: React.FC<ModalProps> = ({
 
               <div className="p-4 md:p-5">
                 <form action={handleSubmit}>
-                  <div className="grid gap-4 mb-4 grid-cols-2">
+                  <div className="grid gap-4 mb-4 grid-cols-2 text-left">
                     <div className="col-span-2">
                       <label
                         htmlFor="bike"
@@ -175,35 +245,22 @@ const AddPartModal: React.FC<ModalProps> = ({
                       >
                         Bike
                       </label>
-                      <select
+                      <input
+                        type="hidden"
                         name="bike"
-                        id="bike"
-                        defaultValue={bike?.id}
+                        value={selectedBikeId}
                         required={bike ? true : false}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        onChange={handleBikeChange}
-                      >
-                        {bike ? (
-                          <option value="" disabled hidden>
-                            Select bike
-                          </option>
-                        ) : (
-                          <option value="">Not assigned to a bike</option>
-                        )}
-                        {bikes.length == 0 ? (
-                          <option value="" disabled hidden>
-                            No bikes found
-                          </option>
-                        ) : (
-                          bikes.map((bike: Bike) => {
-                            return (
-                              <option key={bike.id} value={bike.id}>
-                                {bike.name}
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
+                      />
+                      <CustomSelect
+                        options={bikes}
+                        selectedValue={selectedBikeId}
+                        onSelect={handleBikeChange}
+                        placeholder="Select bike"
+                        isOpen={bikeDropdownOpen}
+                        setIsOpen={setBikeDropdownOpen}
+                        getDisplayText={(bike) => bike.name}
+                        allowEmpty={!bike}
+                      />
                     </div>
                     <div className="col-span-2">
                       <label
@@ -215,33 +272,23 @@ const AddPartModal: React.FC<ModalProps> = ({
                       <div className="flex items-center">
                         {!showManufacturerInput && (
                           <>
-                            <select
+                            <input
+                              type="hidden"
                               name="manufacturer"
-                              id="manufacturer"
-                              defaultValue=""
+                              value={selectedManufacturer}
                               required
-                              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                            >
-                              <option value="" disabled hidden>
-                                Select manufacturer
-                              </option>
-                              {manufacturers.length == 0 ? (
-                                <option value="" disabled hidden>
-                                  No parts found
-                                </option>
-                              ) : (
-                                manufacturers.map((manufacturer) => {
-                                  return (
-                                    <option
-                                      key={manufacturer.id}
-                                      value={manufacturer.id}
-                                    >
-                                      {manufacturer.name}
-                                    </option>
-                                  );
-                                })
-                              )}
-                            </select>
+                            />
+                            <CustomSelect
+                              options={manufacturers}
+                              selectedValue={selectedManufacturer}
+                              onSelect={setSelectedManufacturer}
+                              placeholder="Select manufacturer"
+                              isOpen={manufacturerDropdownOpen}
+                              setIsOpen={setManufacturerDropdownOpen}
+                              getDisplayText={(manufacturer) =>
+                                manufacturer.name
+                              }
+                            />
                             <Button
                               type="button"
                               variant="icon"
@@ -311,7 +358,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         htmlFor="price"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
-                        Purchase price
+                        Purchase price {getCurrencyLabel()}
                       </label>
                       <input
                         type="number"
@@ -339,38 +386,39 @@ const AddPartModal: React.FC<ModalProps> = ({
                         required
                       />
                     </div>
-                    <fieldset className="col-span-1">
-                      <legend className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="col-span-1">
+                      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         State
-                      </legend>
-
-                      {PartStatus.length == 0 ? (
-                        <p>No sell status found</p>
+                      </label>
+                      {/* Hidden input to store selected status */}
+                      <input
+                        type="hidden"
+                        name="part_status"
+                        value={selectedStatus}
+                        required
+                      />
+                      {PartStatus.length === 0 ? (
+                        <p className="text-gray-500">No part status found</p>
                       ) : (
-                        PartStatus.map((status) => {
-                          return (
-                            <p key={status.slug}>
-                              <input
-                                tabIndex={0}
-                                name="part_status"
-                                type="radio"
-                                id={status.slug}
-                                className="mr-2 bg-gray-50 border border-gray-300 text-gray-900 focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600"
-                                value={status.slug}
-                              />
-                              <label htmlFor={status.slug}>{status.name}</label>
-                            </p>
-                          );
-                        })
+                        <div className="flex flex-wrap gap-2">
+                          {PartStatus.map((status) => (
+                            <StatusTag
+                              key={status.slug}
+                              status={status}
+                              isSelected={selectedStatus === status.slug}
+                              onClick={() => setSelectedStatus(status.slug)}
+                            />
+                          ))}
+                        </div>
                       )}
-                    </fieldset>
+                    </div>
 
                     <div className="col-span-1">
                       <label
                         htmlFor="sell_price"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
-                        Sell price
+                        Sell price {getCurrencyLabel()}
                       </label>
                       <input
                         type="number"
@@ -382,20 +430,20 @@ const AddPartModal: React.FC<ModalProps> = ({
                       />
                     </div>
                     <div className="col-span-1">
-                      <label
-                        htmlFor="secondhand"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
+                      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         Secondhand
                       </label>
                       <input
-                        tabIndex={0}
-                        type="checkbox"
+                        type="hidden"
                         name="secondhand"
-                        id="secondhand"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        value="true"
+                        value={isSecondhand ? "true" : "false"}
+                      />
+                      <StyledCheckbox
+                        checked={isSecondhand}
+                        onChange={setIsSecondhand}
+                        showDynamicLabel={true}
+                        yesLabel="Yes"
+                        noLabel="No"
                       />
                     </div>
                     <div className="col-span-1">
@@ -420,37 +468,28 @@ const AddPartModal: React.FC<ModalProps> = ({
                       >
                         Type
                       </label>
-                      <select
+                      <input
+                        type="hidden"
                         name="type"
-                        id="type"
-                        defaultValue=""
+                        value={selectedType}
                         required
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      >
-                        <option value="" disabled hidden>
-                          Select type of part
-                        </option>
-                        {partsType.length == 0 ? (
-                          <option value="" disabled hidden>
-                            No parts found
-                          </option>
-                        ) : (
-                          partsType.map((type) => {
-                            return (
-                              <option key={type.id} value={type.id}>
-                                {type.name}
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
+                      />
+                      <CustomSelect
+                        options={partsType}
+                        selectedValue={selectedType}
+                        onSelect={setSelectedType}
+                        placeholder="Select type of part"
+                        isOpen={typeDropdownOpen}
+                        setIsOpen={setTypeDropdownOpen}
+                        getDisplayText={(type) => type.name}
+                      />
                     </div>
                     <div className="col-span-1">
                       <label
                         htmlFor="weight"
                         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                       >
-                        Weight
+                        Weight {getWeightUnitLabel()}
                       </label>
                       <input
                         type="number"

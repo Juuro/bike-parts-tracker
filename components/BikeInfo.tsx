@@ -1,14 +1,13 @@
-import {
-  fetchBikeParts,
-  fetchCategories,
-  fetchUserProfile,
-  fetchAvailableUnits,
-} from "@/utils/requestsServer";
+"use client";
+
+import { useEffect, useState } from "react";
+import { fetchBikeParts, fetchCategories } from "@/utils/requestsClient";
 import {
   getCurrencySymbol,
   formatWeight,
   formatDistance,
 } from "@/utils/profileUtils";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import {
   Calendar,
   DollarSign,
@@ -24,21 +23,36 @@ type BikeInfoProps = {
   categories?: Category[];
 };
 
-const BikeInfo: React.FC<BikeInfoProps> = async ({
+const BikeInfo: React.FC<BikeInfoProps> = ({
   bike,
   bikeId,
   categories: categoriesProp = [],
 }) => {
-  // Fetch data in parallel
-  const [bikeParts, categories, userProfile, availableUnits] =
-    await Promise.all([
-      fetchBikeParts(bikeId),
-      categoriesProp.length > 0
-        ? Promise.resolve(categoriesProp)
-        : fetchCategories(),
-      fetchUserProfile(),
-      fetchAvailableUnits(),
-    ]);
+  const { userProfile } = useUserProfile();
+  const [bikeParts, setBikeParts] = useState<Installation[]>([]);
+  const [categories, setCategories] = useState<Category[]>(categoriesProp);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [partsData, categoriesData] = await Promise.all([
+          fetchBikeParts(bikeId),
+          categoriesProp.length > 0
+            ? Promise.resolve(categoriesProp)
+            : fetchCategories(),
+        ]);
+        setBikeParts(partsData || []);
+        setCategories(categoriesData || []);
+      } catch (error) {
+        console.error("Error fetching bike data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [bikeId, categoriesProp.length]);
 
   const installedBikeParts = bikeParts.filter(
     (installation: Installation) => !installation.uninstalled_at
@@ -49,10 +63,8 @@ const BikeInfo: React.FC<BikeInfoProps> = async ({
   const userWeightUnit = userProfile?.weight_unit || "kg";
   const userDistanceUnit = userProfile?.distance_unit || "km";
 
-  // Get unit symbols/labels from available units
-  const currencySymbol =
-    availableUnits.currency_unit.find((c: any) => c.unit === userCurrencyUnit)
-      ?.symbol || getCurrencySymbol(userCurrencyUnit);
+  // Get currency symbol
+  const currencySymbol = getCurrencySymbol(userCurrencyUnit);
 
   // Calculate total purchase price from installed parts
   const calculateTotalPrice = () => {
@@ -104,6 +116,17 @@ const BikeInfo: React.FC<BikeInfoProps> = async ({
   // Format values using user's preferred units
   const formattedPrice = `${currencySymbol}${totalPrice.toLocaleString()}`;
   const formattedWeight = formatWeight(totalWeight, userWeightUnit);
+
+  if (loading) {
+    return (
+      <div
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+        style={{ height: "320px" }}
+      >
+        <div className="text-gray-500">Loading bike info...</div>
+      </div>
+    );
+  }
 
   return (
     <div

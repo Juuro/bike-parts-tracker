@@ -53,10 +53,23 @@ const fetchCategories = async () => {
   }
 };
 
+const fetchBikeParts = async (bikeId: string) => {
+  try {
+    const response = await fetch(`/api/bikes/${bikeId}/installation`);
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching bike parts:", error);
+    return [];
+  }
+};
+
 export {
   fetchManufacturers,
   fetchPartStatus,
   fetchPartsType,
   fetchDisciplines,
   fetchCategories,
+  fetchBikeParts,
 };

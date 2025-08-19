@@ -24,11 +24,11 @@ const DeleteInstallationButton: React.FC<DeleteInstallationButtonProps> = ({
   return (
     <button
       onClick={handleDeleteInstallation}
-      className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+      className="py-2 px-3 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm inline-flex justify-center items-center transition-colors"
       type="button"
       title={`Remove this part from ${bikeName}`}
     >
-      <PackageMinus />
+      <PackageMinus size={18} />
     </button>
   );
 };
