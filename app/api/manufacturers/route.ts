@@ -54,6 +54,7 @@ export const GET = async (request: NextRequest) => {
       MANUFACTURERS_CACHE_TTL_MS
     );
 
+    console.log("🔧 Manufacturers API - returning:", result.data.manufacturer);
     return NextResponse.json(result.data.manufacturer);
   } catch (error) {
     console.error("Error in manufacturers API:", error);

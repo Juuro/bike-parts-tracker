@@ -33,9 +33,13 @@ export const GET = async () => {
       body: JSON.stringify({ query }),
     });
 
-    const result = (await response.json()) as {
-      data: { part_status: PartStatus[] };
-    };
+    const result = await response.json();
+
+    if (!result.data || !result.data.part_status) {
+      console.error("🔧 Part Status API - No data returned:", result);
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+
     const { part_status: partStatusResponse } = result.data;
 
     return new Response(JSON.stringify(partStatusResponse), {

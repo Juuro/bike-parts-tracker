@@ -4,7 +4,7 @@ import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
 import { PackagePlus, History, Package, Wrench } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
-import EditPartModal from "./EditPartModal";
+import EditPartModalModern from "./EditPartModalModern";
 import Link from "next/link";
 
 type InstallationsTableProps = {
@@ -160,7 +160,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                   </button>
                 </form>
               )}
-            <EditPartModal
+            <EditPartModalModern
               showCloseButton={true}
               part={part}
               manufacturers={manufacturers}
@@ -325,7 +325,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end space-x-2">
-                            <EditPartModal
+                            <EditPartModalModern
                               showCloseButton={true}
                               part={part}
                               manufacturers={manufacturers}
@@ -543,7 +543,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                                   </button>
                                 </form>
                               )}
-                            <EditPartModal
+                            <EditPartModalModern
                               showCloseButton={true}
                               part={part}
                               manufacturers={manufacturers}

@@ -6,6 +6,7 @@ const fetchManufacturers = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching manufacturers:", error);
+    return [];
   }
 };
 
@@ -28,6 +29,7 @@ const fetchPartsType = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching part types:", error);
+    return [];
   }
 };
 

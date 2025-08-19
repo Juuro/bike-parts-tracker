@@ -32,11 +32,16 @@ export const GET = async () => {
       body: JSON.stringify({ query }),
     });
 
-    const result = (await response.json()) as {
-      data: { parts_type: PartsType[] };
-    };
+    const result = await response.json();
+
+    if (!result.data || !result.data.parts_type) {
+      console.error("🔧 Parts Type API - No data returned:", result);
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+
     const { parts_type: partTypeResponse } = result.data;
 
+    console.log("🔧 Parts Type API - returning:", partTypeResponse);
     return new Response(JSON.stringify(partTypeResponse), {
       status: 200,
     });
