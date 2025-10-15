@@ -1,0 +1,11 @@
+table:
+  name: discipline
+  schema: public
+array_relationships:
+  - name: bikes
+    using:
+      foreign_key_constraint_on:
+        column: discipline_id
+        table:
+          name: bike
+          schema: public

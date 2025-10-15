@@ -2,7 +2,16 @@ import Image from "next/image";
 import { fetchBikeParts, fetchPartStatus } from "@/utils/requestsServer";
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
-import { PackagePlus, History, Package, Wrench } from "lucide-react";
+import {
+  PackagePlus,
+  Calendar,
+  Weight,
+  DollarSign,
+  Settings,
+  History,
+  Package,
+  Wrench,
+} from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
 import EditPartModalModern from "./EditPartModalModern";
 import Link from "next/link";
@@ -102,6 +111,32 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
     );
   };
 
+  const SummaryCard = ({
+    title,
+    value,
+    icon: Icon,
+    className = "",
+  }: {
+    title: string;
+    value: string | number;
+    icon: any;
+    className?: string;
+  }) => (
+    <div
+      className={`bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 ${className}`}
+    >
+      <div className="flex items-center">
+        <div className="flex-shrink-0">
+          <Icon className="h-6 w-6 text-gray-400" />
+        </div>
+        <div className="ml-3">
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   const MobilePartCard = ({
     installation,
     isHistory = false,
@@ -112,23 +147,26 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
     const part = installation.part;
 
     return (
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2 flex-1 min-w-0">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             <Image
-              src={`https://picsum.photos/40/40?random=${part.id}`}
-              className="rounded-md ring-1 ring-gray-200 flex-shrink-0 w-10 h-10"
-              width={40}
-              height={40}
+              src={`https://picsum.photos/48/48?random=${part.id}`}
+              className="rounded-lg ring-2 ring-gray-100 flex-shrink-0"
+              width={48}
+              height={48}
               alt={`${part.name} image`}
             />
             <div className="min-w-0 flex-1">
-              <h3 className="font-medium text-gray-900 text-sm truncate">
+              <h3 className="font-semibold text-gray-900 text-sm truncate">
                 {part.name}
               </h3>
-              <p className="text-xs text-gray-500 truncate">
-                {part.manufacturer.name} • {part.parts_type.name}
+              <p className="text-sm text-gray-500 truncate">
+                {part.manufacturer.name}
               </p>
+              <div className="mt-1">
+                <StatusBadge status={part.part_status} />
+              </div>
             </div>
           </div>
 
@@ -153,7 +191,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                   />
                   <button
                     type="submit"
-                    className="py-2 px-3 text-green-600 bg-transparent hover:bg-green-100 hover:text-green-800 rounded-lg text-sm inline-flex justify-center items-center transition-colors"
+                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                     title={`Reassign part to ${installation.bike.name}`}
                   >
                     <PackagePlus size={18} />
@@ -182,34 +220,42 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-900 font-medium">${part.buy_price}</span>
-            <span className="text-gray-600">{part.weight}g</span>
-            <StatusBadge status={part.part_status} />
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500 font-medium">Type:</span>
+            <p className="text-gray-900">{part.parts_type.name}</p>
           </div>
-
+          <div>
+            <span className="text-gray-500 font-medium">Price:</span>
+            <p className="text-gray-900">${part.buy_price}</p>
+          </div>
+          <div>
+            <span className="text-gray-500 font-medium">Weight:</span>
+            <p className="text-gray-900">{part.weight}g</p>
+          </div>
           {isHistory && installation.installed_at && (
-            <span className="text-gray-500">
-              {new Date(installation.installed_at).toLocaleDateString()}
-            </span>
-          )}
-        </div>
-
-        {isHistory &&
-          isPartCurrentlyInstalledOnAnyBike(part.id, part.installations) && (
-            <div className="mt-2 pt-2 border-t border-gray-100">
-              <span className="text-xs text-gray-500">Currently on: </span>
-              <Link
-                href={`/bikes/${bikeIdOfCurrentInstallation(
-                  part.installations
-                )}`}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-              >
-                {bikeNameOfCurrentInstallation(part.installations)}
-              </Link>
+            <div>
+              <span className="text-gray-500 font-medium">Installed:</span>
+              <p className="text-gray-900">
+                {new Date(installation.installed_at).toLocaleDateString()}
+              </p>
             </div>
           )}
+          {isHistory &&
+            isPartCurrentlyInstalledOnAnyBike(part.id, part.installations) && (
+              <div className="col-span-2">
+                <span className="text-gray-500 font-medium">Currently on:</span>
+                <Link
+                  href={`/bikes/${bikeIdOfCurrentInstallation(
+                    part.installations
+                  )}`}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  {bikeNameOfCurrentInstallation(part.installations)}
+                </Link>
+              </div>
+            )}
+        </div>
       </div>
     );
   };
@@ -218,20 +264,6 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
     <div className="space-y-8">
       {/* Current Installations Section */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <Wrench className="h-6 w-6 text-gray-600" />
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Current Setup
-              </h2>
-              <p className="text-sm text-gray-600">
-                Parts currently installed on this bike
-              </p>
-            </div>
-          </div>
-        </div>
-
         {installedBikeParts.length > 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             {/* Mobile View */}
@@ -296,7 +328,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                           <div className="flex items-center">
                             <Image
                               src={`https://picsum.photos/40/40?random=${part.id}`}
-                              className="rounded-lg ring-2 ring-gray-100 flex-shrink-0 w-10 h-10"
+                              className="rounded-lg ring-2 ring-gray-100"
                               width={40}
                               height={40}
                               alt={`${part.name} image`}
@@ -463,7 +495,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                           <div className="flex items-center">
                             <Image
                               src={`https://picsum.photos/40/40?random=${part.id}`}
-                              className="rounded-lg ring-2 ring-gray-100 flex-shrink-0 w-10 h-10"
+                              className="rounded-lg ring-2 ring-gray-100"
                               width={40}
                               height={40}
                               alt={`${part.name} image`}
@@ -536,7 +568,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                                   />
                                   <button
                                     type="submit"
-                                    className="py-2 px-3 text-green-600 bg-transparent hover:bg-green-100 hover:text-green-800 rounded-lg text-sm inline-flex justify-center items-center transition-colors"
+                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                     title={`Reassign part to ${installation.bike.name}`}
                                   >
                                     <PackagePlus size={18} />

@@ -33,7 +33,28 @@ const CustomSelect = ({
   required = false,
 }: CustomSelectProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const selectedOption = options.find((option) => option.id === selectedValue);
+
+  // Filter options based on search term
+  const filteredOptions = options.filter((option) =>
+    getDisplayText(option).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Clear search when dropdown closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm("");
+    }
+  }, [isOpen]);
+
+  // Auto-focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -92,6 +113,17 @@ const CustomSelect = ({
             overflowX: "hidden",
           }}
         >
+          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search..."
+              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
           {allowEmpty && (
             <button
               type="button"
@@ -115,10 +147,12 @@ const CustomSelect = ({
           ) : (
             <div className="max-h-48 overflow-y-auto flex flex-col">
               <div className="px-3 py-1 text-xs text-gray-500 border-b sticky top-0 bg-white flex-shrink-0">
-                {options.length} options available
+                {searchTerm
+                  ? `${filteredOptions.length} of ${options.length} options`
+                  : `${options.length} options available`}
               </div>
               <div className="flex flex-col flex-1">
-                {options.map((option, index) => (
+                {filteredOptions.map((option, index) => (
                   <button
                     key={option.id || index}
                     type="button"
@@ -136,6 +170,11 @@ const CustomSelect = ({
                     {getDisplayText(option)}
                   </button>
                 ))}
+                {filteredOptions.length === 0 && searchTerm && (
+                  <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                    No results found for &quot;{searchTerm}&quot;
+                  </div>
+                )}
               </div>
             </div>
           )}

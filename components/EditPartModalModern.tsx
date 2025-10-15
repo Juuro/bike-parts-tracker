@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -29,6 +29,7 @@ import {
   fetchManufacturers,
   fetchPartStatus,
   fetchPartsType,
+  addManufacturer,
 } from "@/utils/requestsClient";
 
 type ModalProps = {
@@ -46,6 +47,12 @@ const EditPartModalModern: React.FC<ModalProps> = ({
   partStatus: partStatusProp = [],
   partsType: partsTypeProp = [],
 }) => {
+  // Helper function to format date for input
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
   const [manufacturers, setManufacturers] =
     useState<Manufacturer[]>(manufacturersProp);
   const [partStatus, setPartStatus] = useState<PartStatus[]>(partStatusProp);
@@ -79,8 +86,6 @@ const EditPartModalModern: React.FC<ModalProps> = ({
         partStatus.length === 0 &&
         partsType.length === 0
       ) {
-        console.log("🔧 Modal opened - fetching data once");
-
         // Only fetch data once when modal opens AND data is empty
         try {
           const [fetchedManufacturers, fetchedPartStatus, fetchedPartsType] =
@@ -89,9 +94,6 @@ const EditPartModalModern: React.FC<ModalProps> = ({
               fetchPartStatus(),
               fetchPartsType(),
             ]);
-
-          console.log("🔧 Fetched manufacturers:", fetchedManufacturers);
-          console.log("🔧 Fetched parts types:", fetchedPartsType);
 
           setManufacturers(fetchedManufacturers || []);
           setPartStatus(fetchedPartStatus || []);
@@ -108,20 +110,31 @@ const EditPartModalModern: React.FC<ModalProps> = ({
   // Handle ESC key press to close modal and prevent body scrolling
   useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
 
+  // Handle form submission
   const handleSubmit = async (formData: FormData) => {
-    try {
-      formData.set("part_status", selectedStatus);
-      formData.set("manufacturer", selectedManufacturer);
-      formData.set("type", selectedType);
-      formData.set("secondhand", isSecondhand.toString());
+    // Validate sell price for "on_sale" and "sold" statuses
+    const status = selectedStatus;
+    const sellPrice = formData.get("sell_price") as string;
+    const selectedStatusObj = partStatus.find((s) => s.slug === status);
 
+    if (
+      (status === "on_sale" || status === "sold") &&
+      (!sellPrice || parseFloat(sellPrice) <= 0)
+    ) {
+      toast.error(
+        `A sell price is required for parts marked as "${selectedStatusObj?.name}"`
+      );
+      return;
+    }
+
+    try {
       await updatePart(formData);
       toast.success("Part updated successfully!");
       setIsModalOpen(false);
       router.refresh();
     } catch (error) {
-      console.error("Error updating part:", error);
-      toast.error("Failed to update part. Please try again.");
+      console.error("Update error:", error);
+      toast.error("Failed to update part. Please try again!");
     }
   };
 
@@ -137,10 +150,27 @@ const EditPartModalModern: React.FC<ModalProps> = ({
     setShowManufacturerInput(!showManufacturerInput);
   };
 
-  const formatDateForInput = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
+  const handleManufacturerAdded = async (manufacturer: {
+    name: string;
+    country: string;
+    url?: string;
+  }) => {
+    try {
+      // Add manufacturer to database
+      const newManufacturer = await addManufacturer(manufacturer);
+
+      // Add to manufacturers list
+      setManufacturers((prev) => [...prev, newManufacturer]);
+
+      // Select the new manufacturer
+      setSelectedManufacturer(newManufacturer.id);
+
+      // Go back to dropdown view
+      setShowManufacturerInput(false);
+    } catch (error) {
+      console.error("Error adding manufacturer:", error);
+      toast.error("Failed to add manufacturer. Please try again.");
+    }
   };
 
   const getCurrencyLabel = () => {
@@ -168,16 +198,11 @@ const EditPartModalModern: React.FC<ModalProps> = ({
       >
         <Edit size={18} />
       </button>
-      <div
-        className={`fixed inset-0 z-50 overflow-y-auto transition-opacity duration-300 ${
-          isModalOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
+      {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black/50 transition-opacity duration-300"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4"
           onClick={() => setIsModalOpen(false)}
-        ></div>
-        <div className="flex items-center justify-center min-h-full p-4">
+        >
           <div
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -210,6 +235,22 @@ const EditPartModalModern: React.FC<ModalProps> = ({
             <div className="flex-1 p-6 overflow-y-auto">
               <form id="edit-part-form" action={handleSubmit}>
                 <input type="hidden" name="part_id" value={part.id} />
+                <input
+                  type="hidden"
+                  name="part_status"
+                  value={selectedStatus}
+                />
+                <input
+                  type="hidden"
+                  name="manufacturer"
+                  value={selectedManufacturer}
+                />
+                <input type="hidden" name="type" value={selectedType} />
+                <input
+                  type="hidden"
+                  name="secondhand"
+                  value={isSecondhand.toString()}
+                />
 
                 <div className="space-y-4">
                   {/* Basic Information Card */}
@@ -223,7 +264,11 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                       {/* Manufacturer */}
                       <div>
                         {showManufacturerInput ? (
-                          <ManufacturerForm manufacturers={manufacturers} />
+                          <ManufacturerForm
+                            manufacturers={manufacturers}
+                            onBack={() => setShowManufacturerInput(false)}
+                            onManufacturerAdded={handleManufacturerAdded}
+                          />
                         ) : (
                           <div>
                             <CustomSelect
@@ -283,7 +328,7 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         label="Model year"
                         name="year"
                         type="number"
-                        defaultValue={part.model_year || undefined}
+                        defaultValue={part.model_year}
                         min="1900"
                         max={new Date().getFullYear() + 1}
                         required
@@ -295,8 +340,9 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         label={`Weight ${getWeightUnitLabel()}`}
                         name="weight"
                         type="number"
-                        defaultValue={part.weight || undefined}
+                        defaultValue={part.weight}
                         min="0"
+                        required
                         icon={Weight}
                       />
                     </div>
@@ -314,9 +360,10 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         label={`Purchase price ${getCurrencyLabel()}`}
                         name="price"
                         type="number"
-                        defaultValue={part.buy_price || undefined}
+                        defaultValue={part.buy_price}
                         min="0"
                         step="0.01"
+                        required
                         icon={DollarSign}
                       />
 
@@ -324,10 +371,14 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         label={`Sell price ${getCurrencyLabel()}`}
                         name="sell_price"
                         type="number"
-                        defaultValue={part.sell_price || undefined}
+                        defaultValue={part.sell_price || ""}
                         min="0"
                         step="0.01"
                         icon={DollarSign}
+                        required={
+                          selectedStatus === "on_sale" ||
+                          selectedStatus === "sold"
+                        }
                       />
 
                       <SimpleModernInput
@@ -363,7 +414,7 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         </label>
                         <StyledCheckbox
                           checked={isSecondhand}
-                          onChange={(checked) => setIsSecondhand(checked)}
+                          onChange={setIsSecondhand}
                           showDynamicLabel={true}
                           yesLabel="Secondhand"
                           noLabel="New"
@@ -377,7 +428,7 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                     label="Shop URL"
                     name="shop_url"
                     type="url"
-                    defaultValue={part.shop_url || undefined}
+                    defaultValue={part.shop_url || ""}
                     placeholder="https://shop.example.com/product"
                     icon={Link}
                   />
@@ -395,15 +446,17 @@ const EditPartModalModern: React.FC<ModalProps> = ({
               >
                 Cancel
               </Button>
-              <SubmitButton
-                text="Update Part"
+              <button
+                type="submit"
                 form="edit-part-form"
                 className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
-              />
+              >
+                Update Part
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

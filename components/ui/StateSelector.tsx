@@ -55,14 +55,6 @@ const STATE_CATEGORIES = {
   },
 };
 
-// Quick preset configurations - updated to match common database status names
-const QUICK_PRESETS = [
-  { label: "New Part", statusName: "storage", icon: "✨" },
-  { label: "Used Part", statusName: "storage", icon: "🔄" },
-  { label: "Need Repair", statusName: "repair", icon: "🔧" },
-  { label: "For Sale", statusName: "sale", icon: "💰" },
-];
-
 export const StateSelector: React.FC<StateSelectorProps> = ({
   statuses,
   selectedStatus,
@@ -130,131 +122,12 @@ export const StateSelector: React.FC<StateSelectorProps> = ({
         .filter((category) => category.statuses.length > 0)
     : categorizedStatuses;
 
-  const handlePresetClick = (presetStatusName: string) => {
-    console.log("🔍 Preset clicked:", presetStatusName);
-    console.log(
-      "📋 Available statuses:",
-      statuses.map((s) => ({ slug: s.slug, name: s.name }))
-    );
-
-    // Try multiple matching strategies
-    let status = null;
-
-    // Strategy 1: Exact match
-    status = statuses.find(
-      (s) => s.name.toLowerCase() === presetStatusName.toLowerCase()
-    );
-
-    // Strategy 2: Contains match (both ways)
-    if (!status) {
-      status = statuses.find(
-        (s) =>
-          s.name.toLowerCase().includes(presetStatusName.toLowerCase()) ||
-          presetStatusName.toLowerCase().includes(s.name.toLowerCase())
-      );
-    }
-
-    // Strategy 3: Smart mapping for common presets
-    if (!status) {
-      const mappings = {
-        storage: ["in storage", "storage", "available", "active"],
-        repair: ["under repair", "repair", "broken", "maintenance"],
-        sale: ["for sale", "sale", "selling"],
-      };
-
-      const mapping = mappings[presetStatusName as keyof typeof mappings];
-      if (mapping) {
-        status = statuses.find((s) =>
-          mapping.some((m) => s.name.toLowerCase().includes(m))
-        );
-      }
-    }
-
-    console.log("✅ Found status:", status);
-
-    if (status) {
-      console.log(
-        `🎯 Setting status to: ${status.name} (slug: ${status.slug})`
-      );
-      onStatusChange(status.slug);
-
-      // Show success feedback on preset button
-      const presetButton = document.querySelector(
-        `button[data-preset="${presetStatusName}"]`
-      );
-      if (presetButton) {
-        presetButton.classList.add("bg-green-500", "text-white", "scale-105");
-        setTimeout(() => {
-          presetButton.classList.remove(
-            "bg-green-500",
-            "text-white",
-            "scale-105"
-          );
-        }, 800);
-      }
-
-      // Show feedback on main selector button
-      if (buttonRef.current) {
-        buttonRef.current.classList.add(
-          "ring-4",
-          "ring-green-200",
-          "border-green-400"
-        );
-        setTimeout(() => {
-          buttonRef.current?.classList.remove(
-            "ring-4",
-            "ring-green-200",
-            "border-green-400"
-          );
-        }, 1000);
-      }
-
-      // Close dropdown after a brief delay to show selection
-      setTimeout(() => {
-        setIsOpen(false);
-      }, 300);
-    } else {
-      console.log("❌ No matching status found for preset:", presetStatusName);
-      // Show a temporary visual indicator
-      const presetButton = document.querySelector(
-        `button[data-preset="${presetStatusName}"]`
-      );
-      if (presetButton) {
-        presetButton.classList.add("animate-pulse", "bg-red-100");
-        setTimeout(() => {
-          presetButton.classList.remove("animate-pulse", "bg-red-100");
-        }, 1000);
-      }
-    }
-  };
-
   const selectedCategory = selectedStatusObj
     ? getCategoryForStatus(selectedStatusObj.name)
     : null;
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Quick Presets */}
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Quick Presets
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {QUICK_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              data-preset={preset.statusName}
-              onClick={() => handlePresetClick(preset.statusName)}
-              className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-blue-500 hover:text-white text-gray-700 rounded-lg transition-all duration-200 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-            >
-              <span className="mr-1.5">{preset.icon}</span>
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Main Selector */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 mb-2">

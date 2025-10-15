@@ -107,7 +107,7 @@ export async function executeBikeUpdate(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
@@ -135,7 +135,7 @@ export async function executeBikeInsert(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
@@ -163,7 +163,7 @@ export async function executeBikeDelete(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
@@ -187,7 +187,7 @@ export async function executePartUpdate(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });

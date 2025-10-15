@@ -1,0 +1,11 @@
+table:
+  name: weight_unit
+  schema: public
+array_relationships:
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: weight_unit
+        table:
+          name: users
+          schema: public

@@ -33,6 +33,32 @@ const fetchPartsType = async () => {
   }
 };
 
+const addManufacturer = async (manufacturer: {
+  name: string;
+  country: string;
+  url?: string;
+}) => {
+  try {
+    const response = await fetch("/api/manufacturers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(manufacturer),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding manufacturer:", error);
+    throw error;
+  }
+};
+
 const fetchDisciplines = async () => {
   try {
     const response = await fetch("/api/disciplines");
@@ -71,6 +97,7 @@ export {
   fetchManufacturers,
   fetchPartStatus,
   fetchPartsType,
+  addManufacturer,
   fetchDisciplines,
   fetchCategories,
   fetchBikeParts,

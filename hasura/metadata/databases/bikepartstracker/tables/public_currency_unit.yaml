@@ -1,0 +1,11 @@
+table:
+  name: currency_unit
+  schema: public
+array_relationships:
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: currency_unit
+        table:
+          name: users
+          schema: public

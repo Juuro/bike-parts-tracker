@@ -1,0 +1,56 @@
+table:
+  name: users
+  schema: public
+object_relationships:
+  - name: currencyUnitByCurrencyUnit
+    using:
+      foreign_key_constraint_on: currency_unit
+  - name: distanceUnitByDistanceUnit
+    using:
+      foreign_key_constraint_on: distance_unit
+  - name: weightUnitByWeightUnit
+    using:
+      foreign_key_constraint_on: weight_unit
+array_relationships:
+  - name: accounts
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          name: accounts
+          schema: public
+  - name: authenticators
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: authenticators
+          schema: public
+  - name: bikes
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: bike
+          schema: public
+  - name: parts
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: part
+          schema: public
+  - name: sessions
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          name: sessions
+          schema: public
+  - name: user_backup_codes
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_backup_codes
+          schema: public

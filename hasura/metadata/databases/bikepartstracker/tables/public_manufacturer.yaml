@@ -1,0 +1,11 @@
+table:
+  name: manufacturer
+  schema: public
+array_relationships:
+  - name: parts
+    using:
+      foreign_key_constraint_on:
+        column: manufacturer_id
+        table:
+          name: part
+          schema: public

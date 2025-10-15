@@ -1,0 +1,11 @@
+table:
+  name: part_status
+  schema: public
+array_relationships:
+  - name: parts
+    using:
+      foreign_key_constraint_on:
+        column: part_status_slug
+        table:
+          name: part
+          schema: public

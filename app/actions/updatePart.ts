@@ -1,9 +1,10 @@
 "use server";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import addManufacturer from "./addManufacturer";
 
 async function updatePart(formData: FormData): Promise<void> {
+  console.log("🚀 Server action updatePart called");
+
   const session: any = await auth();
   if (!session) {
     throw new Error("Unauthorized");
@@ -11,17 +12,51 @@ async function updatePart(formData: FormData): Promise<void> {
 
   const accessToken = session?.accessToken;
   const partId = formData.get("part_id") as string;
+  const manufacturerId = formData.get("manufacturer") as string;
 
-  let manufacturerId = formData.get("manufacturer");
-  if (formData.get("newManufacturer")) {
-    const newManufacturerId = await addManufacturer(
-      formData.get("newManufacturer") as string,
-      formData.get("manufacturerCountry") as string,
-      formData.get("manufacturerUrl") as string
-    );
+  console.log("Server action received partId:", partId);
+  console.log("Server action received manufacturerId:", manufacturerId);
 
-    manufacturerId = newManufacturerId[0].id;
-  }
+  // First, let's check what the current values are in the database
+  const currentValuesQuery = `
+    query GetCurrentPart($part_id: uuid!, $user_id: uuid!) {
+      part(where: { id: { _eq: $part_id }, user_id: { _eq: $user_id } }) {
+        id
+        name
+        manufacturer_id
+        type_id
+        part_status_slug
+        secondhand
+        buy_price
+        sell_price
+        purchase_date
+        model_year
+        weight
+        shop_url
+      }
+    }
+  `;
+
+  const currentValuesResponse = await fetch(
+    process.env.HASURA_PROJECT_ENDPOINT!,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+      },
+      body: JSON.stringify({
+        query: currentValuesQuery,
+        variables: { part_id: partId, user_id: session?.userId },
+      }),
+    }
+  );
+
+  const currentValuesResult = await currentValuesResponse.json();
+  console.log(
+    "🚀 Current values in database:",
+    JSON.stringify(currentValuesResult, null, 2)
+  );
 
   // Prepare variables with proper type casting
   const sellPriceValue = formData.get("sell_price");
@@ -45,6 +80,11 @@ async function updatePart(formData: FormData): Promise<void> {
     weight: weightValue ? parseInt(weightValue as string, 10) : null,
     name: formData.get("name") as string,
   };
+
+  console.log(
+    "🚀 Variables being sent to GraphQL:",
+    JSON.stringify(variables, null, 2)
+  );
 
   const query = `
     mutation UpdatePart(
@@ -90,7 +130,7 @@ async function updatePart(formData: FormData): Promise<void> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({
       query,
@@ -105,6 +145,8 @@ async function updatePart(formData: FormData): Promise<void> {
   }
 
   const result = await response.json();
+  console.log("🚀 Full GraphQL response:", JSON.stringify(result, null, 2));
+
   if (result.errors) {
     console.error("GraphQL errors:", result.errors);
     throw new Error("Failed to update part due to GraphQL errors");
@@ -115,6 +157,21 @@ async function updatePart(formData: FormData): Promise<void> {
   } catch (error) {
     console.error(error);
   }
+
+  console.log("Part updated successfully:", result.data.update_part);
+
+  // Revalidate all relevant paths
+  try {
+    console.log("🔄 Revalidating paths...");
+    revalidatePath("/", "page");
+    revalidatePath("/bikes", "page");
+    revalidatePath("/parts", "page");
+    console.log("🔄 Paths revalidated successfully");
+  } catch (error) {
+    console.error("Error revalidating paths:", error);
+  }
+
+  return { success: true, data: result.data.update_part };
 }
 
 export default updatePart;

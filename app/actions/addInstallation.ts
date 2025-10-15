@@ -59,7 +59,7 @@ async function addInstallation(formData: FormData): Promise<void> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
