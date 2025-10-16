@@ -170,8 +170,6 @@ async function updatePart(formData: FormData): Promise<void> {
   } catch (error) {
     console.error("Error revalidating paths:", error);
   }
-
-  return { success: true, data: result.data.update_part };
 }
 
 export default updatePart;

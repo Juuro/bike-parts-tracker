@@ -112,13 +112,13 @@ const EditPartModalModern: React.FC<ModalProps> = ({
 
   // Handle form submission
   const handleSubmit = async (formData: FormData) => {
-    // Validate sell price for "on_sale" and "sold" statuses
+    // Validate sell price for "for_sale" and "sold" statuses
     const status = selectedStatus;
     const sellPrice = formData.get("sell_price") as string;
     const selectedStatusObj = partStatus.find((s) => s.slug === status);
 
     if (
-      (status === "on_sale" || status === "sold") &&
+      (status === "for_sale" || status === "sold") &&
       (!sellPrice || parseFloat(sellPrice) <= 0)
     ) {
       toast.error(
@@ -376,7 +376,7 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                         step="0.01"
                         icon={DollarSign}
                         required={
-                          selectedStatus === "on_sale" ||
+                          selectedStatus === "for_sale" ||
                           selectedStatus === "sold"
                         }
                       />

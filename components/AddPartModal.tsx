@@ -4,6 +4,7 @@ import {
   fetchManufacturers,
   fetchPartsType,
   fetchPartStatus,
+  addManufacturer,
 } from "@/utils/requestsClient";
 import { Minus, Plus, X } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -18,6 +19,7 @@ import CustomSelect from "./ui/CustomSelect";
 import StyledCheckbox from "./ui/StyledCheckbox";
 import { getCurrencySymbol } from "@/utils/profileUtils";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import toast from "react-hot-toast";
 
 type ModalProps = {
   showCloseButton?: boolean;
@@ -128,6 +130,26 @@ const AddPartModal: React.FC<ModalProps> = ({
 
   const replaceManufacturerDropdownWithInputField = (): void => {
     setShowManufacturerInput(!showManufacturerInput);
+  };
+
+  const handleManufacturerAdded = async (manufacturer: {
+    name: string;
+    country: string;
+    url?: string;
+  }) => {
+    try {
+      // Add manufacturer to database
+      const newManufacturer = await addManufacturer(manufacturer);
+
+      // Add to manufacturers list
+      setManufacturers((prev) => [...prev, newManufacturer]);
+
+      // Go back to dropdown view
+      setShowManufacturerInput(false);
+    } catch (error) {
+      console.error("Error adding manufacturer:", error);
+      toast.error("Failed to add manufacturer. Please try again.");
+    }
   };
 
   const getCurrencyLabel = () => {
@@ -304,7 +326,11 @@ const AddPartModal: React.FC<ModalProps> = ({
                         )}
                         {showManufacturerInput && (
                           <>
-                            <ManufacturerForm manufacturers={manufacturers} />
+                            <ManufacturerForm
+                              manufacturers={manufacturers}
+                              onBack={() => setShowManufacturerInput(false)}
+                              onManufacturerAdded={handleManufacturerAdded}
+                            />
                             <Button
                               type="button"
                               variant="icon"
