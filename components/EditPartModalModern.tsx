@@ -23,8 +23,12 @@ import CustomSelect from "./ui/CustomSelect";
 import StyledCheckbox from "./ui/StyledCheckbox";
 import { SimpleModernInput } from "./ui/SimpleModernInput";
 import { StateSelector } from "./ui/StateSelector";
-import { getCurrencySymbol } from "@/utils/profileUtils";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import {
+  formatDateForInput,
+  getCurrencyLabel,
+  getWeightUnitLabel,
+} from "@/utils/partFormUtils";
 import {
   fetchManufacturers,
   fetchPartStatus,
@@ -47,12 +51,6 @@ const EditPartModalModern: React.FC<ModalProps> = ({
   partStatus: partStatusProp = [],
   partsType: partsTypeProp = [],
 }) => {
-  // Helper function to format date for input
-  const formatDateForInput = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0];
-  };
   const [manufacturers, setManufacturers] =
     useState<Manufacturer[]>(manufacturersProp);
   const [partStatus, setPartStatus] = useState<PartStatus[]>(partStatusProp);
@@ -171,21 +169,6 @@ const EditPartModalModern: React.FC<ModalProps> = ({
       console.error("Error adding manufacturer:", error);
       toast.error("Failed to add manufacturer. Please try again.");
     }
-  };
-
-  const getCurrencyLabel = () => {
-    if (!userProfile?.currency_unit) {
-      // Fallback to USD symbol while loading or if not set
-      return "($)";
-    }
-    const symbol = getCurrencySymbol(userProfile.currency_unit);
-    return `(${symbol})`;
-  };
-
-  const getWeightUnitLabel = () => {
-    if (!userProfile?.weight_unit) return "(g)";
-    const unit = userProfile.weight_unit;
-    return `(${unit})`;
   };
 
   return (
@@ -337,7 +320,9 @@ const EditPartModalModern: React.FC<ModalProps> = ({
 
                       {/* Weight */}
                       <SimpleModernInput
-                        label={`Weight ${getWeightUnitLabel()}`}
+                        label={`Weight ${getWeightUnitLabel(
+                          userProfile?.weight_unit
+                        )}`}
                         name="weight"
                         type="number"
                         defaultValue={part.weight}
@@ -357,7 +342,9 @@ const EditPartModalModern: React.FC<ModalProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <SimpleModernInput
-                        label={`Purchase price ${getCurrencyLabel()}`}
+                        label={`Purchase price ${getCurrencyLabel(
+                          userProfile?.currency_unit
+                        )}`}
                         name="price"
                         type="number"
                         defaultValue={part.buy_price}
@@ -368,7 +355,9 @@ const EditPartModalModern: React.FC<ModalProps> = ({
                       />
 
                       <SimpleModernInput
-                        label={`Sell price ${getCurrencyLabel()}`}
+                        label={`Sell price ${getCurrencyLabel(
+                          userProfile?.currency_unit
+                        )}`}
                         name="sell_price"
                         type="number"
                         defaultValue={part.sell_price || ""}

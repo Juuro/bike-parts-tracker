@@ -6,19 +6,35 @@ import {
   fetchPartStatus,
   addManufacturer,
 } from "@/utils/requestsClient";
-import { Minus, Plus, X } from "lucide-react";
+import {
+  Package,
+  DollarSign,
+  Calendar,
+  Weight,
+  Link as LinkIcon,
+  Settings,
+  Plus,
+  Minus,
+  X,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./ui/SubmitButton";
 import addPart from "@/app/actions/addPart";
 import ManufacturerForm from "./ManufacturerForm";
 import { Button } from "./ui/button";
 import { useEscapeToCloseModal } from "@/hooks/useEscapeToCloseModal";
 import CustomSelect from "./ui/CustomSelect";
 import StyledCheckbox from "./ui/StyledCheckbox";
-import { getCurrencySymbol } from "@/utils/profileUtils";
+import { SimpleModernInput } from "./ui/SimpleModernInput";
+import { StateSelector } from "./ui/StateSelector";
+import { FormSection } from "./ui/FormSection";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import {
+  formatDateForForm,
+  getCurrencyLabel,
+  getWeightUnitLabel,
+} from "@/utils/partFormUtils";
 import toast from "react-hot-toast";
 
 type ModalProps = {
@@ -38,7 +54,6 @@ const AddPartModal: React.FC<ModalProps> = ({
   partsType: partsTypeProp = [],
   partStatus: partStatusProp = [],
 }) => {
-  const [selectedDate, setSelectedDate] = useState("");
   const [manufacturers, setManufacturers] =
     useState<Manufacturer[]>(manufacturersProp);
   const [PartStatus, setPartStatus] = useState<PartStatus[]>(partStatusProp);
@@ -54,20 +69,29 @@ const AddPartModal: React.FC<ModalProps> = ({
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [isSecondhand, setIsSecondhand] = useState<boolean>(false);
+  const [formFields, setFormFields] = useState({
+    name: "",
+    year: "",
+    price: "",
+    purchase_date: "",
+    weight: "",
+    sell_price: "",
+    shop_url: "",
+    installed_at: "",
+  });
   const { userProfile } = useUserProfile();
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    const today = new Date();
-    // TODO: This is wrong between 0 and 1 o'clock during summer time.
-    const formattedDate = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    setSelectedDate(formattedDate);
+    const formattedDate = formatDateForForm();
+    setFormFields((prev) => ({ ...prev, installed_at: formattedDate }));
 
     // Set initial bike if provided
     if (bike?.id) {
       setSelectedBikeId(bike.id);
     }
-  }, []);
+  }, [bike?.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,26 +125,82 @@ const AddPartModal: React.FC<ModalProps> = ({
     partsTypeProp.length,
   ]);
 
+  const resetForm = () => {
+    const formattedDate = formatDateForForm();
+
+    setFormFields({
+      name: "",
+      year: "",
+      price: "",
+      purchase_date: "",
+      weight: "",
+      sell_price: "",
+      shop_url: "",
+      installed_at: formattedDate,
+    });
+    setSelectedManufacturer("");
+    setSelectedType("");
+    setSelectedStatus("");
+    setSelectedBikeId(bike?.id || "");
+    setIsSecondhand(false);
+  };
+
   const handleSubmit = async (formData: FormData) => {
+    // Validate required fields that aren't enforced by hidden inputs
+    if (!selectedStatus) {
+      toast.error("Please select a status for the part");
+      return;
+    }
+
+    if (!selectedManufacturer) {
+      toast.error("Please select a manufacturer");
+      return;
+    }
+
+    if (!selectedType) {
+      toast.error("Please select a part type");
+      return;
+    }
+
+    // Validate bike selection if adding an installation
+    if (bike && !selectedBikeId) {
+      toast.error("Please select a bike");
+      return;
+    }
+
     try {
       if (bike) {
         await addInstallation(formData);
       } else {
         await addPart(formData);
       }
+
+      // Close modal on success
+      setIsModalOpen(false);
+
+      // Reset form
+      resetForm();
+
+      // Show success message
+      toast.success("Part added successfully!");
+
+      // Navigate and refresh data
+      if (bike) {
+        router.push(`/bikes/${bike.id}`);
+      } else {
+        router.push("/parts");
+      }
+      router.refresh();
     } catch (error) {
       console.error(error);
-    }
-    if (bike) {
-      redirect(`/bikes/${bike.id}`);
-    } else {
-      redirect("/parts");
+      toast.error("Failed to add part. Please try again.");
     }
   };
 
   const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       setIsModalOpen(false);
+      resetForm();
     }
   };
 
@@ -152,62 +232,6 @@ const AddPartModal: React.FC<ModalProps> = ({
     }
   };
 
-  const getCurrencyLabel = () => {
-    if (!userProfile?.currency_unit) {
-      // Fallback to USD symbol while loading or if not set
-      return "($)";
-    }
-    const symbol = getCurrencySymbol(userProfile.currency_unit);
-    return `(${symbol})`;
-  };
-
-  const getWeightUnitLabel = () => {
-    if (!userProfile?.weight_unit) return "(g)";
-    const unit = userProfile.weight_unit;
-    return `(${unit})`;
-  };
-
-  const getStatusColor = (statusName: string) => {
-    switch (statusName.toLowerCase()) {
-      case "installed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "available":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "broken":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "sold":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const StatusTag = ({
-    status,
-    isSelected,
-    onClick,
-  }: {
-    status: PartStatus;
-    isSelected: boolean;
-    onClick: () => void;
-  }) => {
-    const baseClasses =
-      "inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border cursor-pointer transition-all duration-200 hover:scale-105";
-    const selectedClasses = isSelected
-      ? "bg-blue-600 text-white border-blue-600 shadow-lg font-semibold"
-      : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100";
-
-    return (
-      <button
-        type="button"
-        className={`${baseClasses} ${selectedClasses}`}
-        onClick={onClick}
-      >
-        {status.name}
-      </button>
-    );
-  };
-
   // Handle ESC key press to close modal and prevent body scrolling
   useEscapeToCloseModal(isModalOpen, () => setIsModalOpen(false));
 
@@ -224,82 +248,104 @@ const AddPartModal: React.FC<ModalProps> = ({
       </Button>
       {isModalOpen && (
         <div
-          tabIndex={-1}
-          aria-hidden="true"
-          className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4"
           onClick={closeModal}
         >
-          <div className="relative p-4 w-full max-w-prose max-h-full">
-            <article
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="add-part-title"
-              className="relative bg-white rounded-lg shadow dark:bg-gray-700"
-            >
-              <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3
-                  id="add-part-title"
-                  className="text-xl font-semibold text-gray-900 dark:text-white"
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Add Part</h2>
+                  <p className="text-sm text-gray-500">
+                    Create a new bike part
+                  </p>
+                </div>
+              </div>
+              {showCloseButton && (
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    resetForm();
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close modal"
                 >
-                  Add part
-                </h3>
+                  <X className="h-6 w-6 text-gray-500" />
+                </button>
+              )}
+            </div>
 
-                {showCloseButton && (
-                  <Button
-                    type="button"
-                    variant="close"
-                    size="close"
-                    onClick={() => setIsModalOpen(false)}
+            {/* Content */}
+            <div className="flex-1 p-6 overflow-y-auto">
+              <form id="add-part-form" action={handleSubmit}>
+                <input type="hidden" name="bike" value={selectedBikeId} />
+                <input
+                  type="hidden"
+                  name="manufacturer"
+                  value={selectedManufacturer}
+                />
+                <input type="hidden" name="type" value={selectedType} />
+                <input
+                  type="hidden"
+                  name="part_status"
+                  value={selectedStatus}
+                />
+                <input
+                  type="hidden"
+                  name="secondhand"
+                  value={isSecondhand.toString()}
+                />
+
+                <div className="space-y-4">
+                  {/* Basic Information Card */}
+                  <FormSection
+                    title="Basic Information"
+                    icon={Package}
+                    gradient="gray"
                   >
-                    <X />
-                    <span className="sr-only">Close modal</span>
-                  </Button>
-                )}
-              </header>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Bike */}
+                      {bikes && bikes.length > 0 && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Bike{" "}
+                            <span className="text-gray-500 text-xs font-normal">
+                              (optional)
+                            </span>
+                          </label>
+                          <CustomSelect
+                            options={bikes}
+                            selectedValue={selectedBikeId}
+                            onSelect={handleBikeChange}
+                            placeholder="Select bike"
+                            isOpen={bikeDropdownOpen}
+                            setIsOpen={setBikeDropdownOpen}
+                            getDisplayText={(bike) => bike.name}
+                            allowEmpty={!bike}
+                          />
+                        </div>
+                      )}
 
-              <div className="p-4 md:p-5">
-                <form action={handleSubmit}>
-                  <div className="grid gap-4 mb-4 grid-cols-2 text-left">
-                    <div className="col-span-2">
-                      <label
-                        htmlFor="bike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Bike
-                      </label>
-                      <input
-                        type="hidden"
-                        name="bike"
-                        value={selectedBikeId}
-                        required={bike ? true : false}
-                      />
-                      <CustomSelect
-                        options={bikes}
-                        selectedValue={selectedBikeId}
-                        onSelect={handleBikeChange}
-                        placeholder="Select bike"
-                        isOpen={bikeDropdownOpen}
-                        setIsOpen={setBikeDropdownOpen}
-                        getDisplayText={(bike) => bike.name}
-                        allowEmpty={!bike}
-                      />
-                    </div>
-                    <div className="col-span-2">
-                      <label
-                        htmlFor="manufacturer"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Manufacturer
-                      </label>
-                      <div className="flex items-center">
-                        {!showManufacturerInput && (
-                          <>
-                            <input
-                              type="hidden"
-                              name="manufacturer"
-                              value={selectedManufacturer}
-                              required
-                            />
+                      {/* Manufacturer */}
+                      <div className="md:col-span-2">
+                        {showManufacturerInput ? (
+                          <ManufacturerForm
+                            manufacturers={manufacturers}
+                            onBack={() => setShowManufacturerInput(false)}
+                            onManufacturerAdded={handleManufacturerAdded}
+                          />
+                        ) : (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                              Manufacturer
+                            </label>
                             <CustomSelect
                               options={manufacturers}
                               selectedValue={selectedManufacturer}
@@ -311,247 +357,263 @@ const AddPartModal: React.FC<ModalProps> = ({
                                 manufacturer.name
                               }
                             />
-                            <Button
+                            <button
                               type="button"
-                              variant="icon"
-                              size="icon"
-                              title="Add new manufacturer"
                               onClick={
                                 replaceManufacturerDropdownWithInputField
                               }
+                              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
                             >
-                              <Plus strokeWidth={3} />
-                            </Button>
-                          </>
-                        )}
-                        {showManufacturerInput && (
-                          <>
-                            <ManufacturerForm
-                              manufacturers={manufacturers}
-                              onBack={() => setShowManufacturerInput(false)}
-                              onManufacturerAdded={handleManufacturerAdded}
-                            />
-                            <Button
-                              type="button"
-                              variant="icon"
-                              size="icon"
-                              title="Add new manufacturer"
-                              onClick={
-                                replaceManufacturerDropdownWithInputField
-                              }
-                            >
-                              <Minus strokeWidth={3} />
-                            </Button>
-                          </>
+                              + Add new manufacturer
+                            </button>
+                          </div>
                         )}
                       </div>
-                    </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Model name
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        required
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="year"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Model year
-                      </label>
-                      <input
-                        type="number"
-                        name="year"
-                        min="1910"
-                        id="year"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="1985"
-                        required
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="price"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Purchase price {getCurrencyLabel()}
-                      </label>
-                      <input
-                        type="number"
-                        name="price"
-                        min="0"
-                        id="price"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="399"
-                        required
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="purchase_date"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Purchase date
-                      </label>
-                      <input
-                        type="date"
-                        name="purchase_date"
-                        id="purchase_date"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        required
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        State
-                      </label>
-                      {/* Hidden input to store selected status */}
-                      <input
-                        type="hidden"
-                        name="part_status"
-                        value={selectedStatus}
-                        required
-                      />
-                      {PartStatus.length === 0 ? (
-                        <p className="text-gray-500">No part status found</p>
-                      ) : (
-                        <div className="flex flex-wrap gap-2">
-                          {PartStatus.map((status) => (
-                            <StatusTag
-                              key={status.slug}
-                              status={status}
-                              isSelected={selectedStatus === status.slug}
-                              onClick={() => setSelectedStatus(status.slug)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
 
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="sell_price"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Sell price {getCurrencyLabel()}
-                      </label>
-                      <input
+                      {/* Type */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Type
+                        </label>
+                        <CustomSelect
+                          options={partsType}
+                          selectedValue={selectedType}
+                          onSelect={setSelectedType}
+                          placeholder="Select type of part"
+                          isOpen={typeDropdownOpen}
+                          setIsOpen={setTypeDropdownOpen}
+                          getDisplayText={(type) => type.name}
+                        />
+                      </div>
+
+                      {/* Model Name */}
+                      <SimpleModernInput
+                        label="Model name"
+                        name="name"
+                        value={formFields.name}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        required
+                        className="md:col-span-2"
+                      />
+
+                      {/* Model Year */}
+                      <SimpleModernInput
+                        label="Model year"
+                        name="year"
                         type="number"
-                        name="sell_price"
-                        min="1"
-                        id="sell_price"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder="299"
+                        value={formFields.year}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            year: e.target.value,
+                          }))
+                        }
+                        min="1900"
+                        max={new Date().getFullYear() + 1}
+                        required
+                        icon={Calendar}
+                      />
+
+                      {/* Weight */}
+                      <SimpleModernInput
+                        label={`Weight ${getWeightUnitLabel(
+                          userProfile?.weight_unit
+                        )}`}
+                        name="weight"
+                        type="number"
+                        value={formFields.weight}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            weight: e.target.value,
+                          }))
+                        }
+                        min="0"
+                        required
+                        icon={Weight}
                       />
                     </div>
-                    <div className="col-span-1">
-                      <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Secondhand
-                      </label>
-                      <input
-                        type="hidden"
-                        name="secondhand"
-                        value={isSecondhand ? "true" : "false"}
+                  </FormSection>
+
+                  {/* Pricing & Dates Card */}
+                  <FormSection
+                    title="Pricing & Dates"
+                    icon={DollarSign}
+                    gradient="green"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <SimpleModernInput
+                        label={`Purchase price ${getCurrencyLabel(
+                          userProfile?.currency_unit
+                        )}`}
+                        name="price"
+                        type="number"
+                        value={formFields.price}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            price: e.target.value,
+                          }))
+                        }
+                        min="0"
+                        step="0.01"
+                        required
+                        icon={DollarSign}
                       />
-                      <StyledCheckbox
-                        checked={isSecondhand}
-                        onChange={setIsSecondhand}
-                        showDynamicLabel={true}
-                        yesLabel="Yes"
-                        noLabel="No"
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Sell price{" "}
+                          {getCurrencyLabel(userProfile?.currency_unit)}{" "}
+                          <span className="text-gray-500 text-xs font-normal">
+                            (optional)
+                          </span>
+                        </label>
+                        <div className="relative">
+                          <DollarSign
+                            size={16}
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                          />
+                          <input
+                            type="number"
+                            name="sell_price"
+                            value={formFields.sell_price}
+                            onChange={(e) =>
+                              setFormFields((prev) => ({
+                                ...prev,
+                                sell_price: e.target.value,
+                              }))
+                            }
+                            min="0"
+                            step="0.01"
+                            className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
+                          />
+                        </div>
+                      </div>
+
+                      <SimpleModernInput
+                        label="Purchase date"
+                        name="purchase_date"
+                        type="date"
+                        value={formFields.purchase_date}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            purchase_date: e.target.value,
+                          }))
+                        }
+                        required
+                        icon={Calendar}
                       />
                     </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="shop_url"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Shop url
-                      </label>
+                  </FormSection>
+
+                  {/* Condition & Status Card */}
+                  <FormSection
+                    title="Condition & Status"
+                    icon={Settings}
+                    gradient="blue"
+                  >
+                    <div className="space-y-4">
+                      {/* State Selection */}
+                      <StateSelector
+                        statuses={PartStatus}
+                        selectedStatus={selectedStatus}
+                        onStatusChange={setSelectedStatus}
+                      />
+
+                      {/* Secondhand Toggle */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Condition
+                        </label>
+                        <StyledCheckbox
+                          checked={isSecondhand}
+                          onChange={setIsSecondhand}
+                          showDynamicLabel={true}
+                          yesLabel="Secondhand"
+                          noLabel="New"
+                        />
+                      </div>
+                    </div>
+                  </FormSection>
+
+                  {/* Shop URL */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Shop URL{" "}
+                      <span className="text-gray-500 text-xs font-normal">
+                        (optional)
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <LinkIcon
+                        size={16}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                      />
                       <input
                         type="url"
                         name="shop_url"
-                        id="shop_url"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
+                        value={formFields.shop_url}
+                        onChange={(e) =>
+                          setFormFields((prev) => ({
+                            ...prev,
+                            shop_url: e.target.value,
+                          }))
+                        }
+                        placeholder="https://shop.example.com/product"
+                        className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
                       />
                     </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="type"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Type
-                      </label>
-                      <input
-                        type="hidden"
-                        name="type"
-                        value={selectedType}
-                        required
-                      />
-                      <CustomSelect
-                        options={partsType}
-                        selectedValue={selectedType}
-                        onSelect={setSelectedType}
-                        placeholder="Select type of part"
-                        isOpen={typeDropdownOpen}
-                        setIsOpen={setTypeDropdownOpen}
-                        getDisplayText={(type) => type.name}
-                      />
-                    </div>
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="weight"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                      >
-                        Weight {getWeightUnitLabel()}
-                      </label>
-                      <input
-                        type="number"
-                        name="weight"
-                        min="0"
-                        id="weight"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        required
-                      />
-                    </div>
-                    {selectedBikeId && (
-                      <div className="col-span-1">
-                        <label
-                          htmlFor="installed_at"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Installation date
-                        </label>
-                        <input
-                          type="date"
-                          name="installed_at"
-                          id="installed_at"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                          placeholder=""
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          required
-                        />
-                      </div>
-                    )}
                   </div>
-                  <SubmitButton text="Add new part" />
-                </form>
-              </div>
-            </article>
+
+                  {/* Installation Date - Only show when bike is selected */}
+                  {selectedBikeId && (
+                    <SimpleModernInput
+                      label="Installation date"
+                      name="installed_at"
+                      type="date"
+                      value={formFields.installed_at}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          installed_at: e.target.value,
+                        }))
+                      }
+                      required
+                      icon={Calendar}
+                    />
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  resetForm();
+                }}
+                className="px-6 py-2.5"
+              >
+                Cancel
+              </Button>
+              <button
+                type="submit"
+                form="add-part-form"
+                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+              >
+                Add Part
+              </button>
+            </div>
           </div>
         </div>
       )}

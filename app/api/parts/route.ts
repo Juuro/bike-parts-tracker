@@ -18,7 +18,7 @@ export const GET = async () => {
       query GetParts {
         part(
           where: { user_id: { _eq: "${userId}" } }
-          order_by: { updated_at: desc_nulls_last }
+          order_by: { created_at: desc }
         ) {
           secondhand
           buy_price
