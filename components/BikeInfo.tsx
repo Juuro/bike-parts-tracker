@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { fetchBikeParts, fetchCategories } from "@/utils/requestsClient";
-import {
-  getCurrencySymbol,
-  formatWeight,
-  formatDistance,
-} from "@/utils/profileUtils";
+import { getCurrencySymbol, formatWeight } from "@/utils/profileUtils";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import {
-  Calendar,
   DollarSign,
   Weight,
   Bike as BikeIcon,
