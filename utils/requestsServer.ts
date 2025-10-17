@@ -1,3 +1,4 @@
+import "server-only";
 import { headers } from "next/headers";
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;

@@ -1,4 +1,5 @@
 // GraphQL utilities for bike operations
+import "server-only";
 import { AuthSession } from "./authUtils";
 
 export function buildUpdateBikeMutation(
