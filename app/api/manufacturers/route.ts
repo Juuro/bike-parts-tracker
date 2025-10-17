@@ -35,7 +35,6 @@ export const GET = async () => {
 
     const result = await response.json();
 
-    console.log("🔧 Manufacturers API - returning:", result.data.manufacturer);
     return NextResponse.json(result.data.manufacturer);
   } catch (error) {
     console.error(error);
@@ -100,7 +99,6 @@ export const POST = async (request: Request) => {
       return new Response("Failed to add manufacturer", { status: 500 });
     }
 
-    console.log("🔧 Added manufacturer:", result.data.insert_manufacturer_one);
     return NextResponse.json(result.data.insert_manufacturer_one);
   } catch (error) {
     console.error("Error adding manufacturer:", error);

@@ -41,7 +41,6 @@ export const GET = async () => {
 
     const { parts_type: partTypeResponse } = result.data;
 
-    console.log("🔧 Parts Type API - returning:", partTypeResponse);
     return new Response(JSON.stringify(partTypeResponse), {
       status: 200,
     });

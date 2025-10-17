@@ -3,8 +3,6 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
 async function updatePart(formData: FormData): Promise<void> {
-  console.log("🚀 Server action updatePart called");
-
   const session: any = await auth();
   if (!session) {
     throw new Error("Unauthorized");
@@ -13,9 +11,6 @@ async function updatePart(formData: FormData): Promise<void> {
   const accessToken = session?.accessToken;
   const partId = formData.get("part_id") as string;
   const manufacturerId = formData.get("manufacturer") as string;
-
-  console.log("Server action received partId:", partId);
-  console.log("Server action received manufacturerId:", manufacturerId);
 
   // First, let's check what the current values are in the database
   const currentValuesQuery = `
@@ -53,10 +48,6 @@ async function updatePart(formData: FormData): Promise<void> {
   );
 
   const currentValuesResult = await currentValuesResponse.json();
-  console.log(
-    "🚀 Current values in database:",
-    JSON.stringify(currentValuesResult, null, 2)
-  );
 
   // Prepare variables with proper type casting
   const sellPriceValue = formData.get("sell_price");
@@ -80,11 +71,6 @@ async function updatePart(formData: FormData): Promise<void> {
     weight: weightValue ? parseInt(weightValue as string, 10) : null,
     name: formData.get("name") as string,
   };
-
-  console.log(
-    "🚀 Variables being sent to GraphQL:",
-    JSON.stringify(variables, null, 2)
-  );
 
   const query = `
     mutation UpdatePart(
@@ -145,7 +131,6 @@ async function updatePart(formData: FormData): Promise<void> {
   }
 
   const result = await response.json();
-  console.log("🚀 Full GraphQL response:", JSON.stringify(result, null, 2));
 
   if (result.errors) {
     console.error("GraphQL errors:", result.errors);
@@ -158,15 +143,11 @@ async function updatePart(formData: FormData): Promise<void> {
     console.error(error);
   }
 
-  console.log("Part updated successfully:", result.data.update_part);
-
   // Revalidate all relevant paths
   try {
-    console.log("🔄 Revalidating paths...");
     revalidatePath("/", "page");
     revalidatePath("/bikes", "page");
     revalidatePath("/parts", "page");
-    console.log("🔄 Paths revalidated successfully");
   } catch (error) {
     console.error("Error revalidating paths:", error);
   }
