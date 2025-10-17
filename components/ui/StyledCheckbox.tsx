@@ -27,10 +27,16 @@ const StyledCheckbox = ({
       : noLabel
     : label;
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      onChange(!checked);
+    }
+  };
+
   return (
-    <div
+    <label
       className={`relative flex items-center cursor-pointer group ${className}`}
-      onClick={() => onChange(!checked)}
     >
       <div
         className={`flex items-center justify-center w-6 h-6 rounded-md border-2 transition-all duration-200 ${
@@ -38,6 +44,10 @@ const StyledCheckbox = ({
             ? "bg-blue-600 border-blue-600 text-white"
             : "bg-white border-gray-300 group-hover:border-gray-400"
         }`}
+        role="checkbox"
+        aria-checked={checked}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
       >
         {checked && <Check size={16} strokeWidth={3} />}
       </div>
@@ -50,10 +60,10 @@ const StyledCheckbox = ({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="absolute opacity-0 w-full h-full cursor-pointer"
-        tabIndex={0}
+        className="sr-only"
+        aria-hidden="true"
       />
-    </div>
+    </label>
   );
 };
 
