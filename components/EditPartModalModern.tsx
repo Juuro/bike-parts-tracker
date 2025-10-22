@@ -13,7 +13,6 @@ import {
   Settings,
   Edit,
 } from "lucide-react";
-import SubmitButton from "./ui/SubmitButton";
 import updatePart from "@/app/actions/updatePart";
 import ManufacturerForm from "./ManufacturerForm";
 import { Button } from "./ui/button";
