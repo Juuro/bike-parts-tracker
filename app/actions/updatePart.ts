@@ -12,43 +12,6 @@ async function updatePart(formData: FormData): Promise<void> {
   const partId = formData.get("part_id") as string;
   const manufacturerId = formData.get("manufacturer") as string;
 
-  // First, let's check what the current values are in the database
-  const currentValuesQuery = `
-    query GetCurrentPart($part_id: uuid!, $user_id: uuid!) {
-      part(where: { id: { _eq: $part_id }, user_id: { _eq: $user_id } }) {
-        id
-        name
-        manufacturer_id
-        type_id
-        part_status_slug
-        secondhand
-        buy_price
-        sell_price
-        purchase_date
-        model_year
-        weight
-        shop_url
-      }
-    }
-  `;
-
-  const currentValuesResponse = await fetch(
-    process.env.HASURA_PROJECT_ENDPOINT!,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
-      },
-      body: JSON.stringify({
-        query: currentValuesQuery,
-        variables: { part_id: partId, user_id: session?.userId },
-      }),
-    }
-  );
-
-  const currentValuesResult = await currentValuesResponse.json();
-
   // Prepare variables with proper type casting
   const sellPriceValue = formData.get("sell_price");
   const secondhandValue = formData.get("secondhand");

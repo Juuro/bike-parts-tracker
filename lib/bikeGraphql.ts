@@ -109,6 +109,7 @@ export async function executeBikeUpdate(
     headers: {
       "Content-Type": "application/json",
       "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+      // Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ query }),
   });
