@@ -23,6 +23,7 @@ export const GET = async () => {
           id
           name
           strava_bike
+          ebike
           discipline {
             abbr
             name

@@ -10,6 +10,7 @@ import {
   Bike as BikeIcon,
   Zap,
   ExternalLink,
+  Route,
 } from "lucide-react";
 
 type BikeInfoProps = {
@@ -131,6 +132,11 @@ const BikeInfo: React.FC<BikeInfoProps> = ({
       <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <BikeIcon size={20} />
         Bike Information
+        {bike.ebike && (
+          <span className="text-yellow-500" title="eBike">
+            <Zap size={16} fill="currentColor" />
+          </span>
+        )}
       </h2>
 
       <div className="space-y-4">
@@ -170,7 +176,7 @@ const BikeInfo: React.FC<BikeInfoProps> = ({
         {/* Distance - Placeholder for now */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-gray-600">
-            <Zap size={16} />
+            <Route size={16} />
             <span className="text-sm font-medium">Distance</span>
           </div>
           <span className="text-sm text-gray-500 italic">

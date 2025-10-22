@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import CustomSelect from "./ui/CustomSelect";
 import StyledCheckbox from "./ui/StyledCheckbox";
+import BikeImageUpload from "./ui/BikeImageUpload";
 import updateBike from "@/app/actions/updateBike";
 import Image from "next/image";
 import { Button } from "./ui/button";
@@ -210,6 +211,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
                     className="block mb-2 text-sm font-medium text-gray-700"
                   >
                     Strava Bike ID
+                    <span className="text-gray-500 ml-1">– optional</span>
                   </label>
                   <input
                     type="text"
@@ -218,7 +220,6 @@ const EditBikeModal: React.FC<ModalProps> = ({
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder=""
                     defaultValue={bike?.strava_bike}
-                    required
                   />
                 </div>
 
@@ -255,46 +256,19 @@ const EditBikeModal: React.FC<ModalProps> = ({
                 </div>
 
                 <div className="col-span-2">
-                  <div className="flex items-center justify-start gap-2">
-                    {images?.map((image: string, index: number) => {
-                      return (
-                        <div key={index} className="relative">
-                          <Image
-                            src={image}
-                            className="rounded-lg object-cover h-24 w-24"
-                            width={150}
-                            height={150}
-                            alt=""
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-1 right-1 bg-white bg-opacity-70 rounded-full p-1 hover:bg-opacity-100 transition-opacity h-6 w-6"
-                            onClick={() => handleRemoveImage(index, image)}
-                            type="button"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <label
-                    htmlFor="images"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
-                    Images (Select up to 4 images, 10 MB max. each){" "}
-                    <span className="text-gray-500 ml-1">– optional</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="images"
+                  <BikeImageUpload
+                    existingImages={images}
+                    onImagesChange={(files) => {
+                      // Handle new file selection - files are automatically handled by the component
+                    }}
+                    onImageRemove={(index, imageUrl) =>
+                      handleRemoveImage(index, imageUrl)
+                    }
+                    maxImages={4}
+                    maxSizeMB={10}
+                    label="Images (Select up to 4 images, 10 MB max. each)"
+                    description="– optional"
                     name="images"
-                    className="border rounded w-full py-2 px-3"
-                    accept="image/*"
-                    multiple
                   />
                   <input
                     type="hidden"

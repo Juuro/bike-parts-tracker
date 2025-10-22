@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import ModalWrapper from "./ui/ModalWrapper";
 import CustomSelect from "./ui/CustomSelect";
 import StyledCheckbox from "./ui/StyledCheckbox";
+import BikeImageUpload from "./ui/BikeImageUpload";
 import Link from "next/link";
 import addBike from "@/app/actions/addBike";
 import { Button } from "./ui/button";
@@ -190,20 +191,18 @@ const AddBikeModal: React.FC<ModalProps> = ({
                 </div>
 
                 <div className="col-span-2">
-                  <label
-                    htmlFor="images"
-                    className="block mb-2 text-sm font-medium text-gray-700 text-left"
-                  >
-                    Images (Select up to 4 images){" "}
-                    <span className="text-gray-500 ml-1">– optional</span>
-                  </label>
-                  <input
-                    type="file"
-                    id="images"
+                  <BikeImageUpload
+                    onImagesChange={(files) => {
+                      // Handle file selection - files are automatically handled by the component
+                    }}
+                    onImageRemove={() => {
+                      // No existing images to remove in AddBikeModal
+                    }}
+                    maxImages={4}
+                    maxSizeMB={10}
+                    label="Images (Select up to 4 images)"
+                    description="– optional"
                     name="images"
-                    className="border rounded w-full py-2 px-3"
-                    accept="image/*"
-                    multiple
                   />
                 </div>
 

@@ -12,7 +12,7 @@ export function buildUpdateBikeMutation(
       update_bike(where: {id: {_eq: "${formData.get("bike_id")}"}}, _set: {
         name: "${formData.get("name")}",
         strava_bike: "${formData.get("strava_bike")}", 
-        ebike: ${formData.get("ebike") || false}, 
+        ebike: ${formData.get("ebike") === "true"}, 
         discipline_id: "${formData.get("discipline")}",
         user_id: "${session.userId}"
         category_id: "${formData.get("category")}"
@@ -45,7 +45,7 @@ export function buildInsertBikeMutation(
         objects: {
           name: "${formData.get("name")}", 
           strava_bike: "${formData.get("strava_bike")}", 
-          ebike: ${formData.get("ebike") || false}, 
+          ebike: ${formData.get("ebike") === "true"}, 
           discipline_id: "${formData.get("discipline")}",
           user_id: "${session.userId}"
           category_id: "${formData.get("category")}"

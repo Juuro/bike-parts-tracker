@@ -22,6 +22,7 @@ export const GET = async (req: Request, { params }: { params: any }) => {
           id
           name
           strava_bike
+          ebike
           discipline {
             id
             name
