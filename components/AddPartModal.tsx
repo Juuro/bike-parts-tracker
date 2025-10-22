@@ -29,6 +29,7 @@ import StyledCheckbox from "./ui/StyledCheckbox";
 import { SimpleModernInput } from "./ui/SimpleModernInput";
 import { StateSelector } from "./ui/StateSelector";
 import { FormSection } from "./ui/FormSection";
+import ModalWrapper from "./ui/ModalWrapper";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import {
   formatDateForForm,
@@ -246,377 +247,359 @@ const AddPartModal: React.FC<ModalProps> = ({
         <Plus strokeWidth={2} size={20} className="mr-2" />
         Add new part
       </Button>
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4"
-          onClick={closeModal}
-        >
-          <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Package className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Add Part</h2>
-                  <p className="text-sm text-gray-500">
-                    Create a new bike part
-                  </p>
-                </div>
+      <ModalWrapper isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Package className="h-6 w-6 text-blue-600" />
               </div>
-              {showCloseButton && (
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    resetForm();
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label="Close modal"
-                >
-                  <X className="h-6 w-6 text-gray-500" />
-                </button>
-              )}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Add Part</h2>
+                <p className="text-sm text-gray-500">Create a new bike part</p>
+              </div>
             </div>
+            {showCloseButton && (
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  resetForm();
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
+            )}
+          </div>
 
-            {/* Content */}
-            <div className="flex-1 p-6 overflow-y-auto">
-              <form id="add-part-form" action={handleSubmit}>
-                <input type="hidden" name="bike" value={selectedBikeId} />
-                <input
-                  type="hidden"
-                  name="manufacturer"
-                  value={selectedManufacturer}
-                />
-                <input type="hidden" name="type" value={selectedType} />
-                <input
-                  type="hidden"
-                  name="part_status"
-                  value={selectedStatus}
-                />
-                <input
-                  type="hidden"
-                  name="secondhand"
-                  value={isSecondhand.toString()}
-                />
+          {/* Content */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <form id="add-part-form" action={handleSubmit}>
+              <input type="hidden" name="bike" value={selectedBikeId} />
+              <input
+                type="hidden"
+                name="manufacturer"
+                value={selectedManufacturer}
+              />
+              <input type="hidden" name="type" value={selectedType} />
+              <input type="hidden" name="part_status" value={selectedStatus} />
+              <input
+                type="hidden"
+                name="secondhand"
+                value={isSecondhand.toString()}
+              />
 
-                <div className="space-y-4">
-                  {/* Basic Information Card */}
-                  <FormSection
-                    title="Basic Information"
-                    icon={Package}
-                    gradient="gray"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Bike */}
-                      {bikes && bikes.length > 0 && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Bike{" "}
-                            <span className="text-gray-500 text-xs font-normal">
-                              (optional)
-                            </span>
-                          </label>
-                          <CustomSelect
-                            options={bikes}
-                            selectedValue={selectedBikeId}
-                            onSelect={handleBikeChange}
-                            placeholder="Select bike"
-                            isOpen={bikeDropdownOpen}
-                            setIsOpen={setBikeDropdownOpen}
-                            getDisplayText={(bike) => bike.name}
-                            allowEmpty={!bike}
-                          />
-                        </div>
-                      )}
-
-                      {/* Manufacturer */}
+              <div className="space-y-4">
+                {/* Basic Information Card */}
+                <FormSection
+                  title="Basic Information"
+                  icon={Package}
+                  gradient="gray"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Bike */}
+                    {bikes && bikes.length > 0 && (
                       <div className="md:col-span-2">
-                        {showManufacturerInput ? (
-                          <ManufacturerForm
-                            manufacturers={manufacturers}
-                            onBack={() => setShowManufacturerInput(false)}
-                            onManufacturerAdded={handleManufacturerAdded}
-                          />
-                        ) : (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                              Manufacturer
-                            </label>
-                            <CustomSelect
-                              options={manufacturers}
-                              selectedValue={selectedManufacturer}
-                              onSelect={setSelectedManufacturer}
-                              placeholder="Select manufacturer"
-                              isOpen={manufacturerDropdownOpen}
-                              setIsOpen={setManufacturerDropdownOpen}
-                              getDisplayText={(manufacturer) =>
-                                manufacturer.name
-                              }
-                            />
-                            <button
-                              type="button"
-                              onClick={
-                                replaceManufacturerDropdownWithInputField
-                              }
-                              className="mt-2 text-sm text-blue-600 hover:text-blue-700"
-                            >
-                              + Add new manufacturer
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Type */}
-                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Type
-                        </label>
-                        <CustomSelect
-                          options={partsType}
-                          selectedValue={selectedType}
-                          onSelect={setSelectedType}
-                          placeholder="Select type of part"
-                          isOpen={typeDropdownOpen}
-                          setIsOpen={setTypeDropdownOpen}
-                          getDisplayText={(type) => type.name}
-                        />
-                      </div>
-
-                      {/* Model Name */}
-                      <SimpleModernInput
-                        label="Model name"
-                        name="name"
-                        value={formFields.name}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                        required
-                        className="md:col-span-2"
-                      />
-
-                      {/* Model Year */}
-                      <SimpleModernInput
-                        label="Model year"
-                        name="year"
-                        type="number"
-                        value={formFields.year}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            year: e.target.value,
-                          }))
-                        }
-                        min="1900"
-                        max={new Date().getFullYear() + 1}
-                        required
-                        icon={Calendar}
-                      />
-
-                      {/* Weight */}
-                      <SimpleModernInput
-                        label={`Weight ${getWeightUnitLabel(
-                          userProfile?.weight_unit
-                        )}`}
-                        name="weight"
-                        type="number"
-                        value={formFields.weight}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            weight: e.target.value,
-                          }))
-                        }
-                        min="0"
-                        required
-                        icon={Weight}
-                      />
-                    </div>
-                  </FormSection>
-
-                  {/* Pricing & Dates Card */}
-                  <FormSection
-                    title="Pricing & Dates"
-                    icon={DollarSign}
-                    gradient="green"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <SimpleModernInput
-                        label={`Purchase price ${getCurrencyLabel(
-                          userProfile?.currency_unit
-                        )}`}
-                        name="price"
-                        type="number"
-                        value={formFields.price}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            price: e.target.value,
-                          }))
-                        }
-                        min="0"
-                        step="0.01"
-                        required
-                        icon={DollarSign}
-                      />
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Sell price{" "}
-                          {getCurrencyLabel(userProfile?.currency_unit)}{" "}
+                          Bike{" "}
                           <span className="text-gray-500 text-xs font-normal">
                             (optional)
                           </span>
                         </label>
-                        <div className="relative">
-                          <DollarSign
-                            size={16}
-                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          />
-                          <input
-                            type="number"
-                            name="sell_price"
-                            value={formFields.sell_price}
-                            onChange={(e) =>
-                              setFormFields((prev) => ({
-                                ...prev,
-                                sell_price: e.target.value,
-                              }))
-                            }
-                            min="0"
-                            step="0.01"
-                            className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
-                          />
-                        </div>
-                      </div>
-
-                      <SimpleModernInput
-                        label="Purchase date"
-                        name="purchase_date"
-                        type="date"
-                        value={formFields.purchase_date}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            purchase_date: e.target.value,
-                          }))
-                        }
-                        required
-                        icon={Calendar}
-                      />
-                    </div>
-                  </FormSection>
-
-                  {/* Condition & Status Card */}
-                  <FormSection
-                    title="Condition & Status"
-                    icon={Settings}
-                    gradient="blue"
-                  >
-                    <div className="space-y-4">
-                      {/* State Selection */}
-                      <StateSelector
-                        statuses={PartStatus}
-                        selectedStatus={selectedStatus}
-                        onStatusChange={setSelectedStatus}
-                      />
-
-                      {/* Secondhand Toggle */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Condition
-                        </label>
-                        <StyledCheckbox
-                          checked={isSecondhand}
-                          onChange={setIsSecondhand}
-                          showDynamicLabel={true}
-                          yesLabel="Secondhand"
-                          noLabel="New"
+                        <CustomSelect
+                          options={bikes}
+                          selectedValue={selectedBikeId}
+                          onSelect={handleBikeChange}
+                          placeholder="Select bike"
+                          isOpen={bikeDropdownOpen}
+                          setIsOpen={setBikeDropdownOpen}
+                          getDisplayText={(bike) => bike.name}
+                          allowEmpty={!bike}
                         />
                       </div>
-                    </div>
-                  </FormSection>
+                    )}
 
-                  {/* Shop URL */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Shop URL{" "}
-                      <span className="text-gray-500 text-xs font-normal">
-                        (optional)
-                      </span>
-                    </label>
-                    <div className="relative">
-                      <LinkIcon
-                        size={16}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      />
-                      <input
-                        type="url"
-                        name="shop_url"
-                        value={formFields.shop_url}
-                        onChange={(e) =>
-                          setFormFields((prev) => ({
-                            ...prev,
-                            shop_url: e.target.value,
-                          }))
-                        }
-                        placeholder="https://shop.example.com/product"
-                        className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
+                    {/* Manufacturer */}
+                    <div className="md:col-span-2">
+                      {showManufacturerInput ? (
+                        <ManufacturerForm
+                          manufacturers={manufacturers}
+                          onBack={() => setShowManufacturerInput(false)}
+                          onManufacturerAdded={handleManufacturerAdded}
+                        />
+                      ) : (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Manufacturer
+                          </label>
+                          <CustomSelect
+                            options={manufacturers}
+                            selectedValue={selectedManufacturer}
+                            onSelect={setSelectedManufacturer}
+                            placeholder="Select manufacturer"
+                            isOpen={manufacturerDropdownOpen}
+                            setIsOpen={setManufacturerDropdownOpen}
+                            getDisplayText={(manufacturer) => manufacturer.name}
+                          />
+                          <button
+                            type="button"
+                            onClick={replaceManufacturerDropdownWithInputField}
+                            className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                          >
+                            + Add new manufacturer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Type
+                      </label>
+                      <CustomSelect
+                        options={partsType}
+                        selectedValue={selectedType}
+                        onSelect={setSelectedType}
+                        placeholder="Select type of part"
+                        isOpen={typeDropdownOpen}
+                        setIsOpen={setTypeDropdownOpen}
+                        getDisplayText={(type) => type.name}
                       />
                     </div>
-                  </div>
 
-                  {/* Installation Date - Only show when bike is selected */}
-                  {selectedBikeId && (
+                    {/* Model Name */}
                     <SimpleModernInput
-                      label="Installation date"
-                      name="installed_at"
-                      type="date"
-                      value={formFields.installed_at}
+                      label="Model name"
+                      name="name"
+                      value={formFields.name}
                       onChange={(e) =>
                         setFormFields((prev) => ({
                           ...prev,
-                          installed_at: e.target.value,
+                          name: e.target.value,
+                        }))
+                      }
+                      required
+                      className="md:col-span-2"
+                    />
+
+                    {/* Model Year */}
+                    <SimpleModernInput
+                      label="Model year"
+                      name="year"
+                      type="number"
+                      value={formFields.year}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          year: e.target.value,
+                        }))
+                      }
+                      min="1900"
+                      max={new Date().getFullYear() + 1}
+                      required
+                      icon={Calendar}
+                    />
+
+                    {/* Weight */}
+                    <SimpleModernInput
+                      label={`Weight ${getWeightUnitLabel(
+                        userProfile?.weight_unit
+                      )}`}
+                      name="weight"
+                      type="number"
+                      value={formFields.weight}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          weight: e.target.value,
+                        }))
+                      }
+                      min="0"
+                      required
+                      icon={Weight}
+                    />
+                  </div>
+                </FormSection>
+
+                {/* Pricing & Dates Card */}
+                <FormSection
+                  title="Pricing & Dates"
+                  icon={DollarSign}
+                  gradient="green"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <SimpleModernInput
+                      label={`Purchase price ${getCurrencyLabel(
+                        userProfile?.currency_unit
+                      )}`}
+                      name="price"
+                      type="number"
+                      value={formFields.price}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          price: e.target.value,
+                        }))
+                      }
+                      min="0"
+                      step="0.01"
+                      required
+                      icon={DollarSign}
+                    />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Sell price{" "}
+                        {getCurrencyLabel(userProfile?.currency_unit)}{" "}
+                        <span className="text-gray-500 text-xs font-normal">
+                          (optional)
+                        </span>
+                      </label>
+                      <div className="relative">
+                        <DollarSign
+                          size={16}
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        />
+                        <input
+                          type="number"
+                          name="sell_price"
+                          value={formFields.sell_price}
+                          onChange={(e) =>
+                            setFormFields((prev) => ({
+                              ...prev,
+                              sell_price: e.target.value,
+                            }))
+                          }
+                          min="0"
+                          step="0.01"
+                          className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
+                        />
+                      </div>
+                    </div>
+
+                    <SimpleModernInput
+                      label="Purchase date"
+                      name="purchase_date"
+                      type="date"
+                      value={formFields.purchase_date}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          purchase_date: e.target.value,
                         }))
                       }
                       required
                       icon={Calendar}
                     />
-                  )}
-                </div>
-              </form>
-            </div>
+                  </div>
+                </FormSection>
 
-            {/* Footer */}
-            <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  resetForm();
-                }}
-                className="px-6 py-2.5"
-              >
-                Cancel
-              </Button>
-              <button
-                type="submit"
-                form="add-part-form"
-                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
-              >
-                Add Part
-              </button>
-            </div>
+                {/* Condition & Status Card */}
+                <FormSection
+                  title="Condition & Status"
+                  icon={Settings}
+                  gradient="blue"
+                >
+                  <div className="space-y-4">
+                    {/* State Selection */}
+                    <StateSelector
+                      statuses={PartStatus}
+                      selectedStatus={selectedStatus}
+                      onStatusChange={setSelectedStatus}
+                    />
+
+                    {/* Secondhand Toggle */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Condition
+                      </label>
+                      <StyledCheckbox
+                        checked={isSecondhand}
+                        onChange={setIsSecondhand}
+                        showDynamicLabel={true}
+                        yesLabel="Secondhand"
+                        noLabel="New"
+                      />
+                    </div>
+                  </div>
+                </FormSection>
+
+                {/* Shop URL */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Shop URL{" "}
+                    <span className="text-gray-500 text-xs font-normal">
+                      (optional)
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <LinkIcon
+                      size={16}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    />
+                    <input
+                      type="url"
+                      name="shop_url"
+                      value={formFields.shop_url}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          shop_url: e.target.value,
+                        }))
+                      }
+                      placeholder="https://shop.example.com/product"
+                      className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
+                    />
+                  </div>
+                </div>
+
+                {/* Installation Date - Only show when bike is selected */}
+                {selectedBikeId && (
+                  <SimpleModernInput
+                    label="Installation date"
+                    name="installed_at"
+                    type="date"
+                    value={formFields.installed_at}
+                    onChange={(e) =>
+                      setFormFields((prev) => ({
+                        ...prev,
+                        installed_at: e.target.value,
+                      }))
+                    }
+                    required
+                    icon={Calendar}
+                  />
+                )}
+              </div>
+            </form>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+              className="px-6 py-2.5"
+            >
+              Cancel
+            </Button>
+            <button
+              type="submit"
+              form="add-part-form"
+              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+            >
+              Add Part
+            </button>
           </div>
         </div>
-      )}
+      </ModalWrapper>
     </>
   );
 };
