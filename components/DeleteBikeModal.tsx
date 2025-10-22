@@ -109,22 +109,22 @@ const DeleteBikeModal: React.FC<DeleteBikeModalProps> = ({
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button
+                <div className="flex justify-end gap-3">
+                  <button
                     type="button"
-                    variant="secondary"
                     onClick={() => setIsModalOpen(false)}
+                    className="px-8 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors"
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    variant="destructive"
                     onClick={handleDeleteBike}
+                    className="px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Bike
-                  </Button>
+                  </button>
                 </div>
               </div>
             </article>

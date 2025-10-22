@@ -410,18 +410,17 @@ const EditPartModal: React.FC<ModalProps> = ({
 
           {/* Footer */}
           <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={() => setIsModalOpen(false)}
-              className="px-6 py-2.5"
+              className="px-8 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors"
             >
               Cancel
-            </Button>
+            </button>
             <button
               type="submit"
               form="edit-part-form"
-              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               Update Part
             </button>

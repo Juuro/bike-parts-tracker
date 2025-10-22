@@ -89,7 +89,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
           `}
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {!required && <span className="text-gray-500 ml-1">– optional</span>}
         </label>
       </div>
     </div>

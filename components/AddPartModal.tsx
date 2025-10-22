@@ -304,9 +304,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                           Bike{" "}
-                          <span className="text-gray-500 text-xs font-normal">
-                            (optional)
-                          </span>
+                          <span className="text-gray-500 ml-1">– optional</span>
                         </label>
                         <CustomSelect
                           options={bikes}
@@ -331,10 +329,9 @@ const AddPartModal: React.FC<ModalProps> = ({
                         />
                       ) : (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                            Manufacturer
-                          </label>
                           <CustomSelect
+                            label="Manufacturer"
+                            name="manufacturer"
                             options={manufacturers}
                             selectedValue={selectedManufacturer}
                             onSelect={setSelectedManufacturer}
@@ -342,6 +339,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                             isOpen={manufacturerDropdownOpen}
                             setIsOpen={setManufacturerDropdownOpen}
                             getDisplayText={(manufacturer) => manufacturer.name}
+                            required
                           />
                           <button
                             type="button"
@@ -356,10 +354,9 @@ const AddPartModal: React.FC<ModalProps> = ({
 
                     {/* Type */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Type
-                      </label>
                       <CustomSelect
+                        label="Type"
+                        name="type"
                         options={partsType}
                         selectedValue={selectedType}
                         onSelect={setSelectedType}
@@ -367,6 +364,7 @@ const AddPartModal: React.FC<ModalProps> = ({
                         isOpen={typeDropdownOpen}
                         setIsOpen={setTypeDropdownOpen}
                         getDisplayText={(type) => type.name}
+                        required
                       />
                     </div>
 
@@ -450,35 +448,23 @@ const AddPartModal: React.FC<ModalProps> = ({
                       icon={DollarSign}
                     />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Sell price{" "}
-                        {getCurrencyLabel(userProfile?.currency_unit)}{" "}
-                        <span className="text-gray-500 text-xs font-normal">
-                          (optional)
-                        </span>
-                      </label>
-                      <div className="relative">
-                        <DollarSign
-                          size={16}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                        />
-                        <input
-                          type="number"
-                          name="sell_price"
-                          value={formFields.sell_price}
-                          onChange={(e) =>
-                            setFormFields((prev) => ({
-                              ...prev,
-                              sell_price: e.target.value,
-                            }))
-                          }
-                          min="0"
-                          step="0.01"
-                          className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
-                        />
-                      </div>
-                    </div>
+                    <SimpleModernInput
+                      label={`Sell price ${getCurrencyLabel(
+                        userProfile?.currency_unit
+                      )}`}
+                      name="sell_price"
+                      type="number"
+                      value={formFields.sell_price}
+                      onChange={(e) =>
+                        setFormFields((prev) => ({
+                          ...prev,
+                          sell_price: e.target.value,
+                        }))
+                      }
+                      min="0"
+                      step="0.01"
+                      icon={DollarSign}
+                    />
 
                     <SimpleModernInput
                       label="Purchase date"
@@ -528,33 +514,20 @@ const AddPartModal: React.FC<ModalProps> = ({
                 </FormSection>
 
                 {/* Shop URL */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Shop URL{" "}
-                    <span className="text-gray-500 text-xs font-normal">
-                      (optional)
-                    </span>
-                  </label>
-                  <div className="relative">
-                    <LinkIcon
-                      size={16}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                    />
-                    <input
-                      type="url"
-                      name="shop_url"
-                      value={formFields.shop_url}
-                      onChange={(e) =>
-                        setFormFields((prev) => ({
-                          ...prev,
-                          shop_url: e.target.value,
-                        }))
-                      }
-                      placeholder="https://shop.example.com/product"
-                      className="w-full py-2.5 text-gray-900 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 hover:border-gray-400 transition-all duration-200 pl-12 pr-3"
-                    />
-                  </div>
-                </div>
+                <SimpleModernInput
+                  label="Shop URL"
+                  name="shop_url"
+                  type="url"
+                  value={formFields.shop_url}
+                  onChange={(e) =>
+                    setFormFields((prev) => ({
+                      ...prev,
+                      shop_url: e.target.value,
+                    }))
+                  }
+                  placeholder="https://shop.example.com/product"
+                  icon={LinkIcon}
+                />
 
                 {/* Installation Date - Only show when bike is selected */}
                 {selectedBikeId && (
@@ -579,21 +552,20 @@ const AddPartModal: React.FC<ModalProps> = ({
 
           {/* Footer */}
           <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={() => {
                 setIsModalOpen(false);
                 resetForm();
               }}
-              className="px-6 py-2.5"
+              className="px-8 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors"
             >
               Cancel
-            </Button>
+            </button>
             <button
               type="submit"
               form="add-part-form"
-              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               Add Part
             </button>
