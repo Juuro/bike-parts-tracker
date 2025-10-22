@@ -13,7 +13,7 @@ import {
   Wrench,
 } from "lucide-react";
 import insertInstallation from "@/app/actions/insertInstallation";
-import EditPartModalModern from "./EditPartModalModern";
+import EditPartModal from "./EditPartModal";
 import Link from "next/link";
 
 type InstallationsTableProps = {
@@ -198,7 +198,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                   </button>
                 </form>
               )}
-            <EditPartModalModern
+            <EditPartModal
               showCloseButton={true}
               part={part}
               manufacturers={manufacturers}
@@ -370,7 +370,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end space-x-2">
-                            <EditPartModalModern
+                            <EditPartModal
                               showCloseButton={true}
                               part={part}
                               manufacturers={manufacturers}
@@ -588,7 +588,7 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
                                   </button>
                                 </form>
                               )}
-                            <EditPartModalModern
+                            <EditPartModal
                               showCloseButton={true}
                               part={part}
                               manufacturers={manufacturers}

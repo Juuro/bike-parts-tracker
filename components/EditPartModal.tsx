@@ -43,7 +43,7 @@ type ModalProps = {
   partsType?: PartsType[];
 };
 
-const EditPartModalModern: React.FC<ModalProps> = ({
+const EditPartModal: React.FC<ModalProps> = ({
   showCloseButton = true,
   part,
   manufacturers: manufacturersProp = [],
@@ -449,4 +449,4 @@ const EditPartModalModern: React.FC<ModalProps> = ({
   );
 };
 
-export default EditPartModalModern;
+export default EditPartModal;

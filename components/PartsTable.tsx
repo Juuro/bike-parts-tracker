@@ -7,7 +7,7 @@ import {
 import DeletePartButton from "./DeletePartButton";
 import DeleteInstallationButton from "./DeleteInstallationButton";
 import AssignPartButton from "./AssignPartButton";
-import EditPartModalModern from "./EditPartModalModern";
+import EditPartModal from "./EditPartModal";
 import Link from "next/link";
 
 type PartsTableProps = {
@@ -194,7 +194,7 @@ const PartsTable: React.FC<PartsTableProps> = async ({
                             />
                           )
                         )}
-                        <EditPartModalModern
+                        <EditPartModal
                           showCloseButton={true}
                           part={part}
                           manufacturers={manufacturers}
