@@ -264,6 +264,19 @@ const InstallationsTable: React.FC<InstallationsTableProps> = async ({
     <div className="space-y-8">
       {/* Current Installations Section */}
       <div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <Wrench className="h-6 w-6 text-gray-600" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Installed Parts
+              </h2>
+              <p className="text-sm text-gray-600">
+                Parts currently installed on this bike
+              </p>
+            </div>
+          </div>
+        </div>
         {installedBikeParts.length > 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             {/* Mobile View */}
