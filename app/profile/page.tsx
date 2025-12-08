@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
-    redirect("/api/auth/signin");
+    redirect("/signin");
   }
 
   const [userProfile, availableUnits] = await Promise.all([
@@ -23,10 +23,10 @@ export default async function ProfilePage() {
   const profileData = userProfile?.id
     ? userProfile
     : {
-        id: (session as any).userId || session.user?.id || "",
-        name: session.user?.name || "",
-        email: session.user?.email || "",
-        image: session.user?.image || "",
+        id: session.user.id,
+        name: session.user.name || "",
+        email: session.user.email,
+        image: session.user.image || "",
         currency_unit: null,
         weight_unit: null,
         distance_unit: null,

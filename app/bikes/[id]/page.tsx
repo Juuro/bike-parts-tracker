@@ -28,7 +28,7 @@ const BikePage = async ({ params }: { params: any }) => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
-    redirect("/api/auth/signin");
+    redirect("/signin");
   }
 
   const { id: bikeId } = await params;
