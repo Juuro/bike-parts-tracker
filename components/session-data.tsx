@@ -1,4 +1,4 @@
-import type { Session } from "next-auth"
+import type { Session } from "@/lib/auth";
 
 export default function SessionData({ session }: { session: Session | null }) {
   if (session?.user) {

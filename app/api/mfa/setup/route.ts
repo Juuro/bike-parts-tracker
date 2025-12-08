@@ -1,5 +1,6 @@
 // API route to setup MFA (get QR code)
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { generateMFASecret } from "@/lib/mfaUtils";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 
@@ -7,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 export const POST = async () => {
   try {
-    const session: any = await auth();
-    if (!session) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
       return new Response("Unauthorized", { status: 401 });
     }
 

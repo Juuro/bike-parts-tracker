@@ -1,18 +1,22 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export const GET = async () => {
   try {
-    const session: any = await auth();
-    if (!session) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
       return new Response("Unauthorized", {
         status: 401,
       });
     }
 
-    const userId = session?.userId;
-    const accessToken = session?.accessToken;
+    const userId = session.user.id;
+    const accessToken = session.session.token;
 
     const query = `
       query GetBikes {

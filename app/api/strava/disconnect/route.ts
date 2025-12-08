@@ -1,10 +1,11 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export const POST = async () => {
   try {
-    const session: any = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.userId) {
       return new Response("Unauthorized", { status: 401 });
     }

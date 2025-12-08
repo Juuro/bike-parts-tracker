@@ -1,5 +1,6 @@
 // Authentication utilities
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export interface AuthSession {
   accessToken: string;
@@ -7,12 +8,16 @@ export interface AuthSession {
 }
 
 export async function authenticateUser(): Promise<AuthSession> {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
     throw new Error("Unauthorized");
   }
+
   return {
-    accessToken: session.accessToken,
-    userId: session.userId,
+    accessToken: session.session.token,
+    userId: session.user.id,
   };
 }

@@ -1,4 +1,5 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { fetchBikes } from "@/utils/requestsServer";
 import React from "react";
 import Card from "./Card";
@@ -7,7 +8,9 @@ import AddBikeModal from "./AddBikeModal";
 import { Bike, Plus, ArrowRight } from "lucide-react";
 
 const HomeBikes = async () => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   let bikes: Bike[] = [];
   if (session) {

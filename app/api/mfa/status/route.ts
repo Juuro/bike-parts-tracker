@@ -1,27 +1,24 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   try {
-    const session: any = await auth();
-    let userId: string | undefined = session?.userId || session?.user?.id;
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-    // Fallback: derive userId from JWT if session.userId is not present
-    if (!userId) {
-      const token: any = await getToken({ req: request });
-      if (token?.sub) userId = token.sub;
-    }
-
-    if (!userId) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
+
+    const userId = session.user.id;
 
     // Query real status from Hasura
     const query = `

@@ -1,7 +1,8 @@
-// Session cache management utilities for NextAuth.js
+// Session cache management utilities for Better-Auth
 // Use these functions to check cache state and log invalidation requests when profile data changes
 
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 /**
  * Logs a session cache invalidation request for debugging purposes.
@@ -73,20 +74,23 @@ export async function invalidateUserSessionCache(
 export async function refreshSessionData(): Promise<ExtendedSession | null> {
   try {
     // Force session refresh by accessing it
-    const session = await auth();
-    if (!session) return null;
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session?.user) return null;
     // Map user fields to ensure no nulls (convert null to undefined)
-    const user = session.user
-      ? {
-          id: session.user.id ?? undefined,
-          name: session.user.name ?? undefined,
-          email: session.user.email ?? undefined,
-          image: session.user.image ?? undefined,
-        }
-      : undefined;
+    const user = {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image ?? undefined,
+    };
     return {
-      ...session,
       user,
+      userId: session.user.id,
+      accessToken: session.session.token,
+      dataFresh: true,
+      userDataUpdatedAt: Date.now(),
     } as ExtendedSession;
   } catch (error) {
     console.error("Failed to refresh session data:", error);

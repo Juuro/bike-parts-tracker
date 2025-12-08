@@ -1,7 +1,7 @@
 "use client";
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
 import { SquarePen, X } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";

@@ -1,16 +1,17 @@
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { StravaAPI } from "@/lib/stravaAPI";
 
 export const dynamic = "force-dynamic";
 
 export const GET = async () => {
   try {
-    const session: any = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.userId) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const accessToken = session?.accessToken;
+    const accessToken = session.session.token;
 
     // Get user's Strava data from database
     const query = `

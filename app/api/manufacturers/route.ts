@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import { getCachedOrFetch } from "@/lib/cache";
 
