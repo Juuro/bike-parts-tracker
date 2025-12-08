@@ -7,7 +7,7 @@ export interface AuthSession {
 }
 
 export async function authenticateUser(): Promise<AuthSession> {
-  const session: any = await auth();
+  const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
   }

@@ -41,7 +41,7 @@ export default function ProfileForm({
   userProfile,
   availableUnits,
 }: ProfileFormProps) {
-  const { data: session, update } = useSession();
+  const { data: session, refetch } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [stravaConnected, setStravaConnected] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(
@@ -124,9 +124,9 @@ export default function ProfileForm({
         }
       }
 
-      // Force session refresh by calling update with trigger refresh
+      // Force session refresh by calling refetch
       try {
-        await update();
+        await refetch();
       } catch (sessionError) {
         console.error("Session refresh error:", sessionError);
         const errorMessage =

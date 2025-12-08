@@ -1,6 +1,19 @@
-import type { Session } from "next-auth"
+// Better-Auth session structure
+interface SessionData {
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    image?: string | null;
+  };
+  session?: {
+    id: string;
+    userId: string;
+    expiresAt: Date;
+  };
+}
 
-export default function SessionData({ session }: { session: Session | null }) {
+export default function SessionData({ session }: { session: SessionData | null }) {
   if (session?.user) {
     return (
       <div className="flex flex-col gap-4 p-4 w-full bg-gray-100 rounded-md">

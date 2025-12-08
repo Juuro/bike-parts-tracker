@@ -1,30 +1,22 @@
 import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-import { Kysely, PostgresDialect } from "kysely";
-
-// Import Kysely adapter directly - not exported in package.json
-// @ts-ignore - kyselyAdapter exists but not in public exports
-import { kyselyAdapter } from "better-auth/dist/adapters/kysely-adapter";
-// @ts-ignore - twoFactor exists but checking path
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { twoFactor } from "better-auth/plugins/two-factor";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 // Create PostgreSQL connection pool
 // Note: Hasura uses PostgreSQL underneath. You'll need to set DATABASE_URL
 // to the PostgreSQL connection string (not the Hasura GraphQL endpoint)
-const dialect = new PostgresDialect({
-  pool: new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 10,
-  }),
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
 });
 
-const db = new Kysely({
-  dialect,
-});
+const db = drizzle(pool);
 
 export const auth = betterAuth({
-  database: kyselyAdapter(db, {
-    type: "postgres",
+  database: drizzleAdapter(db, {
+    provider: "pg",
     usePlural: false, // Set to true if your tables use plural names (users vs user)
   }),
   
@@ -58,7 +50,6 @@ export const auth = betterAuth({
   plugins: [
     twoFactor({
       issuer: "BikePartsTracker",
-      backupCodeLength: 8,
     }),
   ],
 
