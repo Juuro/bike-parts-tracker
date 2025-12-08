@@ -1,5 +1,5 @@
 "use server";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { revalidatePath } from "next/cache";
 
 async function addManufacturer(
@@ -7,12 +7,13 @@ async function addManufacturer(
   manufacturerCountry: string,
   manufacturerUrl: string
 ): Promise<Manufacturer[]> {
-  const session: any = await auth();
+  const session = await getSession();
   if (!session) {
     console.error("Unauthorized");
+    return [];
   }
 
-  const accessToken = session?.accessToken;
+  const accessToken = session.accessToken;
 
   const query = `
     mutation InsertManufacturer {

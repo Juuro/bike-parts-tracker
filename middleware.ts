@@ -1,4 +1,5 @@
-import { betterFetch } from "better-auth/fetch";
+// @ts-ignore - @better-fetch/fetch is an internal dependency
+import { betterFetch } from "@better-fetch/fetch";
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 

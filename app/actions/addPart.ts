@@ -1,15 +1,16 @@
 "use server";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { revalidatePath } from "next/cache";
 import addManufacturer from "./addManufacturer";
 
 async function addPart(formData: FormData): Promise<void> {
-  const session: any = await auth();
+  const session = await getSession();
   if (!session) {
     console.error("Unauthorized");
+    return;
   }
 
-  const accessToken = session?.accessToken;
+  const accessToken = session.accessToken;
 
   let manufacturerId = formData.get("manufacturer");
   if (formData.get("newManufacturer")) {
@@ -48,7 +49,7 @@ async function addPart(formData: FormData): Promise<void> {
           sell_price: ${formData.get("sell_price") || null}
           shop_url: "${formData.get("shop_url")}"
           type_id: "${formData.get("type")}"
-          user_id: "${session?.userId}"
+          user_id: "${session.userId}"
           weight: ${formData.get("weight")}
           name: "${formData.get("name")}"
         }

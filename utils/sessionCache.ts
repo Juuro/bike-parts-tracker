@@ -1,7 +1,7 @@
 // Session cache management utilities for NextAuth.js
 // Use these functions to check cache state and log invalidation requests when profile data changes
 
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 
 /**
  * Logs a session cache invalidation request for debugging purposes.

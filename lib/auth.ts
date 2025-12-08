@@ -1,8 +1,12 @@
 import { betterAuth } from "better-auth";
-import { kyselyAdapter } from "better-auth/adapters/kysely";
-import { twoFactor } from "better-auth/plugins/two-factor";
 import { Pool } from "pg";
 import { Kysely, PostgresDialect } from "kysely";
+
+// Import Kysely adapter directly - not exported in package.json
+// @ts-ignore - kyselyAdapter exists but not in public exports
+import { kyselyAdapter } from "better-auth/dist/adapters/kysely-adapter";
+// @ts-ignore - twoFactor exists but checking path
+import { twoFactor } from "better-auth/plugins/two-factor";
 
 // Create PostgreSQL connection pool
 // Note: Hasura uses PostgreSQL underneath. You'll need to set DATABASE_URL

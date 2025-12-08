@@ -7,7 +7,7 @@ import {
   fetchDisciplines,
   fetchCategories,
 } from "@/utils/requestsServer";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import InstallationsTable from "@/components/InstallationsTable";
@@ -24,7 +24,7 @@ import Link from "next/link";
 
 const BikePage = async ({ params }: { params: any }) => {
   // Check authentication
-  const session = await auth();
+  const session = await getSession();
 
   if (!session) {
     redirect("/api/auth/signin");

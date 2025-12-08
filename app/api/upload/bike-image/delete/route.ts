@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import cloudinary from "@/config/cloudinary";
 import {
   extractPublicIdFromCloudinaryUrl,
@@ -9,7 +9,7 @@ import {
 export async function DELETE(request: NextRequest) {
   try {
     // Check if user is authenticated
-    const session = await auth();
+    const session = await getSession();
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Authentication required" },

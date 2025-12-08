@@ -1,5 +1,5 @@
 // Authentication utilities
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 
 export interface AuthSession {
   accessToken: string;
