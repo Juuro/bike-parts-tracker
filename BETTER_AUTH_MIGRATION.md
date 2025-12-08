@@ -244,6 +244,7 @@ Before deploying to production, the following should be tested:
 - Better-Auth has better TypeScript support with strict typing
 - The configuration is more explicit and easier to audit
 - Rate limiting and security features are preserved from the original implementation
+- **Next.js Updated**: Updated from 15.4.7 to 15.4.8 to patch RCE vulnerability in React flight protocol (CVE-2025-66478)
 
 ## References
 
