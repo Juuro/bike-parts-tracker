@@ -12,8 +12,8 @@ export const GET = async () => {
       });
     }
 
-    const userId = session.userId;
-    const accessToken = session.accessToken;
+    const userId = session.user.id;
+    const accessToken = session.session.token;
 
     const query = `
       query GetParts {

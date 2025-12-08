@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const GET = async () => {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.userId) {
+    if (!session?.user?.id) {
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export const GET = async () => {
       },
       body: JSON.stringify({
         query,
-        variables: { userId: session.userId },
+        variables: { userId: session.user.id },
       }),
     });
 
@@ -95,7 +95,7 @@ export const GET = async () => {
           body: JSON.stringify({
             query: updateQuery,
             variables: {
-              userId: session.userId,
+              userId: session.user.id,
               accessToken: newTokens.access_token,
               refreshToken: newTokens.refresh_token,
               expiresAt: newTokens.expires_at,

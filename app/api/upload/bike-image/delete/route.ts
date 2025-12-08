@@ -10,7 +10,7 @@ import {
 export async function DELETE(request: NextRequest) {
   try {
     // Check if user is authenticated
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Authentication required" },

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const POST = async (request: NextRequest) => {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.userId) {
+    if (!session?.user?.id) {
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -79,12 +79,12 @@ export const POST = async (request: NextRequest) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${session.session.token}`,
       },
       body: JSON.stringify({
         query: updateQuery,
         variables: {
-          userId: session.userId,
+          userId: session.user.id,
           stravaId: athlete.id.toString(),
           stravaAccessToken: access_token,
           stravaRefreshToken: refresh_token,

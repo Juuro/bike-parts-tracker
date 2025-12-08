@@ -21,8 +21,8 @@ export const POST = async (request: Request) => {
       });
     }
 
-    const userId = session.userId || session.user?.id;
-    const accessToken = session.accessToken;
+    const userId = session.user.id;
+    const accessToken = session.session.token;
 
     // Get user's current MFA status
     const getUserQuery = `

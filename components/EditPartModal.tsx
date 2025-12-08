@@ -36,12 +36,12 @@ const EditPartModal: React.FC<ModalProps> = ({
   const [partsType, setPartsType] = useState<PartsType[]>(partsTypeProp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (!isPending && session?.user) {
         // Only fetch data if not provided as props
         if (manufacturersProp.length === 0) {
           const fetchedManufacturers = await fetchManufacturers();

@@ -1,15 +1,18 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import uninstallInstallation from "./uninstallInstallation";
 
 async function insertInstallation(formData: FormData) {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
     console.error("Unauthorized");
+    throw new Error("Unauthorized");
+    throw new Error("Unauthorized");
   }
 
-  const accessToken = session?.accessToken;
+  const accessToken = session.session.token;
 
   const partId = formData.get("part_id");
   const bikeId = formData.get("bike_id");

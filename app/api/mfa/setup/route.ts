@@ -13,8 +13,8 @@ export const POST = async () => {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const userId = session.userId || session.user?.id;
-    const accessToken = session.accessToken;
+    const userId = session.user.id;
+    const accessToken = session.session.token;
 
     // Get user's email for QR code generation
     const getUserQuery = `

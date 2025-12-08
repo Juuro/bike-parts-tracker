@@ -29,7 +29,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const [categories, setCategories] = useState<Category[]>(categoriesProp);
   const [disciplines, setDisciplines] = useState<Discipline[]>(disciplinesProp);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [initialImages, setInitialImages] = useState<string[]>([]);
@@ -44,7 +44,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (!isPending && session?.user) {
         // Only fetch data if not provided as props
         if (disciplinesProp.length === 0) {
           const fetchedDiscipline = await fetchDisciplines();

@@ -23,8 +23,8 @@ export const POST = async (request: Request) => {
       return new Response("Verification code required", { status: 400 });
     }
 
-    const userId = session.userId;
-    const accessToken = session.accessToken;
+    const userId = session.user.id;
+    const accessToken = session.session.token;
 
     // Get user's current MFA secret (should be in pending state)
     const getUserQuery = `

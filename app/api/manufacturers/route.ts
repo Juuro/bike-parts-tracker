@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 
 export const GET = async (request: NextRequest) => {
   try {
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
 
-    if (!(session as any)?.accessToken) {
+    if (!session?.session?.token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -25,7 +25,7 @@ export const GET = async (request: NextRequest) => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${(session as any).accessToken}`,
+              Authorization: `Bearer ${session.session.token}`,
             },
             body: JSON.stringify({
               query: `

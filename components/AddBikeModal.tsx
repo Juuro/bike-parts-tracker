@@ -24,11 +24,11 @@ const AddBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (!isPending && session?.user) {
         const discipline = await fetchDisciplines();
         setDisciplines(discipline);
 

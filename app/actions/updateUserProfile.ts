@@ -1,17 +1,20 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logSessionCacheInvalidationRequest } from "@/utils/sessionCache";
 
 async function updateUserProfile(formData: FormData): Promise<void> {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
     console.error("No session found");
+    throw new Error("Unauthorized");
+    throw new Error("Unauthorized");
     throw new Error("Unauthorized");
   }
 
-  const userId = session?.userId;
-  const accessToken = session?.accessToken;
+  const userId = session.user.id;
+  const accessToken = session.session.token;
 
   if (!userId) {
     console.error("No userId in session:", session);

@@ -1,15 +1,16 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import addManufacturer from "./addManufacturer";
 
 async function updatePart(formData: FormData): Promise<void> {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
     throw new Error("Unauthorized");
   }
 
-  const accessToken = session?.accessToken;
+  const accessToken = session.session.token;
   const partId = formData.get("part_id") as string;
 
   let manufacturerId = formData.get("manufacturer");
@@ -32,7 +33,7 @@ async function updatePart(formData: FormData): Promise<void> {
 
   const variables = {
     part_id: partId,
-    user_id: session?.userId,
+    user_id: session.user.id,
     manufacturer_id: manufacturerId as string,
     model_year: yearValue ? parseInt(yearValue as string, 10) : null,
     buy_price: priceValue ? parseFloat(priceValue as string) : null,

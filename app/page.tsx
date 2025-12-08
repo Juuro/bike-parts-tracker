@@ -1,14 +1,15 @@
 import HomeBikes from "@/components/HomeBikes";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { SignIn } from "@/components/auth-components";
 import { fetchParts } from "@/utils/requestsServer";
 
 export default async function Index() {
-  const session = await auth();
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  if (session) {
+  if (session?.user) {
     const parts = await fetchParts();
     const hasParts = parts && parts.length > 0;
 

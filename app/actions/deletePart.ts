@@ -1,15 +1,18 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 async function deletePart(partId: string, status: string): Promise<void> {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
     console.error("Unauthorized");
+    throw new Error("Unauthorized");
+    throw new Error("Unauthorized");
   }
 
-  const userId = session?.userId;
-  const accessToken = session?.accessToken;
+  const userId = session.user.id;
+  const accessToken = session.session.token;
 
   const query = `
     mutation SetPartStatusBroken {

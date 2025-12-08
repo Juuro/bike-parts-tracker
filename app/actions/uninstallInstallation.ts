@@ -1,14 +1,17 @@
 "use server";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 async function uninstallInstallation(installationId: string) {
-  const session: any = await auth();
-  if (!session) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
     console.error("Unauthorized");
+    throw new Error("Unauthorized");
+    throw new Error("Unauthorized");
   }
 
-  const accessToken = session?.accessToken;
+  const accessToken = session.session.token;
 
   const query = `
     mutation UninstallInstallation {

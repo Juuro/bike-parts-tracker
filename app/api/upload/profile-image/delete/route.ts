@@ -11,7 +11,7 @@ import { logSessionCacheInvalidationRequest } from "@/utils/sessionCache";
 export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
