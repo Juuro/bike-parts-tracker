@@ -1,7 +1,7 @@
 "use client";
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
 import { Plus, X } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
@@ -24,11 +24,11 @@ const AddBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (session) {
         const discipline = await fetchDisciplines();
         setDisciplines(discipline);
 

@@ -1,11 +1,11 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { StravaAPI } from "@/lib/stravaAPI";
 
 export const dynamic = "force-dynamic";
 
 export const GET = async () => {
   try {
-    const session: any = await auth();
+    const session = await getSession();
     if (!session?.userId) {
       return new Response("Unauthorized", { status: 401 });
     }

@@ -1,7 +1,7 @@
 // Session cache management utilities for NextAuth.js
 // Use these functions to check cache state and log invalidation requests when profile data changes
 
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 
 /**
  * Logs a session cache invalidation request for debugging purposes.
@@ -73,7 +73,7 @@ export async function invalidateUserSessionCache(
 export async function refreshSessionData(): Promise<ExtendedSession | null> {
   try {
     // Force session refresh by accessing it
-    const session = await auth();
+    const session = await getSession();
     if (!session) return null;
     // Map user fields to ensure no nulls (convert null to undefined)
     const user = session.user

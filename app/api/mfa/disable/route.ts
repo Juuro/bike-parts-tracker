@@ -1,5 +1,5 @@
 // API route to disable MFA
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { verifyMFACode, verifyBackupCode } from "@/lib/mfaUtils";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export const POST = async (request: Request) => {
   try {
-    const session: any = await auth();
+    const session = await getSession();
     if (!session) {
       return new Response("Unauthorized", { status: 401 });
     }

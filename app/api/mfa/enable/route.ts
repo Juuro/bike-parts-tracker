@@ -1,5 +1,5 @@
 // API route to enable MFA
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import {
   generateMFASecret,
   generateBackupCodes,
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export const POST = async (request: Request) => {
   try {
-    const session: any = await auth();
+    const session = await getSession();
     if (!session) {
       return new Response("Unauthorized", { status: 401 });
     }

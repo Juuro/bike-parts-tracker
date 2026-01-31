@@ -1,7 +1,7 @@
 "use client";
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
 import { SquarePen, X } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
@@ -29,7 +29,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
   const [categories, setCategories] = useState<Category[]>(categoriesProp);
   const [disciplines, setDisciplines] = useState<Discipline[]>(disciplinesProp);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [initialImages, setInitialImages] = useState<string[]>([]);
@@ -44,7 +44,7 @@ const EditBikeModal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (session) {
         // Only fetch data if not provided as props
         if (disciplinesProp.length === 0) {
           const fetchedDiscipline = await fetchDisciplines();

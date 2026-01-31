@@ -1,6 +1,6 @@
 "use client";
 import { SignIn, SignOut } from "./auth-components";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { User, ChevronDown, Shield } from "lucide-react";
 import {
   DropdownMenu,

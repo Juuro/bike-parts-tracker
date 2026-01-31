@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import AddPartModal from "@/components/AddPartModal";
 import PartsTable from "@/components/PartsTable";
 import {
@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 
 const PartsPage = async () => {
   // Check authentication
-  const session = await auth();
+  const session = await getSession();
 
   if (!session) {
     redirect("/api/auth/signin");

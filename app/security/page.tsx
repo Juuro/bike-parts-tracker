@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { Shield, ArrowLeft } from "lucide-react";
 import { MFASettings } from "@/components/MFASettings";
@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default async function SecuritySettingsPage() {
   // Check authentication
-  const session = await auth();
+  const session = await getSession();
 
   if (!session?.user) {
     redirect("/api/auth/signin");

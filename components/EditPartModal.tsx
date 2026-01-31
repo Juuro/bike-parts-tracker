@@ -5,7 +5,7 @@ import {
   fetchPartStatus,
 } from "@/utils/requestsClient";
 import { X, Edit, Minus, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SubmitButton from "./ui/SubmitButton";
@@ -36,12 +36,12 @@ const EditPartModal: React.FC<ModalProps> = ({
   const [partsType, setPartsType] = useState<PartsType[]>(partsTypeProp);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showManufacturerInput, setShowManufacturerInput] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (status === "authenticated") {
+      if (session) {
         // Only fetch data if not provided as props
         if (manufacturersProp.length === 0) {
           const fetchedManufacturers = await fetchManufacturers();

@@ -1,5 +1,5 @@
 // Authentication utilities
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 
 export interface AuthSession {
   accessToken: string;
@@ -7,7 +7,7 @@ export interface AuthSession {
 }
 
 export async function authenticateUser(): Promise<AuthSession> {
-  const session: any = await auth();
+  const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
   }

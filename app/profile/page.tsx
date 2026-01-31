@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import ProfileForm from "@/components/ProfileForm";
 import { fetchUserProfile, fetchAvailableUnits } from "@/utils/requestsServer";
@@ -7,7 +7,7 @@ import { ArrowLeft, User, Shield } from "lucide-react";
 
 export default async function ProfilePage() {
   // Check authentication
-  const session = await auth();
+  const session = await getSession();
 
   if (!session?.user) {
     redirect("/api/auth/signin");

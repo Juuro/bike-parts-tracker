@@ -1,8 +1,8 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 
 export const GET = async (req: Request, { params }: { params: any }) => {
   try {
-    const session: any = await auth();
+    const session = await getSession();
     if (!session) {
       return new Response("Unauthorized", {
         status: 401,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getSession } from "@/lib/auth-server";
 import { makeRateLimitedRequest } from "@/lib/rateLimiter";
 import { getCachedOrFetch } from "@/lib/cache";
 
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const GET = async (request: NextRequest) => {
   try {
-    const session = await auth();
+    const session = await getSession();
 
     if (!(session as any)?.accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
