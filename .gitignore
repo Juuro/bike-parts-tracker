@@ -19,3 +19,5 @@ next-env.d.ts
 .vercel
 .env*.local
 node_modules
+
+hasura/backup.sql

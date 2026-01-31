@@ -1,0 +1,40 @@
+flowchart TD
+  subgraph Client
+    B["Browser UI<br/>Next.js/React"]
+    CC["Client components<br/>(ProfileForm, StravaConnection,<br/>InstallationsTable, EditBikeModal)"]
+    RC["Client fetch helpers<br/>(utils/requestsClient)"]
+  end
+
+  subgraph App["Next.js App Router (server)"]
+    SP["Server pages<br/>(/bikes, /parts, /profile)"]
+    SA["Server Actions<br/>(app/actions/*)"]
+    API["Route Handlers<br/>(app/api/*)"]
+    AUTH["NextAuth + Middleware<br/>(auth.ts, middleware.ts)"]
+    RS["Server fetch utils<br/>(utils/requestsServer)"]
+  end
+
+  subgraph Hasura["Hasura Cloud"]
+    HG["Hasura GraphQL Endpoint"]
+    DB["PostgreSQL"]
+  end
+
+  CLOU["Cloudinary"]
+  STRA["Strava API"]
+  GOOGLE["Google OAuth"]
+  
+  B -->|HTTP nav| SP
+  SP -->|renders & hydrates| CC
+  CC -->|form actions| SA
+  RC -->|client fetch| API
+  CC -->|client fetch via RC| RC
+  SP --> AUTH
+  AUTH -->|JWT w/ Hasura claims| SP
+  AUTH -->|OAuth| GOOGLE
+  SP -->|server fetch via RS| RS
+  RS -->|server fetch| API
+  SP -->|calls| SA
+  SA -->|GraphQL fetch| HG
+  API -->|GraphQL fetch| HG
+  HG --> DB
+  API -->|image upload| CLOU
+  API -->|Strava OAuth & gear| STRA
