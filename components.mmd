@@ -1,0 +1,161 @@
+flowchart TD
+  %% Layout and providers
+  subgraph Layout
+    LayoutRoot["RootLayout (app/layout.tsx)"]
+    MainNav["MainNav (components/main-nav)"]
+    UserBtn["UserButton (components/user-button)"]
+    Footer["Footer"]
+    Toaster["Toaster"]
+    UserProfileProvider["UserProfileProvider (contexts/UserProfileContext)"]
+  end
+
+  %% Pages (server components)
+  subgraph Pages
+    PRoot["Home (/page)"]
+    PParts["Parts (/parts/page)"]
+    PBike["Bike detail (/bikes/[id]/page)"]
+    PProfile["Profile (/profile/page)"]
+    PSecurity["Security (/security/page)"]
+    PSignin["Auth SignIn (/auth/signin/page)"]
+    PStravaCb["Strava Callback (/strava-callback/page)"]
+  end
+
+  %% Feature/client components
+  subgraph Features
+    HomeBikes
+    BikeCard
+    BikeInfo
+    BikeImageGallery
+    AddBikeModal
+    EditBikeModal
+    DeleteBikeModal
+    AddPartModal
+    EditPartModal
+    PartsTable
+    InstallationsTable
+    AssignPartButton
+    BikeAssignmentForm
+    DeletePartButton
+    DeleteInstallationButton
+    ManufacturerForm
+    ImageUpload
+    BikeImageUpload["ui/BikeImageUpload"]
+    ProfileForm
+    StravaConnection
+    StravaBikesList
+    MFASettings
+    WebAuthnSettings
+    SessionData["session-data"]
+    AuthComponents["auth-components (SignIn, etc.)"]
+    Card
+    CustomLink["custom-link"]
+    Popover
+    Header
+    PartsTableCard["PartsTable (mobile cards)"]
+    BikeAssignmentModal["AssignPartButton modal"]
+  end
+
+  %% UI primitives
+  subgraph UI["UI primitives (components/ui/*)"]
+    UI_Button["ui/button"]
+    UI_Input["ui/input & ModernInput & SimpleModernInput"]
+    UI_Submit["ui/SubmitButton"]
+    UI_FormSection["ui/FormSection"]
+    UI_CustomSelect["ui/CustomSelect"]
+    UI_Dropdown["ui/dropdown-menu"]
+    UI_Card["ui/card"]
+    UI_Modal["ui/ModalWrapper"]
+    UI_Avatar["ui/avatar"]
+    UI_Badge["ui/badge"]
+    UI_StateSelector["ui/StateSelector"]
+    UI_StyledCheckbox["ui/StyledCheckbox"]
+    UI_NavMenu["ui/navigation-menu"]
+  end
+
+  %% Layout relations
+  LayoutRoot --> MainNav
+  LayoutRoot --> UserBtn
+  LayoutRoot --> Footer
+  LayoutRoot --> Toaster
+  LayoutRoot --> UserProfileProvider
+  LayoutRoot --> PRoot
+  LayoutRoot --> PParts
+  LayoutRoot --> PBike
+  LayoutRoot --> PProfile
+  LayoutRoot --> PSecurity
+  LayoutRoot --> PSignin
+  LayoutRoot --> PStravaCb
+
+  %% Page -> feature component usage
+  PRoot --> HomeBikes
+  PParts --> AddPartModal
+  PParts --> PartsTable
+  PBike --> BikeInfo
+  PBike --> BikeImageGallery
+  PBike --> EditBikeModal
+  PBike --> DeleteBikeModal
+  PBike --> InstallationsTable
+  PBike --> AddPartModal
+  PProfile --> ProfileForm
+  PProfile --> StravaConnection
+  PProfile --> MFASettings
+  PProfile --> WebAuthnSettings
+  PSecurity --> MFASettings
+  PSecurity --> WebAuthnSettings
+  PSignin --> AuthComponents
+  PStravaCb --> StravaBikesList
+
+  %% Feature relations
+  HomeBikes --> BikeCard
+  HomeBikes --> AddBikeModal
+  HomeBikes --> Card
+
+  BikeCard --> BikeImageGallery
+
+  PartsTable --> AssignPartButton
+  PartsTable --> EditPartModal
+  PartsTable --> DeletePartButton
+  PartsTable --> DeleteInstallationButton
+  PartsTable --> PartsTableCard
+
+  InstallationsTable --> EditPartModal
+  InstallationsTable --> DeletePartButton
+  InstallationsTable --> DeleteInstallationButton
+
+  AssignPartButton --> BikeAssignmentForm
+  AssignPartButton --> BikeAssignmentModal
+
+  AddPartModal --> ManufacturerForm
+  AddPartModal --> ImageUpload
+  AddPartModal --> BikeImageUpload
+
+  EditBikeModal --> BikeImageUpload
+  AddBikeModal --> BikeImageUpload
+
+  ProfileForm --> ImageUpload
+  ProfileForm --> StravaConnection
+
+  StravaConnection --> StravaBikesList
+
+  MFASettings --> WebAuthnSettings
+
+  CustomLink --> Popover
+
+  %% Feature components lean on UI primitives
+  Features --> UI_Button
+  Features --> UI_Input
+  Features --> UI_Submit
+  Features --> UI_FormSection
+  Features --> UI_CustomSelect
+  Features --> UI_Dropdown
+  Features --> UI_Card
+  Features --> UI_Modal
+  Features --> UI_Avatar
+  Features --> UI_Badge
+  Features --> UI_StateSelector
+  Features --> UI_StyledCheckbox
+  Features --> UI_NavMenu
+
+
+
+
