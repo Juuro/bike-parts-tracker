@@ -68,11 +68,11 @@ export const GET = async (req: Request, { params }: { params: any }) => {
     `;
 
     const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-      cache: "force-cache",
+      cache: "no-store",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
       },
       body: JSON.stringify({ query }),
     });

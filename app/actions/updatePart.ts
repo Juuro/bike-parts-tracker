@@ -1,7 +1,6 @@
 "use server";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import addManufacturer from "./addManufacturer";
 
 async function updatePart(formData: FormData): Promise<void> {
   const session: any = await auth();
@@ -11,17 +10,7 @@ async function updatePart(formData: FormData): Promise<void> {
 
   const accessToken = session?.accessToken;
   const partId = formData.get("part_id") as string;
-
-  let manufacturerId = formData.get("manufacturer");
-  if (formData.get("newManufacturer")) {
-    const newManufacturerId = await addManufacturer(
-      formData.get("newManufacturer") as string,
-      formData.get("manufacturerCountry") as string,
-      formData.get("manufacturerUrl") as string
-    );
-
-    manufacturerId = newManufacturerId[0].id;
-  }
+  const manufacturerId = formData.get("manufacturer") as string;
 
   // Prepare variables with proper type casting
   const sellPriceValue = formData.get("sell_price");
@@ -90,7 +79,7 @@ async function updatePart(formData: FormData): Promise<void> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({
       query,
@@ -105,6 +94,7 @@ async function updatePart(formData: FormData): Promise<void> {
   }
 
   const result = await response.json();
+
   if (result.errors) {
     console.error("GraphQL errors:", result.errors);
     throw new Error("Failed to update part due to GraphQL errors");
@@ -114,6 +104,15 @@ async function updatePart(formData: FormData): Promise<void> {
     revalidatePath(`/parts`);
   } catch (error) {
     console.error(error);
+  }
+
+  // Revalidate all relevant paths
+  try {
+    revalidatePath("/", "page");
+    revalidatePath("/bikes", "page");
+    revalidatePath("/parts", "page");
+  } catch (error) {
+    console.error("Error revalidating paths:", error);
   }
 }
 

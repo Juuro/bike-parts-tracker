@@ -1,65 +1,107 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { makeRateLimitedRequest } from "@/lib/rateLimiter";
-import { getCachedOrFetch } from "@/lib/cache";
-
-// Cache configuration
-const MANUFACTURERS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = async (request: NextRequest) => {
+export const GET = async () => {
   try {
-    const session = await auth();
-
-    if (!(session as any)?.accessToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const session: any = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
     }
 
-    const result = await getCachedOrFetch(
-      "manufacturers-list",
-      async () => {
-        return await makeRateLimitedRequest(async () => {
-          const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${(session as any).accessToken}`,
-            },
-            body: JSON.stringify({
-              query: `
-                query GetManufacturers {
-                  manufacturer(order_by: { name: asc }) {
-                    id
-                    name
-                  }
-                }
-              `,
-            }),
-          });
+    const accessToken = session?.accessToken;
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
+    const query = `
+      query GetManufacturers {
+        manufacturer(order_by: {name: asc}) {
+          id
+          name
+        }
+      }
+    `;
 
-          const data = await response.json();
-
-          if (data.errors) {
-            throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
-          }
-
-          return data;
-        });
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      cache: "no-store",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
       },
-      MANUFACTURERS_CACHE_TTL_MS
-    );
+      body: JSON.stringify({ query }),
+    });
+
+    const result = await response.json();
 
     return NextResponse.json(result.data.manufacturer);
   } catch (error) {
-    console.error("Error in manufacturers API:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch manufacturers" },
-      { status: 500 }
-    );
+    console.error(error);
+    return new Response("Something went wrong", { status: 500 });
+  }
+};
+
+export const POST = async (request: Request) => {
+  try {
+    const session: any = await auth();
+    if (!session) {
+      return new Response("Unauthorized", {
+        status: 401,
+      });
+    }
+
+    const { name, country, url } = await request.json();
+
+    if (!name || !country) {
+      return new Response("Name and country are required", {
+        status: 400,
+      });
+    }
+
+    const accessToken = session?.accessToken;
+
+    const mutation = `
+      mutation AddManufacturer($name: String!, $country: String!, $url: String) {
+        insert_manufacturer_one(object: {
+          name: $name,
+          country: $country,
+          url: $url
+        }) {
+          id
+          name
+          country
+          url
+        }
+      }
+    `;
+
+    const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+      },
+      body: JSON.stringify({
+        query: mutation,
+        variables: {
+          name,
+          country,
+          url: url || null,
+        },
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return new Response("Failed to add manufacturer", { status: 500 });
+    }
+
+    return NextResponse.json(result.data.insert_manufacturer_one);
+  } catch (error) {
+    console.error("Error adding manufacturer:", error);
+    return new Response("Something went wrong", { status: 500 });
   }
 };

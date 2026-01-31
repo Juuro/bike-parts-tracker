@@ -18,7 +18,7 @@ export const GET = async () => {
       query GetParts {
         part(
           where: { user_id: { _eq: "${userId}" } }
-          order_by: { updated_at: desc_nulls_last }
+          order_by: { created_at: desc }
         ) {
           secondhand
           buy_price
@@ -66,11 +66,11 @@ export const GET = async () => {
     `;
 
     const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-      cache: "force-cache",
+      cache: "no-store",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
       },
       body: JSON.stringify({ query }),
     });

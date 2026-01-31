@@ -6,6 +6,7 @@ const fetchManufacturers = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching manufacturers:", error);
+    return [];
   }
 };
 
@@ -28,6 +29,33 @@ const fetchPartsType = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching part types:", error);
+    return [];
+  }
+};
+
+const addManufacturer = async (manufacturer: {
+  name: string;
+  country: string;
+  url?: string;
+}) => {
+  try {
+    const response = await fetch("/api/manufacturers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(manufacturer),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding manufacturer:", error);
+    throw error;
   }
 };
 
@@ -53,10 +81,24 @@ const fetchCategories = async () => {
   }
 };
 
+const fetchBikeParts = async (bikeId: string) => {
+  try {
+    const response = await fetch(`/api/bikes/${bikeId}/installation`);
+    if (!response.ok) throw new Error("Failed to fetch");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching bike parts:", error);
+    return [];
+  }
+};
+
 export {
   fetchManufacturers,
   fetchPartStatus,
   fetchPartsType,
+  addManufacturer,
   fetchDisciplines,
   fetchCategories,
+  fetchBikeParts,
 };

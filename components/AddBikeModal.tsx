@@ -1,10 +1,13 @@
 "use client";
 import { fetchDisciplines, fetchCategories } from "@/utils/requestsClient";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Bike } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import SubmitButton from "./ui/SubmitButton";
+import ModalWrapper from "./ui/ModalWrapper";
+import CustomSelect from "./ui/CustomSelect";
+import StyledCheckbox from "./ui/StyledCheckbox";
+import BikeImageUpload from "./ui/BikeImageUpload";
 import Link from "next/link";
 import addBike from "@/app/actions/addBike";
 import { Button } from "./ui/button";
@@ -24,6 +27,11 @@ const AddBikeModal: React.FC<ModalProps> = ({
   const [categories, setCategories] = useState<Category[]>([]);
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [disciplineDropdownOpen, setDisciplineDropdownOpen] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [isEBike, setIsEBike] = useState<boolean>(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -59,12 +67,6 @@ const AddBikeModal: React.FC<ModalProps> = ({
     }
   };
 
-  const closeModal = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      setIsModalOpen(false);
-    }
-  };
-
   return (
     <>
       {buttonClassName ? (
@@ -87,190 +89,158 @@ const AddBikeModal: React.FC<ModalProps> = ({
           <Plus size={120} />
         </Link>
       )}
-      {isModalOpen && (
-        <div
-          className="modal-overlay overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 flex justify-center"
-          onClick={closeModal}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="add-bike-modal-title"
-        >
-          <div className="relative p-4 w-full max-w-prose max-h-full">
-            <article className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <header className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3
-                  id="add-bike-modal-title"
-                  className="text-xl font-semibold text-gray-900 dark:text-white"
-                >
-                  Add bike
-                </h3>
-
-                {showCloseButton && (
-                  <Button
-                    type="button"
-                    variant="close"
-                    size="close"
-                    onClick={() => setIsModalOpen(false)}
-                  >
-                    <X />
-                    <span className="sr-only">Close modal</span>
-                  </Button>
-                )}
-              </header>
-
-              <div className="p-4 md:p-5">
-                <form action={handleSubmit}>
-                  <div className="grid gap-4 mb-4 grid-cols-2">
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="name"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Bike name
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        required
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="strava_bike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Strava Bike ID
-                      </label>
-                      <input
-                        type="text"
-                        name="strava_bike"
-                        id="strava_bike"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        placeholder=""
-                        required
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="discipline"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Discipline
-                      </label>
-                      <div className="flex items-center">
-                        <select
-                          name="discipline"
-                          id="discipline"
-                          defaultValue=""
-                          required
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        >
-                          <option value="" disabled hidden>
-                            Select discipline
-                          </option>
-                          {disciplines.length == 0 ? (
-                            <option value="" disabled hidden>
-                              No disciplines found
-                            </option>
-                          ) : (
-                            disciplines.map((discipline) => {
-                              return (
-                                <option
-                                  key={discipline.id}
-                                  value={discipline.id}
-                                >
-                                  {discipline.name} ({discipline.abbr})
-                                </option>
-                              );
-                            })
-                          )}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="category"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Category
-                      </label>
-                      <div className="flex items-center">
-                        <select
-                          name="category"
-                          id="category"
-                          defaultValue=""
-                          required
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                        >
-                          <option value="" disabled hidden>
-                            Select category
-                          </option>
-                          {disciplines.length == 0 ? (
-                            <option value="" disabled hidden>
-                              No categories found
-                            </option>
-                          ) : (
-                            categories.map((category) => {
-                              return (
-                                <option key={category.id} value={category.id}>
-                                  {category.name}
-                                </option>
-                              );
-                            })
-                          )}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="col-span-2">
-                      <label
-                        htmlFor="images"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Images (Select up to 4 images)
-                      </label>
-                      <input
-                        type="file"
-                        id="images"
-                        name="images"
-                        className="border rounded w-full py-2 px-3"
-                        accept="image/*"
-                        multiple
-                      />
-                    </div>
-
-                    <div className="col-span-1">
-                      <label
-                        htmlFor="ebike"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white text-left"
-                      >
-                        Is this an eBike?
-                      </label>
-                      <div className="flex justify-start">
-                        <input
-                          tabIndex={0}
-                          type="checkbox"
-                          name="ebike"
-                          id="ebike"
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                          value="true"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <SubmitButton text="Add new bike" />
-                </form>
+      <ModalWrapper isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Bike className="h-6 w-6 text-blue-600" />
               </div>
-            </article>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Add Bike</h2>
+                <p className="text-sm text-gray-500">Create a new bike entry</p>
+              </div>
+            </div>
+            {showCloseButton && (
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <form id="add-bike-form" action={handleSubmit}>
+              <input
+                type="hidden"
+                name="discipline"
+                value={selectedDiscipline}
+              />
+              <input type="hidden" name="category" value={selectedCategory} />
+              <input type="hidden" name="ebike" value={isEBike.toString()} />
+              <div className="grid gap-4 mb-4 grid-cols-2">
+                <div className="col-span-1">
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-700 text-left"
+                  >
+                    Bike name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder=""
+                    required
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <label
+                    htmlFor="strava_bike"
+                    className="block mb-2 text-sm font-medium text-gray-700 text-left"
+                  >
+                    Strava Bike ID
+                    <span className="text-gray-500 ml-1">– optional</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="strava_bike"
+                    id="strava_bike"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:invalid:ring-red-500 focus:invalid:border-red-500 focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder=""
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <CustomSelect
+                    label="Discipline"
+                    name="discipline"
+                    options={disciplines}
+                    selectedValue={selectedDiscipline}
+                    onSelect={setSelectedDiscipline}
+                    isOpen={disciplineDropdownOpen}
+                    setIsOpen={setDisciplineDropdownOpen}
+                    placeholder="Select discipline"
+                    getDisplayText={(discipline) =>
+                      `${discipline.name} (${discipline.abbr})`
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <CustomSelect
+                    label="Category"
+                    name="category"
+                    options={categories}
+                    selectedValue={selectedCategory}
+                    onSelect={setSelectedCategory}
+                    isOpen={categoryDropdownOpen}
+                    setIsOpen={setCategoryDropdownOpen}
+                    placeholder="Select category"
+                    getDisplayText={(category) => category.name}
+                    required
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <BikeImageUpload
+                    onImagesChange={(files) => {
+                      // Handle file selection - files are automatically handled by the component
+                    }}
+                    onImageRemove={() => {
+                      // No existing images to remove in AddBikeModal
+                    }}
+                    maxImages={4}
+                    maxSizeMB={10}
+                    label="Images (Select up to 4 images)"
+                    description="– optional"
+                    name="images"
+                  />
+                </div>
+
+                <div className="col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Is this an eBike?
+                  </label>
+                  <StyledCheckbox
+                    checked={isEBike}
+                    onChange={setIsEBike}
+                    showDynamicLabel={true}
+                    yesLabel="Yes, it's an eBike"
+                    noLabel="No, regular bike"
+                  />
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-8 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="add-bike-form"
+              className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Add Bike
+            </button>
           </div>
         </div>
-      )}
+      </ModalWrapper>
     </>
   );
 };

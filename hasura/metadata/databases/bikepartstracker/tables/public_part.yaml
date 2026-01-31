@@ -1,0 +1,24 @@
+table:
+  name: part
+  schema: public
+object_relationships:
+  - name: manufacturer
+    using:
+      foreign_key_constraint_on: manufacturer_id
+  - name: part_status
+    using:
+      foreign_key_constraint_on: part_status_slug
+  - name: parts_type
+    using:
+      foreign_key_constraint_on: type_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+array_relationships:
+  - name: installations
+    using:
+      foreign_key_constraint_on:
+        column: part_id
+        table:
+          name: installation
+          schema: public

@@ -23,6 +23,7 @@ export const GET = async () => {
           id
           name
           strava_bike
+          ebike
           discipline {
             abbr
             name
@@ -33,11 +34,11 @@ export const GET = async () => {
     `;
 
     const response = await fetch(process.env.HASURA_PROJECT_ENDPOINT!, {
-      cache: "force-cache",
+      cache: "no-store",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
       },
       body: JSON.stringify({ query }),
     });

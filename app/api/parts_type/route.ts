@@ -27,14 +27,18 @@ export const GET = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
       },
       body: JSON.stringify({ query }),
     });
 
-    const result = (await response.json()) as {
-      data: { parts_type: PartsType[] };
-    };
+    const result = await response.json();
+
+    if (!result.data || !result.data.parts_type) {
+      console.error("🔧 Parts Type API - No data returned:", result);
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+
     const { parts_type: partTypeResponse } = result.data;
 
     return new Response(JSON.stringify(partTypeResponse), {

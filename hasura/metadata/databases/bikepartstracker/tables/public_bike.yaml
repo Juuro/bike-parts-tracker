@@ -1,0 +1,21 @@
+table:
+  name: bike
+  schema: public
+object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: discipline
+    using:
+      foreign_key_constraint_on: discipline_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+array_relationships:
+  - name: installations
+    using:
+      foreign_key_constraint_on:
+        column: bike_id
+        table:
+          name: installation
+          schema: public

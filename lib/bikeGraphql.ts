@@ -1,4 +1,5 @@
 // GraphQL utilities for bike operations
+import "server-only";
 import { AuthSession } from "./authUtils";
 
 export function buildUpdateBikeMutation(
@@ -11,7 +12,7 @@ export function buildUpdateBikeMutation(
       update_bike(where: {id: {_eq: "${formData.get("bike_id")}"}}, _set: {
         name: "${formData.get("name")}",
         strava_bike: "${formData.get("strava_bike")}", 
-        ebike: ${formData.get("ebike") || false}, 
+        ebike: ${formData.get("ebike") === "true"}, 
         discipline_id: "${formData.get("discipline")}",
         user_id: "${session.userId}"
         category_id: "${formData.get("category")}"
@@ -44,7 +45,7 @@ export function buildInsertBikeMutation(
         objects: {
           name: "${formData.get("name")}", 
           strava_bike: "${formData.get("strava_bike")}", 
-          ebike: ${formData.get("ebike") || false}, 
+          ebike: ${formData.get("ebike") === "true"}, 
           discipline_id: "${formData.get("discipline")}",
           user_id: "${session.userId}"
           category_id: "${formData.get("category")}"
@@ -107,7 +108,8 @@ export async function executeBikeUpdate(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
+      // Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ query }),
   });
@@ -135,7 +137,7 @@ export async function executeBikeInsert(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
@@ -163,7 +165,7 @@ export async function executeBikeDelete(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });
@@ -187,7 +189,7 @@ export async function executePartUpdate(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET!,
     },
     body: JSON.stringify({ query }),
   });

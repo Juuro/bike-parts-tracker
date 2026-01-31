@@ -2,7 +2,7 @@ import React from "react";
 import Card from "./Card";
 import Image from "next/image";
 import Link from "next/link";
-import { Bike } from "lucide-react";
+import { Bike, Zap } from "lucide-react";
 import {
   applyPresetToUrl,
   isCloudinaryUrl,
@@ -49,10 +49,15 @@ const BikeCard: React.FC<BikeCardProps> = ({ bike }) => {
       </Link>
 
       <div className="p-4">
-        <div className="font-bold text-lg mb-1 text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+        <div className="font-bold text-lg mb-1 text-gray-900 group-hover:text-blue-700 transition-colors duration-200 flex items-center gap-2">
           <Link href={`/bikes/${bike.id}`} className="line-clamp-1">
             {bike.name}
           </Link>
+          {bike.ebike && (
+            <span className="text-yellow-500" title="eBike">
+              <Zap size={16} fill="currentColor" />
+            </span>
+          )}
         </div>
         <p className="text-gray-600 text-sm font-medium">
           <Link

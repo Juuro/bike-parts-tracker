@@ -1,4 +1,5 @@
 // Authentication utilities
+import "server-only";
 import { auth } from "@/auth";
 
 export interface AuthSession {

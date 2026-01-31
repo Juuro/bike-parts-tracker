@@ -1,3 +1,4 @@
+import "server-only";
 import { headers } from "next/headers";
 
 const apiDomain = process.env.NEXT_PUBLIC_API_DOMAIN || null;
@@ -9,6 +10,7 @@ const makeApiRequest = async (endpoint: string, errorContext: string) => {
     const response = await fetch(`${apiDomain}${endpoint}`, {
       method: "GET",
       headers: new Headers(headersList),
+      cache: "no-store",
     });
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     const data = await response.json();
@@ -47,6 +49,7 @@ const fetchUserProfile = async () => {
     const response = await fetch(`${apiDomain}/user/profile`, {
       method: "GET",
       headers: new Headers(headersList),
+      cache: "no-store",
     });
     if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
     const data = await response.json();

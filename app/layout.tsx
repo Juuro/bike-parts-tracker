@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { MainNav } from "@/components/main-nav";
 import UserButton from "@/components/user-button";
 import { Toaster } from "react-hot-toast";
+import { UserProfileProvider } from "@/contexts/UserProfileContext";
 
 export const metadata: Metadata = {
   title: "Bike Parts Tracker",
@@ -18,17 +19,19 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
     <html lang="en" className="h-full">
       <body className="h-full flex flex-col">
         <SessionProvider>
-          {/* <Header /> */}
+          <UserProfileProvider>
+            {/* <Header /> */}
 
-          <nav className="sticky flex justify-center border-b bg-slate-50 shadow">
-            <div className="flex items-center justify-between mx-auto w-full h-16 max-w-7xl px-4 sm:px-6 lg:px-8">
-              <MainNav />
-              <UserButton />
-            </div>
-          </nav>
+            <nav className="sticky flex justify-center border-b bg-slate-50 shadow">
+              <div className="flex items-center justify-between mx-auto w-full h-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+                <MainNav />
+                <UserButton />
+              </div>
+            </nav>
 
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Footer />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <Footer />
+          </UserProfileProvider>
           <Toaster
             position="top-right"
             toastOptions={{
